@@ -1,0 +1,84 @@
+<?xml version="1.0"  encoding="UTF-8"?>
+
+<portlet-app version="2.0"
+             xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+	         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	         xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd
+	                             http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
+<!--  
+<portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd 
+								http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" 
+								version="2.0">
+								--> 
+      <portlet>
+      <portlet-name>Filter Chart</portlet-name>
+      <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+      <init-param>
+         <name>contextConfigLocation</name>
+         <value>/WEB-INF/context/filter-chart-portlet.xml</value>
+      </init-param>
+      <supports>
+         <mime-type>text/html</mime-type>
+         <portlet-mode>view</portlet-mode>
+         <portlet-mode>edit</portlet-mode>
+      </supports>
+      <portlet-info>
+         <title>Chart Filters</title>
+      </portlet-info>
+          <!--
+          <security-role-ref>
+              <role-name>kmutt-user</role-name>
+          </security-role-ref>
+          -->
+          <!--
+          <supported-publishing-event xmlns:x='http://liferay.com'>
+              <qname>x:empinfo</qname>
+          </supported-publishing-event>
+          -->
+          <supported-publishing-event>
+              <qname xmlns:x="http://liferay.com/events">x:empinfo</qname>
+          </supported-publishing-event>
+      </portlet>
+
+    <portlet>
+        <portlet-name>Chart Common</portlet-name>
+        <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+        <init-param>
+            <name>contextConfigLocation</name>
+            <value>/WEB-INF/context/chart-common-portlet.xml</value>
+        </init-param>
+        <supports>
+            <mime-type>text/html</mime-type>
+            <portlet-mode>view</portlet-mode>
+            <portlet-mode>edit</portlet-mode>
+        </supports>
+        <portlet-info>
+            <title>Common Charts</title>
+        </portlet-info>
+        <!--
+        <security-role-ref>
+            <role-name>kmutt-user</role-name>
+        </security-role-ref>
+        -->
+        <!--
+        <supported-processing-event xmlns:x='http://liferay.com'>
+                <qname>x:empinfo</qname>
+        </supported-processing-event>
+        -->
+        <supported-processing-event>
+            <qname xmlns:x="http://liferay.com/events">x:empinfo</qname>
+        </supported-processing-event>
+    </portlet>
+    <!--
+    <event-definition xmlns:x='http://liferay.com'>
+        <qname>x:empinfo</qname>
+        <value-type>java.lang.String</value-type>
+    </event-definition>
+    -->
+    <event-definition>
+        <qname xmlns:x="http://liferay.com/events">x:empinfo</qname>
+        <value-type>th.ac.kmutt.chart.fusion.model.FilterFusionM</value-type>
+    </event-definition>
+</portlet-app>
