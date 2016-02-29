@@ -6,7 +6,7 @@ public class ServiceConstant {
     public static final String hostReference = "http://10.2.0.76:10000/BPSService/RestletServlet/";
 
     public static final String LOG_APPENDER = "CHARTServicesLog";
-
+   
     public static final String INTERFACE_RETURN_TYPE = "java.util.List";
     public static final String VOID_RETURN_TYPE = "void";
     public static final String FLAG_INACTIVE = "0";
@@ -195,4 +195,6 @@ public class ServiceConstant {
     public static final String FUSION_CHART_OBJECT  = "retriveFusionChartObject";
     public static final String FILTER_GET_INSTANCE_FILTER = "filterGetInstanceFilter";
     public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
+   // public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
+
 }
