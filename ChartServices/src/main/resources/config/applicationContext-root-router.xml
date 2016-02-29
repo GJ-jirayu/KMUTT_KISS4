@@ -13,35 +13,6 @@
 							bean="aoeResource" />
 					</bean>
 				</entry>
-				<entry key="/Inter">
-					<bean class="org.restlet.ext.spring.SpringFinder">
-						<lookup-method name="create"
-									   bean="inBoundOutBoundResource" />
-					</bean>
-				</entry>
-
-
-
-				<entry key="/copyright">
-					<bean class="org.restlet.ext.spring.SpringFinder">
-						<lookup-method name="create"
-							bean="copyrightResource" />
-					</bean>
-				</entry>
-				<entry key="/funding">
-					<bean class="org.restlet.ext.spring.SpringFinder">
-						<lookup-method name="create"
-									   bean="fundingResource" />
-					</bean>
-				</entry>
-				<entry key="/journalPapers">
-					<bean class="org.restlet.ext.spring.SpringFinder">
-						<lookup-method name="create"
-									   bean="journalPapersResource" />
-					</bean>
-				</entry>
-
-
 				<entry key="/chart">
 					<bean class="org.restlet.ext.spring.SpringFinder">
 						<lookup-method name="create"
@@ -131,6 +102,13 @@
 					<bean class="org.restlet.ext.spring.SpringFinder">
 						<lookup-method name="create"
 									   bean="servicefiltermappingResource" />
+					</bean>
+				</entry>
+				
+					<entry key="/fusionchart">
+					<bean class="org.restlet.ext.spring.SpringFinder">
+						<lookup-method name="create"
+									   bean="fusionChartResource" />
 					</bean>
 				</entry>
 			</map>

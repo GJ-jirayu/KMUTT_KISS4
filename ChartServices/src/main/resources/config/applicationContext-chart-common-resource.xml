@@ -4,25 +4,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:util="http://www.springframework.org/schema/util"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
-	<bean id="inBoundOutBoundResource"
-		  class="th.ac.kmutt.chart.rest.resource.InBoundOutBoundResource"
-		  scope="prototype">
-	</bean>
  	<bean id="aoeResource"
 		class="th.ac.kmutt.chart.rest.resource.AoeResource"
 		scope="prototype"> 
-	</bean>
-	<bean id="copyrightResource"
-		  class="th.ac.kmutt.chart.rest.resource.CopyrightResource"
-		  scope="prototype">
-	</bean>
-	<bean id="fundingResource"
-		  class="th.ac.kmutt.chart.rest.resource.FundingResource"
-		  scope="prototype">
-	</bean>
-	<bean id="journalPapersResource"
-		  class="th.ac.kmutt.chart.rest.resource.JournalPapersResource"
-		  scope="prototype">
 	</bean>
 	<bean id="chartResource"
 		  class="th.ac.kmutt.chart.rest.resource.ChartResource"
@@ -74,6 +58,10 @@
 	</bean>
 	<bean id="servicefiltermappingResource"
 		  class="th.ac.kmutt.chart.rest.resource.ServiceFilterMappingResource"
+		  scope="prototype">
+	</bean>
+		<bean id="fusionChartResource"
+		  class="th.ac.kmutt.chart.rest.resource.FusionChartResource"
 		  scope="prototype">
 	</bean>
 <!--

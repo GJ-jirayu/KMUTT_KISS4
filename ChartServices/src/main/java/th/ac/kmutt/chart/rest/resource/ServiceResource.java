@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.domain.ChartFeatureInstanceEntity;
-import th.ac.kmutt.chart.domain.JournalPapersServiceEntity;
 import th.ac.kmutt.chart.domain.ServiceEntity;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.service.ChartService;

@@ -85,16 +85,16 @@
 	 <bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://10.1.130.242:3306/CHART_DB" />
+		<property name="url" value="jdbc:mysql://localhost:3306/CHART_DB" />
 		<property name="username" value="root" />
-		<property name="password" value="015482543" />
+		<property name="password" value="password" />
 	</bean> 
 	<bean id="liferayDataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://localhost:3306/lportal_dev_v3" />
+		<property name="url" value="jdbc:mysql://localhost:3306/lportal2" />
 		<property name="username" value="root" />
-		<property name="password" value="" />
+		<property name="password" value="password" />
 	</bean>
 
 	<!-- <bean id="dataSource"
@@ -124,13 +124,21 @@
 		<property name="jpaDialect" ref="jpaDialect" />
 		<property name="packagesToScan" value="th.ac.kmutt.chart.dwh.domain.*" />
 	</bean>
-
+<!--
 	<bean id="dataSourceDwh"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.ibm.db2.jcc.DB2Driver" />
 		<property name="url" value="jdbc:db2://10.1.126.140:50003/kmu_dwh" />
 		<property name="username" value="kissusr1" />
 		<property name="password" value="gxHoc=,xN" />
+	</bean>
+	-->
+		<bean id="dataSourceDwh"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/CHART_DB" />
+		<property name="username" value="root" />
+		<property name="password" value="password" />
 	</bean>
 	
 	<bean id="jpaVendorAdapterDwh"

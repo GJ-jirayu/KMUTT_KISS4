@@ -73,10 +73,8 @@ public class ChartInstanceResource  extends BaseResource {
                     if(serviceM!=null){
                         ServiceEntity serviceEntity=new ServiceEntity();
                         BeanUtils.copyProperties(serviceM, serviceEntity);
-                        domain.setServiceByServiceId(serviceEntity);
+                    //    domain.setServiceByServiceId(serviceEntity);
                     }
-
-
 
                     if (xsource.getServiceName() != null
                             && xsource.getServiceName().length() != 0) {
@@ -91,7 +89,6 @@ public class ChartInstanceResource  extends BaseResource {
                                 domains.add(domain);
                                 // get Model List
                                 models=getChartInstanceModels(domains);
-
                                 imakeMessage.setResultListObj(models);
                             }
                             return getRepresentation(entity, imakeMessage, xstream);
@@ -191,12 +188,12 @@ public class ChartInstanceResource  extends BaseResource {
                 model.setChart(chartM);
             }
             // set ServiceM
-            if (domain.getServiceByServiceId() != null) {
+    /*        if (domain.getServiceByServiceId() != null) {
                 ServiceM serviceM = new ServiceM();
                 BeanUtils.copyProperties(domain.getServiceByServiceId(), serviceM);
                 serviceM.setPaging(null);
                 model.setService(serviceM);
-            }
+            }*/
             // set CommentM
             if (domain.getCommentByInstanceId() != null) {
                 CommentM cmmentM = new CommentM();

@@ -18,7 +18,7 @@ public class ChartInstanceEntity  implements Serializable {
     private Integer chartId;
 
     @Basic
-    @Column(name = "SERVICE_ID",insertable = false,updatable = false)
+    @Column(name = "SERVICE_ID",insertable = true,updatable = true)
     private Integer serviceId;
 
     @Basic
@@ -73,11 +73,11 @@ public class ChartInstanceEntity  implements Serializable {
     @ManyToOne
     @JoinColumn(name = "CHART_ID", referencedColumnName = "CHART_ID")
     private ChartEntity chartByChartId;
-
+/*
     @ManyToOne
-    @JoinColumn(name = "SERVICE_ID", referencedColumnName = "SERVICE_ID")
+    @JoinColumn(name = "SERVICE_ID")
     private ServiceEntity serviceByServiceId;
-
+*/
     @OneToOne(mappedBy = "chartInstanceByInstanceId")
     private CommentEntity commentByInstanceId;
 
@@ -172,7 +172,7 @@ public class ChartInstanceEntity  implements Serializable {
         this.chartByChartId = chartByChartId;
     }
 
-
+/*
     public ServiceEntity getServiceByServiceId() {
         return serviceByServiceId;
     }
@@ -180,7 +180,7 @@ public class ChartInstanceEntity  implements Serializable {
     public void setServiceByServiceId(ServiceEntity serviceByServiceId) {
         this.serviceByServiceId = serviceByServiceId;
     }
-
+*/
 
     public CommentEntity getCommentByInstanceId() {
         return commentByInstanceId;

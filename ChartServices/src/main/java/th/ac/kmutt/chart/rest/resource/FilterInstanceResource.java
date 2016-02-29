@@ -8,6 +8,7 @@ import org.restlet.resource.ResourceException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
 import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.domain.*;
 import th.ac.kmutt.chart.model.*;
@@ -147,6 +148,12 @@ public class FilterInstanceResource  extends BaseResource {
                             imakeMessage.setResultListObj(models);
                             return getRepresentation(entity, imakeMessage, xstream);
 
+                        } else if (serviceName.equals(ServiceConstant.FILTER_GET_INSTANCE_FILTER)) {
+                            ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                        	List<FilterInstanceM> fins = chartService.getAllFilterInstance(xsource.getInstanceId());
+                            imakeMessage.setResultListObj(fins);
+
+                            return getRepresentation(entity, imakeMessage, xstream);
                         }
 
                     } else {

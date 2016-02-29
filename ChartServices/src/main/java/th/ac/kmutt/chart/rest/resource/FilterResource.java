@@ -8,6 +8,7 @@ import org.restlet.resource.ResourceException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
 import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.domain.ChartFeatureInstanceEntity;
 import th.ac.kmutt.chart.domain.FilterEntity;
@@ -77,8 +78,6 @@ public class FilterResource  extends BaseResource {
                         domain.setResearchGroup(researchGroup);
                     }
                     */
-
-
                     if (xsource.getServiceName() != null
                             && xsource.getServiceName().length() != 0) {
                         String serviceName = xsource.getServiceName();
@@ -96,7 +95,22 @@ public class FilterResource  extends BaseResource {
                                 imakeMessage.setResultListObj(models);
                             }
                             return getRepresentation(entity, imakeMessage, xstream);
-                        } else if (serviceName.equals(ServiceConstant.FILTER_SAVE)) {
+                        } else    if (serviceName.equals(ServiceConstant.FILTER_GET_ITEMS)) {
+                        	//single Filter return
+                            domain = chartService.getFilterValueList(xsource.getFilterId());
+                            ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                            if (domain != null) {
+                                List<FilterM> models = new ArrayList<FilterM>(1);
+
+                                java.util.ArrayList<FilterEntity> domains =new ArrayList<FilterEntity>(1);
+                                domains.add(domain);
+                                // get Model List
+                                models=getFilterModels(domains);
+
+                                imakeMessage.setResultListObj(models);
+                            }
+                            return getRepresentation(entity, imakeMessage, xstream);
+                        }   else if (serviceName.equals(ServiceConstant.FILTER_SAVE)) {
                             //java.sql.Timestamp now = new java.sql.Timestamp(new Date().getTime());
                             // domain.setCreatedDate(now);
                             //domain.setUpdatedDate(now);
@@ -126,8 +140,8 @@ public class FilterResource  extends BaseResource {
                             }
                             return returnUpdateRecord(entity, xsource, updateRecord);
                         } else if (serviceName.equals(ServiceConstant.FILTER_SEARCH)) {
-                            java.util.ArrayList<FilterEntity> domains = (java.util.ArrayList<FilterEntity>)
-                                    chartService.listFilterEntity(xsource);
+                            @SuppressWarnings("unchecked")
+							java.util.ArrayList<FilterEntity> domains = (java.util.ArrayList<FilterEntity>)chartService.listFilterEntity(xsource);
                             List<FilterM> models = new ArrayList<FilterM>(domains.size());
                             models = getFilterModels(domains);
                             ImakeResultMessage imakeMessage = new ImakeResultMessage();
@@ -154,8 +168,13 @@ public class FilterResource  extends BaseResource {
                             }
                             */
                         }
-
-                    } else {
+                        else if( serviceName.equals(ServiceConstant.FILTER_GET_GLOBAL_FILTER)){
+                            List<FilterM> globalFilters = chartService.getGlobalFilter();
+                            ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                            imakeMessage.setResultListObj(globalFilters);
+                            return getRepresentation(entity, imakeMessage, xstream);
+                        }
+                    } else { // else serviceName null
                     }
                 }
 

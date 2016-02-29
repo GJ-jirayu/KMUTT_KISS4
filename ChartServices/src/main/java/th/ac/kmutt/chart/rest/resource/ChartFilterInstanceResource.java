@@ -8,6 +8,7 @@ import org.restlet.resource.ResourceException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
 import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.domain.*;
 import th.ac.kmutt.chart.model.*;
@@ -17,6 +18,7 @@ import th.ac.kmutt.chart.xstream.common.ImakeResultMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -105,10 +107,10 @@ public class ChartFilterInstanceResource  extends BaseResource {
                             int updateRecord = chartService.saveChartFilterInstanceEntity(domain);
                             return returnUpdateRecord(entity, xsource, updateRecord);
                         } else if (serviceName.equals(ServiceConstant.CHART_FILTER_INSTANCE_UPDATE)) {
-                            //java.sql.Timestamp updatedDate = new java.sql.Timestamp(new Date().getTime());
-                            //domain.setUpdatedDate(updatedDate);
-                            int updateRecord=0;
-                            // int updateRecord = chartService.updateChartFilterInstanceEntity(domain);
+                            java.sql.Timestamp updatedDate = new java.sql.Timestamp(new Date().getTime());
+                         //   domain.setUpdatedDate(updatedDate);
+                             int updateRecord = chartService.updateChartFilterInstanceEntity(domain);
+                            /*
                             chartService.deleteChartFilterInstanceEntity(domain);
                             String[] ids=xsource.getIds();
                             if(ids!=null)
@@ -128,7 +130,7 @@ public class ChartFilterInstanceResource  extends BaseResource {
                                     updateRecord = chartService.saveChartFilterInstanceEntity(domain_inner);
                                 }
 
-                            }
+                            }*/
                             return returnUpdateRecord(entity, xsource, updateRecord);
                         } else if (serviceName.equals(ServiceConstant.CHART_FILTER_INSTANCE_ITEMS_DELETE)) {
 

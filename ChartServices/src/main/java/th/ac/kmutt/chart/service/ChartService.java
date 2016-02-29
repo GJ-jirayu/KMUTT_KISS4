@@ -12,15 +12,9 @@ import th.ac.kmutt.chart.domain.ChartFeatureMappingEntityPK;
 import th.ac.kmutt.chart.domain.ChartFilterInstanceEntity;
 import th.ac.kmutt.chart.domain.ChartInstanceEntity;
 import th.ac.kmutt.chart.domain.CommentEntity;
-import th.ac.kmutt.chart.domain.CopyrightServiceEntity;
-import th.ac.kmutt.chart.domain.CopyrightServiceEntityPK;
 import th.ac.kmutt.chart.domain.FeatureEntity;
 import th.ac.kmutt.chart.domain.FilterEntity;
 import th.ac.kmutt.chart.domain.FilterInstanceEntity;
-import th.ac.kmutt.chart.domain.FundingResourceServiceEntity;
-import th.ac.kmutt.chart.domain.FundingResourceServiceEntityPK;
-import th.ac.kmutt.chart.domain.JournalPapersServiceEntity;
-import th.ac.kmutt.chart.domain.JournalPapersServiceEntityPK;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntityPK;
 import th.ac.kmutt.chart.domain.ServiceEntity;
@@ -28,16 +22,13 @@ import th.ac.kmutt.chart.domain.ServiceFilterMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntityPK;
 import th.ac.kmutt.chart.model.ChartM;
 import th.ac.kmutt.chart.model.CopyrightServiceM;
+import th.ac.kmutt.chart.model.FilterInstanceM;
+import th.ac.kmutt.chart.model.FilterM;
+import th.ac.kmutt.chart.model.FusionChartM;
 import th.ac.kmutt.chart.model.InBoundOutBoundServiceM;
 
 public interface ChartService {
-    public List aew()throws DataAccessException;
     public List listChart() throws DataAccessException;
-    public List listCopyrightServiceEntity(th.ac.kmutt.chart.model.CopyrightServiceM param)throws DataAccessException;
-    public List listJournalPapersServiceEntity(th.ac.kmutt.chart.model.JournalPapersServiceM param)throws DataAccessException;
-    public List listFundingResourceServiceEntity(th.ac.kmutt.chart.model.FundingResourceServiceM param)throws DataAccessException;
-    public Integer saveCopyrightServiceEntity(CopyrightServiceM model)
-            throws DataAccessException ;
 
     //CHART
     public Integer saveChartEntity(ChartEntity transientInstance) throws DataAccessException;
@@ -84,12 +75,7 @@ public interface ChartService {
     public Integer deleteCommentEntity(CommentEntity persistentInstance) throws DataAccessException;
     public CommentEntity findCommentEntityById(String instanceId) throws DataAccessException;
 
-    //COPYRIGHT_SERVICE
-    public Integer saveCopyrightServiceEntity(CopyrightServiceEntity transientInstance) throws DataAccessException;
-    public Integer updateCopyrightServiceEntity(CopyrightServiceEntity transientInstance) throws DataAccessException;
-    public Integer deleteCopyrightServiceEntity(CopyrightServiceEntity persistentInstance) throws DataAccessException;
-    public CopyrightServiceEntity findCopyrightServiceEntityById(CopyrightServiceEntityPK id) throws DataAccessException;
-
+    
     //FEATURE
     public Integer saveFeatureEntity(FeatureEntity transientInstance) throws DataAccessException;
     public Integer updateFeatureEntity(FeatureEntity transientInstance) throws DataAccessException;
@@ -102,6 +88,7 @@ public interface ChartService {
     public Integer deleteFilterEntity(FilterEntity persistentInstance) throws DataAccessException;
     public FilterEntity findFilterEntityById(Integer filterId) throws DataAccessException;
     public List listFilterEntity(th.ac.kmutt.chart.model.FilterM param)throws DataAccessException;
+    public FilterEntity getFilterValueList(Integer filterId) throws DataAccessException;
 
 
     //FILTER_INSTANCE
@@ -110,18 +97,6 @@ public interface ChartService {
     public Integer deleteFilterInstanceEntity(FilterInstanceEntity persistentInstance) throws DataAccessException;
     public FilterInstanceEntity findFilterInstanceEntityById(String instanceId) throws DataAccessException;
     public List listFilterInstanceEntity(th.ac.kmutt.chart.model.FilterInstanceM param)throws DataAccessException;
-
-    //FUNDING_RESOURCE_SERVICE
-    public Integer saveFundingResourceServiceEntity(FundingResourceServiceEntity transientInstance) throws DataAccessException;
-    public Integer updateFundingResourceServiceEntity(FundingResourceServiceEntity transientInstance) throws DataAccessException;
-    public Integer deleteFundingResourceServiceEntity(FundingResourceServiceEntity persistentInstance) throws DataAccessException;
-    public FundingResourceServiceEntity findFundingResourceServiceEntityById(FundingResourceServiceEntityPK id) throws DataAccessException;
-
-    //JOURNAL_PAPERS_SERVICE
-    public Integer saveJournalPapersServiceEntity(JournalPapersServiceEntity transientInstance) throws DataAccessException;
-    public Integer updateJournalPapersServiceEntity(JournalPapersServiceEntity transientInstance) throws DataAccessException;
-    public Integer deleteJournalPapersServiceEntity(JournalPapersServiceEntity persistentInstance) throws DataAccessException;
-    public JournalPapersServiceEntity findJournalPapersServiceEntityById(JournalPapersServiceEntityPK id) throws DataAccessException;
 
     //SERVICE_CHART_MAPPING
     public Integer saveServiceChartMappingEntity(ServiceChartMappingEntity transientInstance) throws DataAccessException;
@@ -145,11 +120,15 @@ public interface ChartService {
     public List listServiceFilterMappingEntity(th.ac.kmutt.chart.model.ServiceFilterMappingM param)throws DataAccessException;
 
     
-    /*INBOUND_OUTBOUND_STUDENT*/
+    /*INBOUND_OUTBOUND_STUDENT
     public List InternationalCompareAllStudent(InBoundOutBoundServiceM transientInstance);
     public List EmpInternationalCompareAllEmp(InBoundOutBoundServiceM transientInstance);
     public List InternationalCompareAllStudentProgramInter(InBoundOutBoundServiceM transientInstance);
     public List ProgramInternationalCompareAllProgram(InBoundOutBoundServiceM transientInstance);
     public List InternationalCompareAllStudentByFaculty(InBoundOutBoundServiceM transientInstance);
     public List InternationalCompareAllEmpByFaculty(InBoundOutBoundServiceM transientInstance);
+	*/
+	public FusionChartM buildChartObject(FusionChartM xsource);
+	public List<FilterInstanceM> getAllFilterInstance(String instanceId);
+	public List<FilterM> getGlobalFilter();
 }

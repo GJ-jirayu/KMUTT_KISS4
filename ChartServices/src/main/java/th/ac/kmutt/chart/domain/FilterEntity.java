@@ -1,6 +1,7 @@
 package th.ac.kmutt.chart.domain;
 
 import javax.persistence.*;
+
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -21,7 +22,8 @@ public class FilterEntity  implements Serializable {
     private Collection<ChartFilterInstanceEntity> chartFilterInstancesByFilterId;
     private Collection<FilterInstanceEntity> filterInstancesByFilterId;
     private Collection<ServiceFilterMappingEntity> serviceFilterMappingsByFilterId;
-*/
+    private Collection<FilterValueEntity> filterValueEntity;*/
+    
     @Id
     @Column(name = "FILTER_ID")
     public Integer getFilterId() {
@@ -149,4 +151,13 @@ public class FilterEntity  implements Serializable {
         this.serviceFilterMappingsByFilterId = serviceFilterMappingsByFilterId;
     }
     */
+
+ /*   @OneToMany(mappedBy = "filterEntity")
+    public Collection<FilterValueEntity> getFilterValueEntity() {
+        return filterValueEntity;
+    }
+
+    public void setFilterValueEntity(Collection<FilterValueEntity> filterValueEntity) {
+        this.filterValueEntity = filterValueEntity;
+    }*/
 }

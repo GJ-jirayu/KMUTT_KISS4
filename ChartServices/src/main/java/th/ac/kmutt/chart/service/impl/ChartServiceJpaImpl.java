@@ -1,14 +1,22 @@
 package th.ac.kmutt.chart.service.impl;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+
+import th.ac.kmutt.chart.builder.*;
 import th.ac.kmutt.chart.domain.*;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.repository.ChartRepository;
 import th.ac.kmutt.chart.service.ChartService;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service("chartServiceJpaImpl")
@@ -26,30 +34,6 @@ public class ChartServiceJpaImpl implements ChartService {
     public List listChart() throws DataAccessException {
         List<ChartEntity> list = chartRepository.listChart();
         return list;
-    }
-
-    public List listCopyrightServiceEntity(CopyrightServiceM param) throws DataAccessException {
-        return chartRepository.listCopyrightServiceEntity(param);
-    }
-
-    public List listJournalPapersServiceEntity(JournalPapersServiceM param) throws DataAccessException {
-        return chartRepository.listJournalPapersServiceEntity(param);
-    }
-
-    public List listFundingResourceServiceEntity(FundingResourceServiceM param) throws DataAccessException {
-        return chartRepository.listFundingResourceServiceEntity(param);
-    }
-
-    public Integer saveCopyrightServiceEntity(CopyrightServiceM model) throws DataAccessException {
-        CopyrightServiceEntity entity=new CopyrightServiceEntity();
-        CopyrightServiceEntityPK id=new CopyrightServiceEntityPK();
-        id.setType(model.getType());
-        id.setYear(model.getYear());
-        id.setMonth(model.getMonth());
-        entity.setId(id);
-        entity.setMonthDesc(model.getMonthDesc());
-        entity.setValue(model.getValue());
-        return chartRepository.saveCopyrightServiceEntity(entity);
     }
 
     public Integer saveChartEntity(ChartEntity transientInstance) throws DataAccessException {
@@ -174,22 +158,6 @@ public class ChartServiceJpaImpl implements ChartService {
         return chartRepository.findCommentEntityById(instanceId);
     }
 
-    public Integer saveCopyrightServiceEntity(CopyrightServiceEntity transientInstance) throws DataAccessException {
-        return chartRepository.saveCopyrightServiceEntity(transientInstance);
-    }
-
-    public Integer updateCopyrightServiceEntity(CopyrightServiceEntity transientInstance) throws DataAccessException {
-        return chartRepository.updateCopyrightServiceEntity(transientInstance);
-    }
-
-    public Integer deleteCopyrightServiceEntity(CopyrightServiceEntity persistentInstance) throws DataAccessException {
-        return chartRepository.deleteCopyrightServiceEntity(persistentInstance);
-    }
-
-    public CopyrightServiceEntity findCopyrightServiceEntityById(CopyrightServiceEntityPK id) throws DataAccessException {
-        return chartRepository.findCopyrightServiceEntityById(id);
-    }
-
     public Integer saveFeatureEntity(FeatureEntity transientInstance) throws DataAccessException {
         return chartRepository.saveFeatureEntity(transientInstance);
     }
@@ -221,6 +189,10 @@ public class ChartServiceJpaImpl implements ChartService {
     public FilterEntity findFilterEntityById(Integer filterId) throws DataAccessException {
         return chartRepository.findFilterEntityById(filterId);
     }
+    
+    public FilterEntity getFilterValueList(Integer filterId) throws DataAccessException {
+        return chartRepository.getFilterValueList(filterId);
+    }
 
     public Integer saveFilterInstanceEntity(FilterInstanceEntity transientInstance) throws DataAccessException {
         return chartRepository.saveFilterInstanceEntity(transientInstance);
@@ -241,38 +213,6 @@ public class ChartServiceJpaImpl implements ChartService {
     @Override
     public List listFilterInstanceEntity(FilterInstanceM param) throws DataAccessException {
         return chartRepository.listFilterInstanceEntity(param);
-    }
-
-    public Integer saveFundingResourceServiceEntity(FundingResourceServiceEntity transientInstance) throws DataAccessException {
-        return chartRepository.saveFundingResourceServiceEntity(transientInstance);
-    }
-
-    public Integer updateFundingResourceServiceEntity(FundingResourceServiceEntity transientInstance) throws DataAccessException {
-        return chartRepository.updateFundingResourceServiceEntity(transientInstance);
-    }
-
-    public Integer deleteFundingResourceServiceEntity(FundingResourceServiceEntity persistentInstance) throws DataAccessException {
-        return chartRepository.deleteFundingResourceServiceEntity(persistentInstance);
-    }
-
-    public FundingResourceServiceEntity findFundingResourceServiceEntityById(FundingResourceServiceEntityPK id) throws DataAccessException {
-        return chartRepository.findFundingResourceServiceEntityById(id);
-    }
-
-    public Integer saveJournalPapersServiceEntity(JournalPapersServiceEntity transientInstance) throws DataAccessException {
-        return chartRepository.saveJournalPapersServiceEntity(transientInstance);
-    }
-
-    public Integer updateJournalPapersServiceEntity(JournalPapersServiceEntity transientInstance) throws DataAccessException {
-        return chartRepository.updateJournalPapersServiceEntity(transientInstance);
-    }
-
-    public Integer deleteJournalPapersServiceEntity(JournalPapersServiceEntity persistentInstance) throws DataAccessException {
-        return chartRepository.deleteJournalPapersServiceEntity(persistentInstance);
-    }
-
-    public JournalPapersServiceEntity findJournalPapersServiceEntityById(JournalPapersServiceEntityPK id) throws DataAccessException {
-        return chartRepository.findJournalPapersServiceEntityById(id);
     }
 
     public Integer saveServiceChartMappingEntity(ServiceChartMappingEntity transientInstance) throws DataAccessException {
@@ -339,9 +279,8 @@ public class ChartServiceJpaImpl implements ChartService {
     }
     
     
-    /*INBOUND_OUTBOUND_STUDENT*/
+    /*INBOUND_OUTBOUND_STUDENT
 
-    
     public List InternationalCompareAllStudent(InBoundOutBoundServiceM persistentInstance){
     	return chartRepository.InternationalCompareAllStudent(persistentInstance);
     }
@@ -365,5 +304,88 @@ public class ChartServiceJpaImpl implements ChartService {
     
     public List InternationalCompareAllEmpByFaculty(InBoundOutBoundServiceM persistentInstance){
     	return chartRepository.InternationalCompareAllEmpByFaculty(persistentInstance);
+    }*/
+    
+    public List<FilterM> getGlobalFilter(){
+    	return chartRepository.fetchGlobalFilter();
+    }
+    @SuppressWarnings("unchecked")
+	public FusionChartM buildChartObject(FusionChartM source){
+    	ChartInstanceEntity chartInsEnt = chartRepository.findChartInstanceEntityById(source.getInstanceId());
+    	if(chartInsEnt!=null){
+	    	source.setChartType(chartInsEnt.getChartType());
+	    	source.setServiceId(chartInsEnt.getServiceId());
+	    	
+	    	try {
+	    		//find datasource 
+	    		ServiceEntity serviceEnt = chartRepository.findServiceEntityById(chartInsEnt.getServiceId());
+	    		ServiceM datasource = new ServiceM();
+	    		BeanUtils.copyProperties(serviceEnt, datasource);
+	    		//find filter
+		    	List<FilterM> filters = chartRepository.fetchInstanceFilters(chartInsEnt.getInstanceId());
+		    	List<FilterM> allFilters = new ArrayList<FilterM>(filters);
+		    	if(source.getFilters()==null | source.getFilters().size()==0  ){ // portlet only send global filters 
+		    		List<FilterM> globalFilters = chartRepository.fetchGlobalFilter();
+		    		allFilters.addAll(globalFilters);
+		    	}else{
+		    		List<FilterM> globalFilters = source.getFilters();  
+		    		allFilters.addAll(globalFilters);
+		    	}
+		    	source.setFilters(allFilters);  // set Filters for generate Title in  portlet app side
+		    	// retrive data in chart
+		    	List<Object[]> results = new ArrayList<Object[]>();
+		    	if(chartInsEnt.getDataSourceType().equals("1")){
+			    	//fetch  result
+		    		results = chartRepository.fetchChartResultSet(datasource, allFilters);
+		    	}else if(chartInsEnt.getDataSourceType().equals("2")){
+		    		results = convertDataJsonToList(chartInsEnt.getDataAdhoc());
+		    	}
+		    	String chartJson = "";
+		    	if(chartInsEnt.getChartType().toLowerCase().equals("bar2d")){
+		    		Bar bar = new Bar();
+		    		bar.setTemplate(chartInsEnt.getChartJson());
+		    		bar.setData(results);
+		    		chartJson = bar.build();
+		    	}else if(chartInsEnt.getChartType().toLowerCase().equals("angulargauge")){
+		    		RealTimeAngular rta = new RealTimeAngular();
+		    		rta.setTemplate(chartInsEnt.getChartJson());
+		    		rta.setData(results);
+		    		chartJson = rta.build();
+		    	} else{
+		    		
+		    	}
+		    	// add json
+		    	source.setChartJson(chartJson);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+    	}//check exist
+    	return source;
+    }
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public List convertDataJsonToList(String jsonString){
+    	List  dataList = new ArrayList<Object[]>();
+    	try {
+    		JSONObject json = new JSONObject(jsonString);
+    		JSONArray rows = json.getJSONArray("data");
+			 for (int i = 0; i < rows.length(); i++) {
+				 JSONObject row = rows.getJSONObject(i);
+				 JSONArray rw = row.getJSONArray("row");
+				 if(rw.length()>1){
+					 dataList.add(new Object[]{  rw.toString() });
+				 }else{
+					 dataList.add(rw.getString(0));
+				 }
+			}
+			
+		} catch (JSONException e) {
+			dataList = new ArrayList<Object[]>();
+		}
+    	return dataList;
+    }
+    public List<FilterInstanceM> getAllFilterInstance(String instanceId){
+    	List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
+     	fins = chartRepository.fetchAllFilterInstance(instanceId);
+    	return fins;
     }
 }

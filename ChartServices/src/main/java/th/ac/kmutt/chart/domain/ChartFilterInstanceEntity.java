@@ -38,7 +38,7 @@ public class ChartFilterInstanceEntity  implements Serializable {
         this.serviceId = serviceId;
     }
 
-
+/*
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -50,7 +50,7 @@ public class ChartFilterInstanceEntity  implements Serializable {
 
         return true;
     }
-
+*/
 
     public String getValue() {
         return value;

@@ -1,8 +1,10 @@
 package th.ac.kmutt.chart.domain;
 
 import javax.persistence.*;
+
 import java.io.Serializable;
 import java.util.Collection;
+
 
 /**
  * Created by imake on 20/10/2015.
@@ -16,6 +18,18 @@ public class ServiceEntity  implements Serializable {
     private String modelName;
     private String type;
     private String activeFlag;
+    private String sqlString;
+    /*
+    @OneToMany(targetEntity=ChartInstanceEntity.class, mappedBy="serviceByServiceId")
+    private Collection<ChartInstanceEntity> chartInstanceEntitys;
+    
+    public Collection<ChartInstanceEntity> getChartInstanceEntitys() {
+        return chartInstanceEntitys;
+    }
+    public void setChartInstanceEntitys(Collection<ChartInstanceEntity> chartInstanceEntitys) {
+		this.chartInstanceEntitys = chartInstanceEntitys;
+	}
+    
     /*
     private Collection<ChartFilterInstanceEntity> chartFilterInstancesByServiceId;
     private Collection<ChartInstanceEntity> chartInstancesByServiceId;
@@ -81,8 +95,17 @@ public class ServiceEntity  implements Serializable {
     public void setActiveFlag(String activeFlag) {
         this.activeFlag = activeFlag;
     }
+    @Basic
+    @Column(name = "SQL_QUERY")
+    public String getSqlString() {
+		return sqlString;
+	}
 
-    @Override
+	public void setSqlString(String sqlString) {
+		this.sqlString = sqlString;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -109,6 +132,7 @@ public class ServiceEntity  implements Serializable {
         result = 31 * result + (activeFlag != null ? activeFlag.hashCode() : 0);
         return result;
     }
+
 /*
     @OneToMany(mappedBy = "serviceByServiceId")
     public Collection<ChartFilterInstanceEntity> getChartFilterInstancesByServiceId() {
@@ -120,10 +144,8 @@ public class ServiceEntity  implements Serializable {
     }
 
     @OneToMany(mappedBy = "serviceByServiceId")
-    public Collection<ChartInstanceEntity> getChartInstancesByServiceId() {
-        return chartInstancesByServiceId;
-    }
-
+    */
+/*
     public void setChartInstancesByServiceId(Collection<ChartInstanceEntity> chartInstancesByServiceId) {
         this.chartInstancesByServiceId = chartInstancesByServiceId;
     }

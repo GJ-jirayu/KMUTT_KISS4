@@ -3,7 +3,9 @@ package th.ac.kmutt.chart.repository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Formatter.BigDecimalLayoutForm;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -12,9 +14,12 @@ import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
+
+import com.liferay.mail.model.Filter;
 
 import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.domain.ChartEntity;
@@ -25,16 +30,10 @@ import th.ac.kmutt.chart.domain.ChartFeatureMappingEntityPK;
 import th.ac.kmutt.chart.domain.ChartFilterInstanceEntity;
 import th.ac.kmutt.chart.domain.ChartInstanceEntity;
 import th.ac.kmutt.chart.domain.CommentEntity;
-import th.ac.kmutt.chart.domain.CopyrightServiceEntity;
-import th.ac.kmutt.chart.domain.CopyrightServiceEntityPK;
 import th.ac.kmutt.chart.domain.FeatureEntity;
 import th.ac.kmutt.chart.domain.FilterEntity;
 import th.ac.kmutt.chart.domain.FilterInstanceEntity;
-import th.ac.kmutt.chart.domain.FundingResourceServiceEntity;
-import th.ac.kmutt.chart.domain.FundingResourceServiceEntityPK;
 import th.ac.kmutt.chart.dwh.domain.InboundOutboundStudent;
-import th.ac.kmutt.chart.domain.JournalPapersServiceEntity;
-import th.ac.kmutt.chart.domain.JournalPapersServiceEntityPK;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntityPK;
 import th.ac.kmutt.chart.domain.ServiceEntity;
@@ -42,9 +41,11 @@ import th.ac.kmutt.chart.domain.ServiceFilterMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntityPK;
 import th.ac.kmutt.chart.fusion.model.FilterFusionM;
 import th.ac.kmutt.chart.model.CopyrightServiceM;
+import th.ac.kmutt.chart.model.FilterInstanceM;
+import th.ac.kmutt.chart.model.FilterM;
+import th.ac.kmutt.chart.model.FilterValueM;
 import th.ac.kmutt.chart.model.FundingResourceServiceM;
-import th.ac.kmutt.chart.model.InBoundOutBoundServiceM;
-import th.ac.kmutt.chart.model.JournalPapersServiceM;
+import th.ac.kmutt.chart.model.ServiceM;
 
 @Repository("chartRepository")
 @Transactional
@@ -112,7 +113,7 @@ public class ChartRepository {
     public List<ChartEntity> listChart() {
         // TODO Auto-generated method stub
         Query query=null;
-        StringBuffer sb = new StringBuffer(" select p from  ChartEntity p  ");
+        StringBuffer sb = new StringBuffer(" select p from  ChartEntity p ");
          query = entityManager.createQuery(sb.toString(), ChartEntity.class);
         query.setFirstResult(0);
         query.setMaxResults(10);
@@ -127,180 +128,6 @@ public class ChartRepository {
         query.setMaxResults(10);
         return query.getResultList();
     }
-    public List listCopyrightServiceEntity(CopyrightServiceM param) throws DataAccessException {
-        StringBuffer sb = new StringBuffer(" where 1=1 ");
-        FilterFusionM filterFusionM =param.getFilterFusionM();
-        logger.info("param.getFilterFusionM()-->" +filterFusionM );
-        if(filterFusionM!=null && filterFusionM.getFilters()!=null){
-            String[] filters=filterFusionM.getFilters();
-            for (int i=0;i<filters.length;i++){
-                String[] filter_array=filters[i].split("_");
-                if(filter_array!=null && filter_array.length>=2){
-                    if(!filter_array[0].equals("-1")) {
-                        logger.info(" index [" + i + "]" + filters[i]);
-                        if (filter_array[0].equals("1")) { // year
-                            sb.append(" and p.id.year<=" + filter_array[1] + "  ");
-                        }
-                    }
-                }
-            }
-        }
-
-        Integer type=param.getType();
-        Integer year=param.getYear();
-        Integer month=param.getMonth();
-        if (type != null ) {
-            sb.append(" and p.id.type=" + type.intValue() + "  ");
-        }
-        if (year != null ) {
-            sb.append(" and p.id.year=" + year.intValue() + "  ");
-        }
-        if (month != null ) {
-            sb.append(" and p.id.month=" + month.intValue() + "  ");
-        }
-        logger.info(entityManager+",query->"+sb.toString());
-        Query query =null;
-        if(param.getInstanceId()!=null && param.getInstanceId().trim().length()>0){
-            StringBuffer sb_filter=new StringBuffer(" select p from ChartFilterInstanceEntity p where p.id.instanceId=:instanceId ");
-            query =entityManager.createQuery(sb_filter.toString());
-            query.setParameter("instanceId",param.getInstanceId());
-            List<ChartFilterInstanceEntity> chartFilterInstanceEntities= query.getResultList();
-            if(chartFilterInstanceEntities!=null && chartFilterInstanceEntities.size()>0){
-                for (int i=0;i<chartFilterInstanceEntities.size();i++){
-                    ChartFilterInstanceEntity chartFilterInstanceEntity=chartFilterInstanceEntities.get(i);
-                    if(chartFilterInstanceEntity.getId().getFilterId()==2){ // เน�เธซเธฅเน�เธ�เธ—เธตเน�เน�เธ”เน�เธฃเธฑเธ�เธ�เธฒเธฃเน€เธ�เธขเน�เธ�เธฃเน�
-                        sb.append(" and p.id.type=" + chartFilterInstanceEntity.getValue() + "  ");
-                    }else  if(chartFilterInstanceEntity.getId().getFilterId()==3){ // เน�เธซเธฅเน�เธ�เน€เธ�เธดเธ�เธ—เธธเธ�
-                        sb.append(" and p.id.type=" + chartFilterInstanceEntity.getValue() + "  ");
-                    }
-
-
-                }
-            }
-            logger.info(" chartFilterInstanceEntities size"+chartFilterInstanceEntities.size());
-        }
-
-        query = entityManager.createQuery(" select p from CopyrightServiceEntity p "
-                + sb.toString()+" order by p.id.year ", CopyrightServiceEntity.class);
-        return query.getResultList();
-    }
-
-    public List listJournalPapersServiceEntity(JournalPapersServiceM param) throws DataAccessException {
-        StringBuffer sb = new StringBuffer(" where 1=1 ");
-        FilterFusionM filterFusionM =param.getFilterFusionM();
-        logger.info("param.getFilterFusionM()-->" +filterFusionM );
-        if(filterFusionM!=null && filterFusionM.getFilters()!=null){
-            String[] filters=filterFusionM.getFilters();
-            for (int i=0;i<filters.length;i++){
-                String[] filter_array=filters[i].split("_");
-                if(filter_array!=null && filter_array.length>=2){
-                    logger.info(" index ["+i+"]"+filters[i]);
-                    if(!filter_array[0].equals("-1")) {
-                        if (filter_array[0].equals("1")) { // year
-                            sb.append(" and p.id.year<=" + filter_array[1] + "  ");
-                        }
-                    }
-                }
-            }
-        }
-
-        Integer type=param.getType();
-        Integer year=param.getYear();
-        if (type != null ) {
-            sb.append(" and p.id.type=" + type.intValue() + "  ");
-        }
-        if (year != null ) {
-            sb.append(" and p.id.year=" + year.intValue() + "  ");
-        }
-        Query query =null;
-        System.out.println(sb.toString());
-        if(param.getInstanceId()!=null && param.getInstanceId().trim().length()>0){
-            StringBuffer sb_filter=new StringBuffer(" select p from ChartFilterInstanceEntity p where p.id.instanceId=:instanceId ");
-             query =entityManager.createQuery(sb_filter.toString());
-            query.setParameter("instanceId",param.getInstanceId());
-            List<ChartFilterInstanceEntity> chartFilterInstanceEntities= query.getResultList();
-            if(chartFilterInstanceEntities!=null && chartFilterInstanceEntities.size()>0){
-                for (int i=0;i<chartFilterInstanceEntities.size();i++){
-                    ChartFilterInstanceEntity chartFilterInstanceEntity=chartFilterInstanceEntities.get(i);
-                    if(chartFilterInstanceEntity.getId().getFilterId()==2){ // เน�เธซเธฅเน�เธ�เธ—เธตเน�เน�เธ”เน�เธฃเธฑเธ�เธ�เธฒเธฃเน€เธ�เธขเน�เธ�เธฃเน�
-                        sb.append(" and p.id.type=" + chartFilterInstanceEntity.getValue() + "  ");
-                    }else  if(chartFilterInstanceEntity.getId().getFilterId()==3){ // เน�เธซเธฅเน�เธ�เน€เธ�เธดเธ�เธ—เธธเธ�
-                        sb.append(" and p.id.type=" + chartFilterInstanceEntity.getValue() + "  ");
-                    }
-
-
-                }
-            }
-            logger.info(" chartFilterInstanceEntities size"+chartFilterInstanceEntities.size());
-        }
-
-         query = entityManager.createQuery(" select p from JournalPapersServiceEntity p "
-                + sb.toString()+" order by p.id.year ", JournalPapersServiceEntity.class);
-
-        return query.getResultList();
-    }
-
-    public List listFundingResourceServiceEntity(FundingResourceServiceM param) throws DataAccessException {
-        StringBuffer sb = new StringBuffer(" where 1=1 ");
-        FilterFusionM filterFusionM =param.getFilterFusionM();
-        logger.info("param.getFilterFusionM()-->" +filterFusionM );
-        if(filterFusionM!=null && filterFusionM.getFilters()!=null){
-            String[] filters=filterFusionM.getFilters();
-            for (int i=0;i<filters.length;i++){
-                String[] filter_array=filters[i].split("_");
-                if(filter_array!=null && filter_array.length>=2){
-                    if(!filter_array[0].equals("-1")) {
-                        logger.info(" index [" + i + "]" + filters[i]);
-                        if (filter_array[0].equals("1")) { // year
-                            sb.append(" and p.id.year<=" + filter_array[1] + "  ");
-                        }
-                    }
-                }
-            }
-        }
-
-        Integer type=param.getType();
-        Integer year=param.getYear();
-        if (type != null ) {
-            sb.append(" and p.id.type=" + type.intValue() + "  ");
-        }
-        if (year != null ) {
-            sb.append(" and p.id.year=" + year.intValue() + "  ");
-        }
-        Query query=null;
-        if(param.getInstanceId()!=null && param.getInstanceId().trim().length()>0){
-            StringBuffer sb_filter=new StringBuffer(" select p from ChartFilterInstanceEntity p where p.id.instanceId=:instanceId ");
-            query =entityManager.createQuery(sb_filter.toString());
-            query.setParameter("instanceId",param.getInstanceId());
-            List<ChartFilterInstanceEntity> chartFilterInstanceEntities= query.getResultList();
-            if(chartFilterInstanceEntities!=null && chartFilterInstanceEntities.size()>0){
-                for (int i=0;i<chartFilterInstanceEntities.size();i++){
-                    ChartFilterInstanceEntity chartFilterInstanceEntity=chartFilterInstanceEntities.get(i);
-                    if(chartFilterInstanceEntity.getId().getFilterId()==2){ // เน�เธซเธฅเน�เธ�เธ—เธตเน�เน�เธ”เน�เธฃเธฑเธ�เธ�เธฒเธฃเน€เธ�เธขเน�เธ�เธฃเน�
-                        sb.append(" and p.id.type=" + chartFilterInstanceEntity.getValue() + "  ");
-                    }else  if(chartFilterInstanceEntity.getId().getFilterId()==3){ // เน�เธซเธฅเน�เธ�เน€เธ�เธดเธ�เธ—เธธเธ�
-                        sb.append(" and p.id.type=" + chartFilterInstanceEntity.getValue() + "  ");
-                    }
-
-
-                }
-            }
-            logger.info(" chartFilterInstanceEntities size"+chartFilterInstanceEntities.size());
-        }
-
-         query = entityManager.createQuery(" select p from FundingResourceServiceEntity p "
-                + sb.toString()+" order by p.id.year ", FundingResourceServiceEntity.class);
-
-        return query.getResultList();
-    }
-    /*
-    public Integer saveCopyrightServiceEntity(CopyrightServiceEntity transientInstance)
-            throws DataAccessException {
-        // TODO Auto-generated method stub
-        entityManager.persist(transientInstance);
-        return transientInstance.getType();
-    }
-*/
 
     //CHART
     public Integer saveChartEntity(ChartEntity transientInstance) throws DataAccessException{
@@ -436,16 +263,14 @@ public class ChartRepository {
         return 1;
     }
     public Integer updateChartInstanceEntity(ChartInstanceEntity transientInstance) throws DataAccessException{
-        logger.info("transientInstance getInstanceId->"+transientInstance.getInstanceId());
-
-        logger.info("transientInstance getServiceId->"+transientInstance.getServiceByServiceId());
         if(transientInstance.getCommentByInstanceId()!=null && transientInstance.getCommentByInstanceId().getInstanceId()!=null
                 && transientInstance.getCommentByInstanceId().getInstanceId().trim().length()>0)
-        logger.info("transientInstance getCommentByInstanceId->"+transientInstance.getCommentByInstanceId().getComment());
-        entityManager.merge(transientInstance);
+       { 	entityManager.merge(transientInstance);
+       }
+        /*
         if(transientInstance.getCommentByInstanceId()!=null && transientInstance.getCommentByInstanceId().getInstanceId()!=null
                 && transientInstance.getCommentByInstanceId().getInstanceId().trim().length()>0)
-            entityManager.merge(transientInstance.getCommentByInstanceId());
+            entityManager.merge(transientInstance.getCommentByInstanceId());*/
         return 1;
     }
     public Integer deleteChartInstanceEntity(ChartInstanceEntity persistentInstance) throws DataAccessException{
@@ -508,27 +333,6 @@ public class ChartRepository {
         return entityManager.find(CommentEntity.class, instanceId);
     }
 
-    //COPYRIGHT_SERVICE
-    public Integer saveCopyrightServiceEntity(CopyrightServiceEntity transientInstance) throws DataAccessException{
-        entityManager.persist(transientInstance);
-        return transientInstance.getId().getType();
-    }
-    public Integer updateCopyrightServiceEntity(CopyrightServiceEntity transientInstance) throws DataAccessException{
-        entityManager.merge(transientInstance);
-        return transientInstance.getId().getType();
-    }
-    public Integer deleteCopyrightServiceEntity(CopyrightServiceEntity persistentInstance) throws DataAccessException{
-        int deletedCount = 0;
-        deletedCount = entityManager.createQuery(
-                new StringBuilder().append("delete from CopyrightServiceEntity where id=:id").toString())
-                .setParameter("id", persistentInstance.getId())
-                .executeUpdate();
-        return deletedCount;
-    }
-    public CopyrightServiceEntity findCopyrightServiceEntityById(CopyrightServiceEntityPK id) throws DataAccessException{
-        return entityManager.find(CopyrightServiceEntity.class, id);
-    }
-
     //FEATURE
     public Integer saveFeatureEntity(FeatureEntity transientInstance) throws DataAccessException {
         entityManager.persist(transientInstance);
@@ -570,7 +374,16 @@ public class ChartRepository {
     public FilterEntity findFilterEntityById(Integer filterId) throws DataAccessException{
         return entityManager.find(FilterEntity.class, filterId);
     }
-
+    public FilterEntity getFilterValueList(Integer filterId) throws DataAccessException{
+    	FilterEntity ret = new FilterEntity();
+    	try{
+    		ret  = entityManager.find(FilterEntity.class, filterId);
+   // 		ret  = entityManager.find(FilterValueEntity.class, filterId);
+    	}catch(Exception ex){
+    		ret = new FilterEntity();
+    	}
+    	return ret;
+    }
     //FILTER_INSTANCE
     public Integer saveFilterInstanceEntity(FilterInstanceEntity transientInstance) throws DataAccessException {
         entityManager.persist(transientInstance);
@@ -592,47 +405,6 @@ public class ChartRepository {
         return entityManager.find(FilterInstanceEntity.class, instanceId);
     }
 
-    //FUNDING_RESOURCE_SERVICE
-    public Integer saveFundingResourceServiceEntity(FundingResourceServiceEntity transientInstance) throws DataAccessException{
-        entityManager.persist(transientInstance);
-        return transientInstance.getId().getType();
-    }
-    public Integer updateFundingResourceServiceEntity(FundingResourceServiceEntity transientInstance) throws DataAccessException{
-        entityManager.merge(transientInstance);
-        return transientInstance.getId().getType();
-    }
-    public Integer deleteFundingResourceServiceEntity(FundingResourceServiceEntity persistentInstance) throws DataAccessException{
-        int deletedCount = 0;
-        deletedCount = entityManager.createQuery(
-                new StringBuilder().append("delete from FundingResourceServiceEntity where id=:id").toString())
-                .setParameter("id",persistentInstance.getId())
-                .executeUpdate();
-        return deletedCount;
-    }
-    public FundingResourceServiceEntity findFundingResourceServiceEntityById(FundingResourceServiceEntityPK id) throws DataAccessException{
-        return entityManager.find(FundingResourceServiceEntity.class, id);
-    }
-
-    //JOURNAL_PAPERS_SERVICE
-    public Integer saveJournalPapersServiceEntity(JournalPapersServiceEntity transientInstance) throws DataAccessException{
-        entityManager.persist(transientInstance);
-        return transientInstance.getId().getType();
-    }
-    public Integer updateJournalPapersServiceEntity(JournalPapersServiceEntity transientInstance) throws DataAccessException{
-        entityManager.merge(transientInstance);
-        return transientInstance.getId().getType();
-    }
-    public Integer deleteJournalPapersServiceEntity(JournalPapersServiceEntity persistentInstance) throws DataAccessException{
-        int deletedCount = 0;
-        deletedCount = entityManager.createQuery(
-                new StringBuilder().append("delete from JournalPapersServiceEntity where id=:id").toString())
-                .setParameter("id",persistentInstance.getId())
-                .executeUpdate();
-        return deletedCount;
-    }
-    public JournalPapersServiceEntity findJournalPapersServiceEntityById(JournalPapersServiceEntityPK id) throws DataAccessException{
-        return entityManager.find(JournalPapersServiceEntity.class, id);
-    }
 
     //SERVICE_CHART_MAPPING
     public Integer saveServiceChartMappingEntity(ServiceChartMappingEntity transientInstance) throws DataAccessException{
@@ -698,167 +470,151 @@ public class ChartRepository {
     }
 
     
-    /*INBOUND_OUTBOUND_STUDENT*/
+    /*INBOUND_OUTBOUND_STUDENT
+	public List InternationalCompareAllStudent(InBoundOutBoundServiceM param) throws DataAccessException {
+		Query query = entityManagerDwh.createNativeQuery(		
 	
-public List InternationalCompareAllStudent(InBoundOutBoundServiceM param) throws DataAccessException {
-	Query query = entityManagerDwh.createNativeQuery(		
-
-			"SELECT ROUND(DECIMAL(DECIMAL(INB.NOOFSTUDENT)/AL.NO_OF_STUDENT *100,10,2),2) AS NoOf \n"
-				+"FROM ( SELECT ACADEMIC_YEAR, SUM(FACT_INBOUND_OUTBOUND_STUDENT.NO_OF_STUDENT) AS NOOFSTUDENT\n"
-						 +"FROM FACT_INBOUND_OUTBOUND_STUDENT\n"
-						 +"INNER JOIN DIM_FIELD ON  FACT_INBOUND_OUTBOUND_STUDENT.FIELD_KEY = DIM_FIELD.FIELD_KEY\n"
-						+"WHERE IN_OUT_TYPE_KEY = '2'\n"
-						+"AND NATIONALITY <> 'Thai'\n"
-						+"AND ACADEMIC_YEAR = :paramYear \n"
-						+"AND( DIM_FIELD.FACULTY_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
-						+"AND( DIM_FIELD.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment) \n"
-						+"GROUP BY ACADEMIC_YEAR\n"
-						+")INB\n"
-				+"INNER JOIN (SELECT DS.ACADEMIC_YEAR,\n"
-								+"SUM(NO_OF_STUDENT) AS NO_OF_STUDENT\n"
-								+"FROM FACT_ALL_STUDENT FAS\n"
-								+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
-								+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
-								+"WHERE DS.ACADEMIC_YEAR = :paramYear \n"
-								+"AND (DF.FACULTY_CODE = :paramFaculty OR 'ALL' =:paramFaculty)\n"
-								+"AND (DF.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
-								+"AND LEFT(DS.SEMESTER,1) = '1'\n"
-								+"GROUP BY ACADEMIC_YEAR )AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR\n"
-
-
-			);
-	query.setParameter("paramYear", param.getAcademicYear());
-	query.setParameter("paramFaculty", param.getFacultyCode());
-	query.setParameter("paramDepartment",param.getDepartmentCode());
-	List<BigDecimal> results = query.getResultList();
-	 
-	List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
-	for (BigDecimal result : results) {	
-		InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
-		inboundOutboundStudent.setNoOf((BigDecimal) result);
-
-		
-		inboundOutboundStudents.add(inboundOutboundStudent);
-		
-	}
-	 		 
-	 return inboundOutboundStudents;
-}
-
-
-public List EmpInternationalCompareAllEmp(InBoundOutBoundServiceM param) throws DataAccessException {
-	Query query = entityManagerDwh.createNativeQuery(		
-
-			"SELECT ROUND(DECIMAL(DECIMAL(HR.NOOFEMPIN)/INB.NOOFEMP *100,10,1),1) AS NoOf\n"
-			+"FROM ( SELECT DD.ACADAMIC_YEAR, count(HR_FACT_EMPLOYEE.emp_key) AS NOOFEMP\n"
-								+"FROM HR_FACT_EMPLOYEE \n"
-								+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
-								+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
-								+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
-																		+"FROM HR_FACT_EMPLOYEE HFE \n"
-																		+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
-																		+"WHERE DD.CALENDAR_YEAR = :paramYear\n"  
-																		+")\n"
-                                +"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
-                                +"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
-                                +"group by DD.ACADAMIC_YEAR )INB\n"
-				+"INNER JOIN (SELECT DD.ACADAMIC_YEAR, count(HR_FACT_EMPLOYEE.emp_key) AS NOOFEMPIN\n"
-								+"FROM HR_FACT_EMPLOYEE \n"
-								+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
-								+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
-								+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
-																		+"FROM HR_FACT_EMPLOYEE HFE \n"
-																		+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
-																		+"WHERE DD.CALENDAR_YEAR = :paramYear\n" 
-																		+")\n"
-								+"AND HR_FACT_EMPLOYEE.NATIONALITY_KEY <> 100\n"
-                                +"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
-                                +"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
-								+"group by DD.ACADAMIC_YEAR )HR on INB.ACADAMIC_YEAR = HR.ACADAMIC_YEAR\n"
-			);
-	query.setParameter("paramYear", param.getAcademicYear());
-	query.setParameter("paramFaculty", param.getFacultyCode());
-	query.setParameter("paramDepartment",param.getDepartmentCode());
-	List<BigDecimal> results = query.getResultList();
-	 
-	List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
-	for (BigDecimal result : results) {	
-		InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
-		inboundOutboundStudent.setNoOf((BigDecimal) result);
-		
-		inboundOutboundStudents.add(inboundOutboundStudent);
-		
-	}
-	 		 
-	 return inboundOutboundStudents;
-}
-
-
-public List InternationalCompareAllStudentProgramInter(InBoundOutBoundServiceM param) throws DataAccessException {
-	Query query = entityManagerDwh.createNativeQuery(		
-
-			"SELECT ROUND(DECIMAL(DECIMAL(INB.NO_OF_INTER)/AL.NO_OF_ALL *100,10,2),2) AS NoOf \n"
-				+"FROM ( SELECT ACADEMIC_YEAR, SUM(FACT_INBOUND_OUTBOUND_STUDENT.NO_OF_STUDENT) AS NO_OF_INTER\n"
-						+" FROM FACT_INBOUND_OUTBOUND_STUDENT\n"
-						 +"INNER JOIN DIM_FIELD ON  FACT_INBOUND_OUTBOUND_STUDENT.FIELD_KEY = DIM_FIELD.FIELD_KEY\n"
-                         +"WHERE IN_OUT_TYPE_KEY = '2'\n"
-						 +"AND NATIONALITY <> 'Thai'\n"
-						 +"AND ACADEMIC_YEAR = :paramYear \n"
-						 +"AND( DIM_FIELD.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty )\n"
-						 +"AND( DIM_FIELD.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment) \n"
-						 +"GROUP BY ACADEMIC_YEAR\n"
-						 +")INB\n"
-				+"INNER JOIN (SELECT DS.ACADEMIC_YEAR,\n"
-								+"SUM(FAS.NO_OF_STUDENT) AS NO_OF_ALL\n"
-								+"FROM FACT_ALL_STUDENT FAS\n"
-								+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
-								+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
-                                +"INNER JOIN DIM_PROGRAM DP ON FAS.PROGRAM_KEY = DP.PROGRAM_KEY\n"
-								+"WHERE DS.ACADEMIC_YEAR = :paramYear \n"
-								+"AND (DF.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty )\n"
-								+"AND (DF.DEPARTMENT_CODE = :paramDepartment  OR 'ALL' = :paramDepartment)\n"
-								+"AND LEFT(DS.SEMESTER,1) = '1'\n"
-                                +"AND DP.ARRANGE_TYPE = 'หลักสูตรนานาชาติ'\n"
-								+"GROUP BY ACADEMIC_YEAR\n"
-								+")AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR\n"
-								) ;
-	query.setParameter("paramYear", param.getAcademicYear());
-	query.setParameter("paramFaculty", param.getFacultyCode());
-	query.setParameter("paramDepartment",param.getDepartmentCode());
-	List<BigDecimal> results = query.getResultList();
-	 
-	List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
-	for (BigDecimal result : results) {	
-		InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
-		inboundOutboundStudent.setNoOf((BigDecimal) result);
-		
-		inboundOutboundStudents.add(inboundOutboundStudent);
-		
-	}
-	 		 
-	 return inboundOutboundStudents;
-}
-
-
-public List ProgramInternationalCompareAllProgram(InBoundOutBoundServiceM param) throws DataAccessException {
-	Query query = entityManagerDwh.createNativeQuery(		
-
-			"SELECT ROUND(DECIMAL(DECIMAL(INB.NO_OF_INTER)/AL.NO_OF_ALL *100,10,2),2) AS NoOf\n"
-					+"FROM (SELECT DS.ACADEMIC_YEAR,\n"
-							+"COUNT(dISTINCT DP.PROGRAM_CODE) AS NO_OF_INTER\n"
-							+"FROM FACT_ALL_STUDENT FAS\n"
-							+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
-							+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
-							+"INNER JOIN DIM_PROGRAM DP ON FAS.PROGRAM_KEY = DP.PROGRAM_KEY\n"
-							+"WHERE DS.ACADEMIC_YEAR = :paramYear \n"
-							+"AND (DF.FACULTY_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
-							+"AND (DF.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
-							+"AND LEFT(DS.SEMESTER,1) = '1'\n"
-							+"AND DP.ARRANGE_TYPE = 'หลักสูตรนานาชาติ'\n"
-							+"GROUP BY ACADEMIC_YEAR \n"
+				"SELECT ROUND(DECIMAL(DECIMAL(INB.NOOFSTUDENT)/AL.NO_OF_STUDENT *100,10,2),2) AS NoOf \n"
+					+"FROM ( SELECT ACADEMIC_YEAR, SUM(FACT_INBOUND_OUTBOUND_STUDENT.NO_OF_STUDENT) AS NOOFSTUDENT\n"
+							 +"FROM FACT_INBOUND_OUTBOUND_STUDENT\n"
+							 +"INNER JOIN DIM_FIELD ON  FACT_INBOUND_OUTBOUND_STUDENT.FIELD_KEY = DIM_FIELD.FIELD_KEY\n"
+							+"WHERE IN_OUT_TYPE_KEY = '2'\n"
+							+"AND NATIONALITY <> 'Thai'\n"
+							+"AND ACADEMIC_YEAR = :paramYear \n"
+							+"AND( DIM_FIELD.FACULTY_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
+							+"AND( DIM_FIELD.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment) \n"
+							+"GROUP BY ACADEMIC_YEAR\n"
 							+")INB\n"
 					+"INNER JOIN (SELECT DS.ACADEMIC_YEAR,\n"
-								+"COUNT(dISTINCT DP.PROGRAM_CODE) AS NO_OF_ALL\n"
+									+"SUM(NO_OF_STUDENT) AS NO_OF_STUDENT\n"
+									+"FROM FACT_ALL_STUDENT FAS\n"
+									+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
+									+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
+									+"WHERE DS.ACADEMIC_YEAR = :paramYear \n"
+									+"AND (DF.FACULTY_CODE = :paramFaculty OR 'ALL' =:paramFaculty)\n"
+									+"AND (DF.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
+									+"AND LEFT(DS.SEMESTER,1) = '1'\n"
+									+"GROUP BY ACADEMIC_YEAR )AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR\n"
+				);
+		query.setParameter("paramYear", param.getAcademicYear());
+		query.setParameter("paramFaculty", param.getFacultyCode());
+		query.setParameter("paramDepartment",param.getDepartmentCode());
+		List<BigDecimal> results = query.getResultList();
+		 
+		List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
+		for (BigDecimal result : results) {	
+			InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
+			inboundOutboundStudent.setNoOf((BigDecimal) result);
+	
+			
+			inboundOutboundStudents.add(inboundOutboundStudent);
+			
+		}
+		 		 
+		 return inboundOutboundStudents;
+	}
+	
+	
+	public List EmpInternationalCompareAllEmp(InBoundOutBoundServiceM param) throws DataAccessException {
+		Query query = entityManagerDwh.createNativeQuery(		
+	
+				"SELECT ROUND(DECIMAL(DECIMAL(HR.NOOFEMPIN)/INB.NOOFEMP *100,10,1),1) AS NoOf\n"
+				+"FROM ( SELECT DD.ACADAMIC_YEAR, count(HR_FACT_EMPLOYEE.emp_key) AS NOOFEMP\n"
+									+"FROM HR_FACT_EMPLOYEE \n"
+									+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
+									+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
+									+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
+																			+"FROM HR_FACT_EMPLOYEE HFE \n"
+																			+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
+																			+"WHERE DD.CALENDAR_YEAR = :paramYear\n"  
+																			+")\n"
+	                                +"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
+	                                +"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
+	                                +"group by DD.ACADAMIC_YEAR )INB\n"
+					+"INNER JOIN (SELECT DD.ACADAMIC_YEAR, count(HR_FACT_EMPLOYEE.emp_key) AS NOOFEMPIN\n"
+									+"FROM HR_FACT_EMPLOYEE \n"
+									+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
+									+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
+									+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
+																			+"FROM HR_FACT_EMPLOYEE HFE \n"
+																			+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
+																			+"WHERE DD.CALENDAR_YEAR = :paramYear\n" 
+																			+")\n"
+									+"AND HR_FACT_EMPLOYEE.NATIONALITY_KEY <> 100\n"
+	                                +"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
+	                                +"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
+									+"group by DD.ACADAMIC_YEAR )HR on INB.ACADAMIC_YEAR = HR.ACADAMIC_YEAR\n"
+				);
+		query.setParameter("paramYear", param.getAcademicYear());
+		query.setParameter("paramFaculty", param.getFacultyCode());
+		query.setParameter("paramDepartment",param.getDepartmentCode());
+		List<BigDecimal> results = query.getResultList();
+		 
+		List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
+		for (BigDecimal result : results) {	
+			InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
+			inboundOutboundStudent.setNoOf((BigDecimal) result);
+			
+			inboundOutboundStudents.add(inboundOutboundStudent);
+			
+		}
+		 		 
+		 return inboundOutboundStudents;
+	}
+	
+	
+	public List InternationalCompareAllStudentProgramInter(InBoundOutBoundServiceM param) throws DataAccessException {
+		Query query = entityManagerDwh.createNativeQuery(		
+	
+				"SELECT ROUND(DECIMAL(DECIMAL(INB.NO_OF_INTER)/AL.NO_OF_ALL *100,10,2),2) AS NoOf \n"
+					+"FROM ( SELECT ACADEMIC_YEAR, SUM(FACT_INBOUND_OUTBOUND_STUDENT.NO_OF_STUDENT) AS NO_OF_INTER\n"
+							+" FROM FACT_INBOUND_OUTBOUND_STUDENT\n"
+							 +"INNER JOIN DIM_FIELD ON  FACT_INBOUND_OUTBOUND_STUDENT.FIELD_KEY = DIM_FIELD.FIELD_KEY\n"
+	                         +"WHERE IN_OUT_TYPE_KEY = '2'\n"
+							 +"AND NATIONALITY <> 'Thai'\n"
+							 +"AND ACADEMIC_YEAR = :paramYear \n"
+							 +"AND( DIM_FIELD.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty )\n"
+							 +"AND( DIM_FIELD.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment) \n"
+							 +"GROUP BY ACADEMIC_YEAR\n"
+							 +")INB\n"
+					+"INNER JOIN (SELECT DS.ACADEMIC_YEAR,\n"
+									+"SUM(FAS.NO_OF_STUDENT) AS NO_OF_ALL\n"
+									+"FROM FACT_ALL_STUDENT FAS\n"
+									+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
+									+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
+	                                +"INNER JOIN DIM_PROGRAM DP ON FAS.PROGRAM_KEY = DP.PROGRAM_KEY\n"
+									+"WHERE DS.ACADEMIC_YEAR = :paramYear \n"
+									+"AND (DF.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty )\n"
+									+"AND (DF.DEPARTMENT_CODE = :paramDepartment  OR 'ALL' = :paramDepartment)\n"
+									+"AND LEFT(DS.SEMESTER,1) = '1'\n"
+	                                +"AND DP.ARRANGE_TYPE = 'หลักสูตรนานาชาติ'\n"
+									+"GROUP BY ACADEMIC_YEAR\n"
+									+")AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR\n"
+									) ;
+		query.setParameter("paramYear", param.getAcademicYear());
+		query.setParameter("paramFaculty", param.getFacultyCode());
+		query.setParameter("paramDepartment",param.getDepartmentCode());
+		List<BigDecimal> results = query.getResultList();
+		 
+		List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
+		for (BigDecimal result : results) {	
+			InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
+			inboundOutboundStudent.setNoOf((BigDecimal) result);
+			
+			inboundOutboundStudents.add(inboundOutboundStudent);
+			
+		}
+		 		 
+		 return inboundOutboundStudents;
+	}
+	
+	
+	public List ProgramInternationalCompareAllProgram(InBoundOutBoundServiceM param) throws DataAccessException {
+		Query query = entityManagerDwh.createNativeQuery(		
+	
+				"SELECT ROUND(DECIMAL(DECIMAL(INB.NO_OF_INTER)/AL.NO_OF_ALL *100,10,2),2) AS NoOf\n"
+						+"FROM (SELECT DS.ACADEMIC_YEAR,\n"
+								+"COUNT(dISTINCT DP.PROGRAM_CODE) AS NO_OF_INTER\n"
 								+"FROM FACT_ALL_STUDENT FAS\n"
 								+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
 								+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
@@ -867,134 +623,262 @@ public List ProgramInternationalCompareAllProgram(InBoundOutBoundServiceM param)
 								+"AND (DF.FACULTY_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
 								+"AND (DF.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
 								+"AND LEFT(DS.SEMESTER,1) = '1'\n"
-								+"GROUP BY ACADEMIC_YEAR )AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR\n"
-			);
-	query.setParameter("paramYear", param.getAcademicYear());
-	query.setParameter("paramFaculty", param.getFacultyCode());
-	query.setParameter("paramDepartment",param.getDepartmentCode());
-	List<BigDecimal> results = query.getResultList();
-	 
-	List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
-	for (BigDecimal result : results) {	
-		InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
-		inboundOutboundStudent.setNoOf((BigDecimal) result);
-		
-		inboundOutboundStudents.add(inboundOutboundStudent);
-		
+								+"AND DP.ARRANGE_TYPE = 'หลักสูตรนานาชาติ'\n"
+								+"GROUP BY ACADEMIC_YEAR \n"
+								+")INB\n"
+						+"INNER JOIN (SELECT DS.ACADEMIC_YEAR,\n"
+									+"COUNT(dISTINCT DP.PROGRAM_CODE) AS NO_OF_ALL\n"
+									+"FROM FACT_ALL_STUDENT FAS\n"
+									+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
+									+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
+									+"INNER JOIN DIM_PROGRAM DP ON FAS.PROGRAM_KEY = DP.PROGRAM_KEY\n"
+									+"WHERE DS.ACADEMIC_YEAR = :paramYear \n"
+									+"AND (DF.FACULTY_CODE = :paramFaculty OR 'ALL' = :paramFaculty)\n"
+									+"AND (DF.DEPARTMENT_CODE = :paramDepartment OR 'ALL' = :paramDepartment)\n"
+									+"AND LEFT(DS.SEMESTER,1) = '1'\n"
+									+"GROUP BY ACADEMIC_YEAR )AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR\n"
+				);
+		query.setParameter("paramYear", param.getAcademicYear());
+		query.setParameter("paramFaculty", param.getFacultyCode());
+		query.setParameter("paramDepartment",param.getDepartmentCode());
+		List<BigDecimal> results = query.getResultList();
+		 
+		List<InboundOutboundStudent> inboundOutboundStudents = new ArrayList<InboundOutboundStudent>();
+		for (BigDecimal result : results) {	
+			InboundOutboundStudent inboundOutboundStudent = new InboundOutboundStudent();
+			inboundOutboundStudent.setNoOf((BigDecimal) result);
+			
+			inboundOutboundStudents.add(inboundOutboundStudent);
+			
+		}
+		 		 
+		 return inboundOutboundStudents;
 	}
-	 		 
-	 return inboundOutboundStudents;
-}
-
-public List InternationalCompareAllStudentByFaculty(InBoundOutBoundServiceM param) throws DataAccessException {
-	Query query = entityManagerDwh.createNativeQuery(		
-
-			"SELECT INB.FACULTY_NAME_INITIAL,INB.NO_OF_INTER,AL.NO_OF_ALL\n"
-			+"FROM ( SELECT ACADEMIC_YEAR,\n"
-                         +"DIM_FACULTY.FACULTY_NAME_INITIAL, \n"
-                         +"SUM(FACT_INBOUND_OUTBOUND_STUDENT.NO_OF_STUDENT) AS NO_OF_INTER\n"
-                         +"FROM FACT_INBOUND_OUTBOUND_STUDENT\n"
-                         +"INNER JOIN DIM_FACULTY ON  FACT_INBOUND_OUTBOUND_STUDENT.FACULTY_KEY = DIM_FACULTY.FACULTY_KEY\n"
-                         +"INNER JOIN DIM_FIELD ON  FACT_INBOUND_OUTBOUND_STUDENT.FIELD_KEY = DIM_FIELD.FIELD_KEY\n"
-                         +"WHERE IN_OUT_TYPE_KEY = '2'\n"
-                         +"AND NATIONALITY <> 'Thai'\n"
-                         +"AND ACADEMIC_YEAR = :paramYear \n"
-                         +"AND( DIM_FIELD.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty)\n"
-                         +"AND( DIM_FIELD.DEPARTMENT_CODE = :paramDepartment  OR 'ALL' = :paramDepartment) \n"
-                         +"GROUP BY ACADEMIC_YEAR, DIM_FACULTY.FACULTY_NAME_INITIAL \n"
-                         +")INB\n"
-          +"INNER JOIN (SELECT DS.ACADEMIC_YEAR,DC.FACULTY_NAME_INITIAL,\n"
-          				+"SUM(FAS.NO_OF_STUDENT) AS NO_OF_ALL\n"
-          				+"FROM FACT_ALL_STUDENT FAS\n"
-          				+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
-          				+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
-          				+"INNER JOIN DIM_FACULTY DC ON DF.FACULTY_CODE = DC.FACULTY_CODE\n"
-          				+"WHERE DS.ACADEMIC_YEAR = :paramYear\n" 
-          				+"AND (DF.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty)\n"
-          				+"AND (DF.DEPARTMENT_CODE = :paramDepartment  OR 'ALL' = :paramDepartment)\n"
-          				+"AND LEFT(DS.SEMESTER,1) = '1'  \n"
-          				+"GROUP BY DS.ACADEMIC_YEAR,DC.FACULTY_NAME_INITIAL\n"
-          				+")AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR AND AL.FACULTY_NAME_INITIAL = INB.FACULTY_NAME_INITIAL\n"
-					) ;
-	query.setParameter("paramYear", param.getAcademicYear());
-	query.setParameter("paramFaculty", param.getFacultyCode());
-	query.setParameter("paramDepartment",param.getDepartmentCode());
-	List<Object[]> results = query.getResultList();
-	 
-	List<InBoundOutBoundServiceM> inboundOutboundStudents = new ArrayList<InBoundOutBoundServiceM>();
-	for (Object[] result : results) {	
-		InBoundOutBoundServiceM inBoundOutBoundServiceM = new InBoundOutBoundServiceM();
-		inBoundOutBoundServiceM.setShortFaculty((String) result[0]);
-		inBoundOutBoundServiceM.setnoOfInter((Integer) result[1]);
-		inBoundOutBoundServiceM.setnoOfAll((Integer) result[2]);
-		
-		inBoundOutBoundServiceM.setPaging(null);
-		inboundOutboundStudents.add(inBoundOutBoundServiceM);
-		
+	
+	public List InternationalCompareAllStudentByFaculty(InBoundOutBoundServiceM param) throws DataAccessException {
+		Query query = entityManagerDwh.createNativeQuery(		
+	
+				"SELECT INB.FACULTY_NAME_INITIAL,INB.NO_OF_INTER,AL.NO_OF_ALL\n"
+				+"FROM ( SELECT ACADEMIC_YEAR,\n"
+	                         +"DIM_FACULTY.FACULTY_NAME_INITIAL, \n"
+	                         +"SUM(FACT_INBOUND_OUTBOUND_STUDENT.NO_OF_STUDENT) AS NO_OF_INTER\n"
+	                         +"FROM FACT_INBOUND_OUTBOUND_STUDENT\n"
+	                         +"INNER JOIN DIM_FACULTY ON  FACT_INBOUND_OUTBOUND_STUDENT.FACULTY_KEY = DIM_FACULTY.FACULTY_KEY\n"
+	                         +"INNER JOIN DIM_FIELD ON  FACT_INBOUND_OUTBOUND_STUDENT.FIELD_KEY = DIM_FIELD.FIELD_KEY\n"
+	                         +"WHERE IN_OUT_TYPE_KEY = '2'\n"
+	                         +"AND NATIONALITY <> 'Thai'\n"
+	                         +"AND ACADEMIC_YEAR = :paramYear \n"
+	                         +"AND( DIM_FIELD.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty)\n"
+	                         +"AND( DIM_FIELD.DEPARTMENT_CODE = :paramDepartment  OR 'ALL' = :paramDepartment) \n"
+	                         +"GROUP BY ACADEMIC_YEAR, DIM_FACULTY.FACULTY_NAME_INITIAL \n"
+	                         +")INB\n"
+	          +"INNER JOIN (SELECT DS.ACADEMIC_YEAR,DC.FACULTY_NAME_INITIAL,\n"
+	          				+"SUM(FAS.NO_OF_STUDENT) AS NO_OF_ALL\n"
+	          				+"FROM FACT_ALL_STUDENT FAS\n"
+	          				+"INNER JOIN DIM_SEMESTER DS ON  FAS.SEMESTER_KEY = DS.SEMESTER_KEY\n"
+	          				+"INNER JOIN DIM_FIELD DF ON FAS.FIELD_KEY =DF.FIELD_KEY\n"
+	          				+"INNER JOIN DIM_FACULTY DC ON DF.FACULTY_CODE = DC.FACULTY_CODE\n"
+	          				+"WHERE DS.ACADEMIC_YEAR = :paramYear\n" 
+	          				+"AND (DF.FACULTY_CODE = :paramFaculty  OR 'ALL' = :paramFaculty)\n"
+	          				+"AND (DF.DEPARTMENT_CODE = :paramDepartment  OR 'ALL' = :paramDepartment)\n"
+	          				+"AND LEFT(DS.SEMESTER,1) = '1'  \n"
+	          				+"GROUP BY DS.ACADEMIC_YEAR,DC.FACULTY_NAME_INITIAL\n"
+	          				+")AL on INB.ACADEMIC_YEAR = AL.ACADEMIC_YEAR AND AL.FACULTY_NAME_INITIAL = INB.FACULTY_NAME_INITIAL\n"
+						) ;
+		query.setParameter("paramYear", param.getAcademicYear());
+		query.setParameter("paramFaculty", param.getFacultyCode());
+		query.setParameter("paramDepartment",param.getDepartmentCode());
+		List<Object[]> results = query.getResultList();
+		 
+		List<InBoundOutBoundServiceM> inboundOutboundStudents = new ArrayList<InBoundOutBoundServiceM>();
+		for (Object[] result : results) {	
+			InBoundOutBoundServiceM inBoundOutBoundServiceM = new InBoundOutBoundServiceM();
+			inBoundOutBoundServiceM.setShortFaculty((String) result[0]);
+			inBoundOutBoundServiceM.setnoOfInter((Integer) result[1]);
+			inBoundOutBoundServiceM.setnoOfAll((Integer) result[2]);
+			
+			inBoundOutBoundServiceM.setPaging(null);
+			inboundOutboundStudents.add(inBoundOutBoundServiceM);
+			
+		}
+		 return inboundOutboundStudents;
 	}
-	 return inboundOutboundStudents;
-}
-
-
-public List InternationalCompareAllEmpByFaculty(InBoundOutBoundServiceM param) throws DataAccessException {
-	Query query = entityManagerDwh.createNativeQuery(		
-
-			"SELECT INB.FACULTY_NAME_INITIAL as ShortFaculty,INB.noOfInter,AL.noOfAll \n"
-				+"FROM ( SELECT DD.ACADAMIC_YEAR, \n"
-				+"CASE \n"
-				+" WHEN DIM_FACULTY.FACULTY_NAME_INITIAL IS NULL \n"
-				+"THEN 'KMUTT'\n"
-				+" ELSE DIM_FACULTY.FACULTY_NAME_INITIAL END FACULTY_NAME_INITIAL ,\n"
-				+" count(HR_FACT_EMPLOYEE.emp_key) AS noOfInter\n"
-				+"FROM HR_FACT_EMPLOYEE \n"
-				+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
-				+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
-								+"LEFT JOIN DIM_FACULTY ON  HR_DIM_DEPARTMENT.ORGENIZATION_CODE = DIM_FACULTY.FACULTY_CODE\n"
-								+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
-																		+"FROM HR_FACT_EMPLOYEE HFE \n"
-																		+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
-																		+"WHERE DD.CALENDAR_YEAR = :paramYear \n"
-																		+")\n"
-								+"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE =  :paramFaculty OR 'ALL' =  :paramFaculty)\n"
-								+"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE =  :paramDepartment OR 'ALL' =  :paramDepartment )\n"
-								+"AND  HR_FACT_EMPLOYEE.NATIONALITY_KEY <> 100\n"
-								+"group by DD.ACADAMIC_YEAR,DIM_FACULTY.FACULTY_NAME_INITIAL )INB\n"
-				+"INNER JOIN (SELECT DD.ACADAMIC_YEAR, \n"
-								+"CASE \n"
-								+"WHEN DIM_FACULTY.FACULTY_NAME_INITIAL IS NULL\n" 
-								+"THEN 'KMUTT'\n"
-								+"ELSE DIM_FACULTY.FACULTY_NAME_INITIAL END AS FACULTY_NAME_INITIAL ,\n"
-								+"count(HR_FACT_EMPLOYEE.emp_key) AS noOfAll\n"
-								+"FROM HR_FACT_EMPLOYEE \n"
-								+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
-								+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
-								+"LEFT JOIN DIM_FACULTY ON  HR_DIM_DEPARTMENT.ORGENIZATION_CODE = DIM_FACULTY.FACULTY_CODE\n"
-								+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
-																		+"FROM HR_FACT_EMPLOYEE HFE \n"
-																		+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
-																		+"WHERE DD.CALENDAR_YEAR = :paramYear \n"
-																		+")\n"
-								+"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE =  :paramFaculty OR 'ALL' =  :paramFaculty )\n"
-								+"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE =  :paramDepartment OR 'ALL' =  :paramDepartment )\n"
-								+"group by DD.ACADAMIC_YEAR,DIM_FACULTY.FACULTY_NAME_INITIAL )AL on INB.ACADAMIC_YEAR = AL.ACADAMIC_YEAR  AND  INB.FACULTY_NAME_INITIAL = AL.FACULTY_NAME_INITIAL \n"
-					) ;
-	query.setParameter("paramYear", param.getAcademicYear());
-	query.setParameter("paramFaculty", param.getFacultyCode());
-	query.setParameter("paramDepartment",param.getDepartmentCode());
-	List<Object[]> results = query.getResultList();
-	 
-	List<InBoundOutBoundServiceM> inboundOutboundStudents = new ArrayList<InBoundOutBoundServiceM>();
-	for (Object[] result : results) {	
-		InBoundOutBoundServiceM inBoundOutBoundServiceM = new InBoundOutBoundServiceM();
-		inBoundOutBoundServiceM.setShortFaculty((String) result[0]);
-		inBoundOutBoundServiceM.setnoOfInter((Integer) result[1]);
-		inBoundOutBoundServiceM.setnoOfAll((Integer) result[2]);
-		
-		inBoundOutBoundServiceM.setPaging(null);
-		inboundOutboundStudents.add(inBoundOutBoundServiceM);
-		
+	
+	
+	public List InternationalCompareAllEmpByFaculty(InBoundOutBoundServiceM param) throws DataAccessException {
+		Query query = entityManagerDwh.createNativeQuery(		
+	
+				"SELECT INB.FACULTY_NAME_INITIAL as ShortFaculty,INB.noOfInter,AL.noOfAll \n"
+					+"FROM ( SELECT DD.ACADAMIC_YEAR, \n"
+					+"CASE \n"
+					+" WHEN DIM_FACULTY.FACULTY_NAME_INITIAL IS NULL \n"
+					+"THEN 'KMUTT'\n"
+					+" ELSE DIM_FACULTY.FACULTY_NAME_INITIAL END FACULTY_NAME_INITIAL ,\n"
+					+" count(HR_FACT_EMPLOYEE.emp_key) AS noOfInter\n"
+					+"FROM HR_FACT_EMPLOYEE \n"
+					+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
+					+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
+									+"LEFT JOIN DIM_FACULTY ON  HR_DIM_DEPARTMENT.ORGENIZATION_CODE = DIM_FACULTY.FACULTY_CODE\n"
+									+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
+																			+"FROM HR_FACT_EMPLOYEE HFE \n"
+																			+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
+																			+"WHERE DD.CALENDAR_YEAR = :paramYear \n"
+																			+")\n"
+									+"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE =  :paramFaculty OR 'ALL' =  :paramFaculty)\n"
+									+"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE =  :paramDepartment OR 'ALL' =  :paramDepartment )\n"
+									+"AND  HR_FACT_EMPLOYEE.NATIONALITY_KEY <> 100\n"
+									+"group by DD.ACADAMIC_YEAR,DIM_FACULTY.FACULTY_NAME_INITIAL )INB\n"
+					+"INNER JOIN (SELECT DD.ACADAMIC_YEAR, \n"
+									+"CASE \n"
+									+"WHEN DIM_FACULTY.FACULTY_NAME_INITIAL IS NULL\n" 
+									+"THEN 'KMUTT'\n"
+									+"ELSE DIM_FACULTY.FACULTY_NAME_INITIAL END AS FACULTY_NAME_INITIAL ,\n"
+									+"count(HR_FACT_EMPLOYEE.emp_key) AS noOfAll\n"
+									+"FROM HR_FACT_EMPLOYEE \n"
+									+"INNER JOIN DIM_DATE DD ON  HR_FACT_EMPLOYEE.MONTH_KEY = DD.DATE_KEY\n"
+									+"INNER JOIN HR_DIM_DEPARTMENT ON HR_FACT_EMPLOYEE.DEPARTMENT_KEY = HR_DIM_DEPARTMENT.DEPARTMENT_KEY\n"
+									+"LEFT JOIN DIM_FACULTY ON  HR_DIM_DEPARTMENT.ORGENIZATION_CODE = DIM_FACULTY.FACULTY_CODE\n"
+									+"WHERE  HR_FACT_EMPLOYEE.MONTH_KEY = (SELECT Max (HFE.MONTH_KEY)\n"
+																			+"FROM HR_FACT_EMPLOYEE HFE \n"
+																			+"INNER JOIN DIM_DATE DD ON  HFE.MONTH_KEY = DD.DATE_KEY\n"
+																			+"WHERE DD.CALENDAR_YEAR = :paramYear \n"
+																			+")\n"
+									+"AND (HR_DIM_DEPARTMENT.ORGENIZATION_CODE =  :paramFaculty OR 'ALL' =  :paramFaculty )\n"
+									+"AND (HR_DIM_DEPARTMENT.DEPARTMENT_CODE =  :paramDepartment OR 'ALL' =  :paramDepartment )\n"
+									+"group by DD.ACADAMIC_YEAR,DIM_FACULTY.FACULTY_NAME_INITIAL )AL on INB.ACADAMIC_YEAR = AL.ACADAMIC_YEAR  AND  INB.FACULTY_NAME_INITIAL = AL.FACULTY_NAME_INITIAL \n"
+						) ;
+		query.setParameter("paramYear", param.getAcademicYear());
+		query.setParameter("paramFaculty", param.getFacultyCode());
+		query.setParameter("paramDepartment",param.getDepartmentCode());
+		List<Object[]> results = query.getResultList();
+		 
+		List<InBoundOutBoundServiceM> inboundOutboundStudents = new ArrayList<InBoundOutBoundServiceM>();
+		for (Object[] result : results) {	
+			InBoundOutBoundServiceM inBoundOutBoundServiceM = new InBoundOutBoundServiceM();
+			inBoundOutBoundServiceM.setShortFaculty((String) result[0]);
+			inBoundOutBoundServiceM.setnoOfInter((Integer) result[1]);
+			inBoundOutBoundServiceM.setnoOfAll((Integer) result[2]);
+			
+			inBoundOutBoundServiceM.setPaging(null);
+			inboundOutboundStudents.add(inBoundOutBoundServiceM);
+			
+		}
+		 return inboundOutboundStudents;
 	}
-	 return inboundOutboundStudents;
-}
+	*/
+	
+	@SuppressWarnings("unchecked")
+	public List<Object[]> fetchChartResultSet(ServiceM datasource,List<FilterM> filters){
+		List<Object[]>  results  = new ArrayList<Object[]>();
 
+			String sql = datasource.getSqlString();
+			Query query = entityManagerDwh.createNativeQuery(sql);
+			for( FilterM filter : filters ){
+				if(  sql.contains(":"+filter.getColumnName())  ){ // check param syntax in sqlQuery
+					query.setParameter(filter.getColumnName(),filter.getSelectedValue());
+				}
+			}
+			results = query.getResultList();
+
+		return results;
+	}
+	@SuppressWarnings("unchecked")
+	public List<FilterM> fetchInstanceFilters(String instanceId){
+		 List<FilterM> filters = new ArrayList<FilterM>();  
+		 // [filter_name,column_name,value]
+		String sql = "SELECT f.FILTER_NAME,f.COLUMN_NAME, coalesce( cfi.VALUE , f.SUBSTITUTE_DEFAULT) as filter_value "
+				+ "	FROM CHART_FILTER_INSTANCE cfi inner join  FILTER f on cfi.FILTER_ID = f.FILTER_ID "
+				+ "   WHERE cfi.instance_id = '"+instanceId+"'";
+		try{
+		Query query = entityManager.createNativeQuery(sql);
+		List<Object[]> resultSet = query.getResultList();
+		for( Object[] result :  resultSet){
+			FilterM f = new FilterM();
+			f.setFilterName( (String)result[0]);
+			f.setColumnName((String)result[1]);
+			f.setSelectedValue( (String)result[2] );
+			filters.add(f);
+		}
+		}catch(Exception ex){
+			filters = new ArrayList<FilterM>();  
+		}
+		return filters;
+	}
+	public List<FilterInstanceM> fetchAllFilterInstance(String instanceId){
+		//  no try exception
+		List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
+		String sql = "SELECT f.filter_id,f.filter_name,f.sql_query,cfi.VALUE "
+				+ "	FROM CHART_FILTER_INSTANCE cfi inner join FILTER f on cfi.FILTER_ID  = f.FILTER_ID "
+				+ " where INSTANCE_ID =  '"+instanceId+"'";
+		Query query = entityManager.createNativeQuery(sql);
+		List<Object[]> resultSet = query.getResultList();
+		for( Object[] result :  resultSet){
+			FilterInstanceM fin = new FilterInstanceM();
+			fin.setInstanceId(instanceId);
+			fin.setFilterId( (Integer)result[0]);
+			FilterM f = new FilterM();
+			f.setFilterId( (Integer)result[0] );
+			f.setFilterName( (String) result[1]);
+			f.setSqlQuery((String) result[2]);
+			f.setSelectedValue((String)result[3]);
+			fin.setFilterM(f);	//set fin Filter
+			
+			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
+			if(  f.getSqlQuery()!=null   ){
+				Query qf =   entityManager.createNativeQuery( f.getSqlQuery());
+				List<Object[]> resultFilter =  qf.getResultList();
+				for( Object[] rf : resultFilter ){
+					fvs.add( buildFilterItems(rf) );
+				}
+			}else{
+				fvs.add(buildFilterItems(new Object[]{}));
+			}
+			fin.setItems(fvs);  // set fin FilterValue
+			fins.add(fin);
+		}
+		return fins;
+	}
+	public FilterValueM buildFilterItems(Object[] rf){
+		FilterValueM fv = new FilterValueM();
+		if(rf.length==1){
+			//Can't be because entityManager.createNativeQuery  dose not reture List<Object[]>  for  1 column resultset
+			//fv.setKeyMapping((String)rf[0]);
+			//fv.setValueMapping((String)rf[0]);
+		}else if(rf.length==2){
+			fv.setKeyMapping((String)rf[0]);
+			fv.setValueMapping((String)rf[1]);
+		}else{
+		}
+		return fv;
+	}
+	public  List<FilterM> fetchGlobalFilter(){
+		List<FilterM> filters = new ArrayList<FilterM>();
+		String sql = "select filter_id,filter_name,column_name,SUBSTITUTE_DEFAULT,SQL_QUERY from FILTER where type = 'global'";
+		Query q = entityManager.createNativeQuery(sql);
+		List<Object[]> fd = q.getResultList();
+		for(Object[] f : fd){
+			FilterM fm = new FilterM();
+			fm.setFilterId( (Integer) f[0]  );
+			fm.setFilterName( (String) f[1] );
+			fm.setColumnName((String) f[2]);
+			fm.setSelectedValue((String) f[3]);
+			fm.setSqlQuery((String) f[4] );
+			
+			//filterValue
+			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
+			if(  fm.getSqlQuery()!=null   ){
+				Query qf =   entityManager.createNativeQuery( fm.getSqlQuery());
+				List<Object[]> resultFilter =  qf.getResultList();
+				for( Object[] rf : resultFilter ){
+					fvs.add( buildFilterItems(rf) );
+				}
+			}else{
+				fvs.add(buildFilterItems(new Object[]{}));
+			}
+			fm.setFilterValues(fvs);
+			//into list
+			filters.add(fm);
+		}
+		return filters;
+	}
 }
