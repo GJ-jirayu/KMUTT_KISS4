@@ -95,6 +95,12 @@ public class ImakeXML implements Serializable {
 /*	@XStreamAlias("vcriteria")
 	private VCriteria vcriteria;*/
 
+	public String getInstanceId() {
+		return instanceId;
+	}
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
+	}
 	public String getXmlResource() {
 		return xmlResource;
 	}
@@ -231,15 +237,8 @@ public class ImakeXML implements Serializable {
 		return filterFusionM;
 	}
 
-	public String getInstanceId() {
-		return instanceId;
-	}
-
-	public void setInstanceId(String instanceId) {
-		this.instanceId = instanceId;
-	}
-
 	public void setFilterFusionM(FilterFusionM filterFusionM) {
 		this.filterFusionM = filterFusionM;
 	}
+	
 }

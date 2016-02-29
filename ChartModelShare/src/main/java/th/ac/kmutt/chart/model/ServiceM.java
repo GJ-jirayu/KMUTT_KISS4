@@ -7,6 +7,7 @@ import java.io.Serializable;
 
 /**
  * Created by imake on 20/10/2015.
+ *  Edited by gj +sqlString 
  */
 @XStreamAlias("ServiceM")
 public class ServiceM extends ImakeXML implements Serializable {
@@ -17,6 +18,7 @@ public class ServiceM extends ImakeXML implements Serializable {
     private String modelName;
     private String type;
     private String activeFlag;
+    private String sqlString;
 
     public Integer getServiceId() {
         return serviceId;
@@ -67,4 +69,12 @@ public class ServiceM extends ImakeXML implements Serializable {
     public void setActiveFlag(String activeFlag) {
         this.activeFlag = activeFlag;
     }
+
+	public String getSqlString() {
+		return sqlString;
+	}
+
+	public void setSqlString(String sqlString) {
+		this.sqlString = sqlString;
+	}
 }

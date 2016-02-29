@@ -21,9 +21,9 @@ public interface ChartService {
 */
 
 	public List listChart() ;
-	public List listCopyrightService(th.ac.kmutt.chart.model.CopyrightServiceM param);
-	public List listJournalPapersService(th.ac.kmutt.chart.model.JournalPapersServiceM param);
-	public List listFundingResourceService(th.ac.kmutt.chart.model.FundingResourceServiceM param);
+	//public List listCopyrightService(th.ac.kmutt.chart.model.CopyrightServiceM param);
+	//public List listJournalPapersService(th.ac.kmutt.chart.model.JournalPapersServiceM param);
+	//public List listFundingResourceService(th.ac.kmutt.chart.model.FundingResourceServiceM param);
 
 
 	//CHART
@@ -69,12 +69,6 @@ public interface ChartService {
 	public Integer deleteComment(CommentM model) ;
 	public CommentM findCommentById(String instanceId) ;
 
-	//COPYRIGHT_SERVICE
-	public Integer saveCopyrightService(CopyrightServiceM model) ;
-	public Integer updateCopyrightService(CopyrightServiceM model) ;
-	public Integer deleteCopyrightService(CopyrightServiceM model) ;
-	public CopyrightServiceM findCopyrightServiceById(Integer type,Integer year,Integer month) ;
-
 	//FEATURE
 	public Integer saveFeature(FeatureM model) ;
 	public Integer updateFeature(FeatureM model) ;
@@ -95,6 +89,7 @@ public interface ChartService {
 	public FilterInstanceM findFilterInstanceById(String instanceId) ;
 	public List listFilterInstance(th.ac.kmutt.chart.model.FilterInstanceM param);
 
+	/*
 	//FUNDING_RESOURCE_SERVICE
 	public Integer saveFundingResourceService(FundingResourceServiceM model) ;
 	public Integer updateFundingResourceService(FundingResourceServiceM model) ;
@@ -107,6 +102,13 @@ public interface ChartService {
 	public Integer deleteJournalPapersService(JournalPapersServiceM model) ;
 	public JournalPapersServiceM findJournalPapersServiceById(Integer type,Integer year) ;
 
+	//COPYRIGHT_SERVICE
+		public Integer saveCopyrightService(CopyrightServiceM model) ;
+		public Integer updateCopyrightService(CopyrightServiceM model) ;
+		public Integer deleteCopyrightService(CopyrightServiceM model) ;
+		public CopyrightServiceM findCopyrightServiceById(Integer type,Integer year,Integer month) ;
+*/
+	
 	//SERVICE_CHART_MAPPING
 	public Integer saveServiceChartMapping(ServiceChartMappingM model) ;
 	public Integer updateServiceChartMapping(ServiceChartMappingM model) ;
@@ -127,4 +129,9 @@ public interface ChartService {
 	public Integer deleteServiceFilterMapping(ServiceFilterMappingM model) ;
 	public ServiceFilterMappingM findServiceFilterMappingById(Integer serviceId,Integer filterId) ;
 	public List listServiceFilterMapping(th.ac.kmutt.chart.model.ServiceFilterMappingM param);
+	
+	//new service by pk
+	public List<FilterM> getGlobalFilter();
+	public FusionChartM getFusionChart(FusionChartM obj);
+	public List<FilterInstanceM> getAllFilterInstance(FilterInstanceM obj);
 }

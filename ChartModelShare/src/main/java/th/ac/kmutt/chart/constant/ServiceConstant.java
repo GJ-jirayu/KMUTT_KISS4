@@ -135,6 +135,8 @@ public class ServiceConstant {
     public static final String FILTER_ITEMS_DELETE = "deleteFilterItems";
     public static final String FILTER_DELETE = "deleteFilter";
     public static final String FILTER_FIND_BY_ID = "findByIdFilter";
+    public static final String FILTER_GET_ITEMS = "retriveFilteritems";
+    public static final String FILTER_GET_INSTANCE_VALUE = "retriveFilterInstanceValue";
 
 
     //FILTER_INSTANCE
@@ -189,4 +191,8 @@ public class ServiceConstant {
     public static final String SERVICE_FILTER_MAPPING_DELETE = "deleteServiceFilterMapping";
     public static final String SERVICE_FILTER_MAPPING_FIND_BY_ID = "findByIdServiceFilterMapping";
     
+    //FUSION CHART SERVICE
+    public static final String FUSION_CHART_OBJECT  = "retriveFusionChartObject";
+    public static final String FILTER_GET_INSTANCE_FILTER = "filterGetInstanceFilter";
+    public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
 }

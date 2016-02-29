@@ -30,21 +30,19 @@ ${filterMap} , ${filterMap["1_1"]} , ${filterMap["1_x"]}
         <tr style="cursor: pointer;">
         <td style="text-align: left">
         <c:forEach items="${filterList}" var="filter" varStatus="loop">
-           ${filter.filterM.filterName}
+           ${filter.filterName}
                    &nbsp;&nbsp;
-                <select name="aoe_global">
-                    <option value="-1">ทั้งหมด</option>
-                    <c:if test="${not empty filter.filterM.filterValues}">
-                        <c:forEach items="${filter.filterM.filterValues}" var="filterValue" varStatus="loop2">
-                            <c:set var="filter_check">${filter.filterM.filterId}_${filterValue.keyMapping}_${filterValue.valueMapping}</c:set>
-                            <c:if test="${ not empty filterMap[filter_check] }">
-                                <option value="${filter.filterM.filterId}_${filterValue.keyMapping}_${filterValue.valueMapping}" selected>${filterValue.valueMapping}</option>
-                            </c:if>
-                            <c:if test="${  empty filterMap[filter_check] }">
-                                <option value="${filter.filterM.filterId}_${filterValue.keyMapping}_${filterValue.valueMapping}" >${filterValue.valueMapping}</option>
-                            </c:if>
+                <select id="g_filter_${filter.filterId}" name="g_filter_${filter.filterId}">
+                       	<c:forEach items="${filter.filterValues}" var="filterValue" varStatus="loop2">
+                            <c:choose>
+							    <c:when test="${filter.selectedValue.equals(filterValue.keyMapping)}">
+							        <option value="${filterValue.keyMapping}" selected>${filterValue.valueMapping}</option>
+							    </c:when>    
+							    <c:otherwise>
+							            <option value="${filterValue.keyMapping}">${filterValue.valueMapping}</option>
+							    </c:otherwise>
+							</c:choose>
                         </c:forEach>
-                    </c:if>
                 </select>
             &nbsp;&nbsp;
         </c:forEach>

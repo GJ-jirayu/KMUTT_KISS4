@@ -4,12 +4,12 @@ package th.ac.kmutt.chart.portlet;
  * Created by imake on 13/09/2015.
  */
 
-import com.google.gson.Gson;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
+
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -18,12 +18,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
+import org.springframework.web.portlet.bind.annotation.ResourceMapping;
+
 import th.ac.kmutt.chart.form.ChartSettingForm;
-import th.ac.kmutt.chart.fusion.model.ChartFusionM;
-import th.ac.kmutt.chart.fusion.model.DataSourceFusionM;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.service.ChartService;
 
@@ -31,6 +32,11 @@ import javax.portlet.PortletMode;
 import javax.portlet.PortletModeException;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
+import javax.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,24 +94,24 @@ public class ChartCommonSettingController {
         } else {
             chartSettingForm = (ChartSettingForm) model.asMap().get("chartSettingForm");
         }
-
+        //get liferay interface
         ThemeDisplay themeDisplay = (ThemeDisplay) request
                 .getAttribute(WebKeys.THEME_DISPLAY);
        // logger.info("themeDisplay->"+themeDisplay);
-        String id= themeDisplay.getPortletDisplay().getId();
 
         String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
         ChartInstanceM chartInstanceM=chartService.findChartInstanceById(instanceId);
         chartSettingForm.setChartInstance(instanceId);
         String json="";
-        String dataSourceType="1";
+        String dataSourceType="1";  //default
         Integer serviceId=null;
-        if(chartInstanceM!=null){
+        if(chartInstanceM!=null){  
             json=chartInstanceM.getChartJson();
             dataSourceType=chartInstanceM.getDataSourceType();
             chartSettingForm.setAdvProp(chartInstanceM.getAdvProp());
             chartSettingForm.setDataAdhoc(chartInstanceM.getDataAdhoc());
             chartSettingForm.setChartType(chartInstanceM.getChartType());
+            chartSettingForm.setChartJson(chartInstanceM.getChartJson());
             chartSettingForm.setJsonStr(json);
             chartSettingForm.setDataSourceType(dataSourceType);
             chartSettingForm.setLinkTo(chartInstanceM.getLinkTo());
@@ -119,11 +125,14 @@ public class ChartCommonSettingController {
             serviceId=chartInstanceM.getServiceId();
 
         }
-
+        // list service 
         ServiceM  serviceM=new ServiceM();
         serviceM.setType("chart");
-        List<ServiceM> listServices=  chartService.listService(serviceM);
+        @SuppressWarnings("unchecked")
+		List<ServiceM> listServices=  chartService.listService(serviceM);
         model.addAttribute("serviceList",listServices);
+        // find chart default properties
+        
         /*
         FilterM filterM=new FilterM();
         filterM.setType("global");
@@ -181,7 +190,6 @@ public class ChartCommonSettingController {
                     }
                 }
 
-
                 ChartFilterInstanceM chartFilterInstanceM =new ChartFilterInstanceM();
                 chartFilterInstanceM.setServiceId(serviceId);
                 chartFilterInstanceM.setInstanceId(instanceId);
@@ -210,8 +218,6 @@ public class ChartCommonSettingController {
         model.addAttribute("chartSettingForm", chartSettingForm);
         model.addAttribute("dataSourceJson",json);
 
-
-
         return "chart/settingChart";
     }
     @RequestMapping(params = "action=doSubmit") // action phase
@@ -221,77 +227,23 @@ public class ChartCommonSettingController {
         //logger.info("into do submit instance =>"+chartSettingForm.getChartInstance()+" ,new json "+chartSettingForm.getJsonStr());
         boolean isSave=false;
         ChartInstanceM chartInstanceM=chartService.findChartInstanceById(chartSettingForm.getChartInstance());
-        if(chartInstanceM==null) {
+        if(chartInstanceM==null) { // new instance
             chartInstanceM = new ChartInstanceM();
             chartInstanceM.setInstanceId(chartSettingForm.getChartInstance());
             isSave=true;
         }
-        String jsonStr="";
-       String dataJson="";
 
-        //Gson gson =new Gson();
-        //  System.out.println(gson.toJson(chartM));
-        //DataSourceFusionM advProp=(DataSourceFusionM)gson.fromJson("{"+chartSettingForm.getAdvProp()+"}",DataSourceFusionM.class);
-        JSONObject myObject = null;
-        JSONObject chartOBJ=null;
-        try {
-            myObject = new JSONObject("{"+chartSettingForm.getAdvProp()+"}");
-            chartOBJ =myObject.getJSONObject("chart");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if(chartSettingForm.getChartTitle()!=null && chartSettingForm.getChartTitle().trim().length()>0){
-            //advProp.getChartFusionM().setCaption(chartSettingForm.getChartTitle());
-            try {
-               // String caption=chartOBJ.getString("caption");
-                chartOBJ.put("caption",chartSettingForm.getChartTitle());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        if(chartSettingForm.getChartSubTitle()!=null && chartSettingForm.getChartSubTitle().trim().length()>0){
-            //advProp.getChartFusionM().setSubCaptionn(chartSettingForm.getChartSubTitle());
-            try {
-                chartOBJ.put("subCaption",chartSettingForm.getChartSubTitle());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            myObject.put("chart",chartOBJ);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        logger.info("myObject->"+myObject.toString());
-        logger.info("mychart->"+chartOBJ.toString());
-        String advProb_new="";
         chartInstanceM.setChartType(chartSettingForm.getChartType());
-        if(chartSettingForm.getDataSourceType().equals("1")){ // webservice
+        chartInstanceM.setDataSourceType(chartSettingForm.getDataSourceType());
+        if(chartSettingForm.getDataSourceType().equals("1")){ // choose use datasource
             ServiceM serviceM=new ServiceM();
             serviceM.setServiceId(Integer.valueOf(chartSettingForm.getDataSource()));
             chartInstanceM.setServiceId(Integer.valueOf(chartSettingForm.getDataSource()));
-            chartInstanceM.setService(serviceM);
-            th.ac.kmutt.chart.model.CopyrightServiceM param
-                    =new th.ac.kmutt.chart.model.CopyrightServiceM();
-            dataJson="\"data\": []";
-
-           // jsonStr="{\"chart\": "+gson.toJson(advProp.getChartFusionM())+","+dataJson+"}";
-            //advProb_new=myObject.toString();
-            //jsonStr=myObject.toString()+","+dataJson+"}";
-        }else{
-            //advProb_new="{"+chartSettingForm.getAdvProp()
-            dataJson=chartSettingForm.getDataAdhoc();
-            //jsonStr="{"+chartSettingForm.getAdvProp()+","+dataJson+"}";
         }
-        jsonStr="{\"chart\": "+chartOBJ.toString()+","+dataJson+"}";
-       // jsonStr="{\"chart\": "+gson.toJson(advProp.getChartFusionM())+","+dataJson+"}";
-        chartInstanceM.setChartJson(jsonStr);
-        //chartInstanceM.setChartId(1);
-        //chartInstanceM.setServiceId(3);
+        chartInstanceM.setChartJson(chartSettingForm.getChartJson());
         chartInstanceM.setAdvProp(chartSettingForm.getAdvProp());
+        chartInstanceM.setDataAdhoc(chartSettingForm.getDataAdhoc());
         chartInstanceM.setChartHeight(chartSettingForm.getChartHeight());
-        chartInstanceM.setDataSourceType(chartSettingForm.getDataSourceType());
         chartInstanceM.setLinkTo(chartSettingForm.getLinkTo());
         chartInstanceM.setFilterRole(chartSettingForm.getFilterRole());
         chartInstanceM.setSubFromFilter(chartSettingForm.getSubFromFilter());
@@ -305,30 +257,46 @@ public class ChartCommonSettingController {
             commentM.setComment(chartSettingForm.getComment());
             chartInstanceM.setComment(commentM);
         }
-        logger.debug("chartSettingForm.getDataSourceType()-->" + chartSettingForm.getDataSourceType());
-        logger.debug("chartSettingForm.getDataSource()-->" + chartSettingForm.getDataSource());
-        logger.debug("chartSettingForm.getInstanceId()-->"+chartInstanceM.getInstanceId());
-        chartInstanceM.setDataAdhoc(chartSettingForm.getDataAdhoc());
+        //  save&update
         if(isSave)
             chartService.saveChartInstance(chartInstanceM);
         else
             chartService.updateChartInstance(chartInstanceM);
-        String[] aoe_internal=request.getParameterValues("aoe_internal");
 
-        logger.debug("into doSubmit aoe_internal=>" + aoe_internal);
-
-        if(chartSettingForm.getDataSourceType().equals("1")) { // webservice
-            ChartFilterInstanceM chartFilterInstanceM = new ChartFilterInstanceM();
-            chartFilterInstanceM.setIds(aoe_internal);
-            chartFilterInstanceM.setServiceId(Integer.valueOf(chartSettingForm.getDataSource()));
-            chartFilterInstanceM.setInstanceId(chartSettingForm.getChartInstance());
-            chartService.updateChartFilterInstance(chartFilterInstanceM);
-        }
         try {
             response.setPortletMode(PortletMode.VIEW);
             response.setRenderParameter("action", "list");
         } catch (PortletModeException e) {
             e.printStackTrace();
         }
+    }
+    //
+    @ResourceMapping(value="loadChartProp")
+	@ResponseBody 
+	public void loadChartProp(ResourceRequest request,ResourceResponse response) throws IOException{
+		HttpServletRequest httpReq = PortalUtil.getHttpServletRequest(request);
+		HttpServletRequest normalRequest	=	PortalUtil.getOriginalServletRequest(httpReq);
+		String chartType = normalRequest.getParameter("chartType");
+		String prop = normalRequest.getParameter("prop");
+		com.liferay.portal.kernel.json.JSONObject json = JSONFactoryUtil.createJSONObject();
+		com.liferay.portal.kernel.json.JSONObject header = JSONFactoryUtil.createJSONObject();
+		header.put("prop", prop);
+		
+		ChartM param = new ChartM();
+		param.setChartType(chartType);
+		@SuppressWarnings("unchecked")
+		List<ChartM> charts = chartService.listChart(param);
+		if( charts!=null & charts.size()>0 ){
+			ChartM chart = charts.get(0);
+			if(prop.equals("chartJson")){
+				json.put("content", chart.getChartJson());
+			}
+			header.put("success","1" );
+		}else{
+
+			header.put("success","0" );
+		}
+		json.put("header",header);
+		response.getWriter().write(json.toString());
     }
 }

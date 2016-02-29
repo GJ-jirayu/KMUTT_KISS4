@@ -1,12 +1,14 @@
 package th.ac.kmutt.chart.service.impl;
 
 import org.springframework.stereotype.Service;
+
 import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.service.ChartService;
 import th.ac.kmutt.chart.xstream.common.ImakeResultMessage;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,7 +31,7 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
     public List listChart() {
         return null;
     }
-
+/*
     @Override
     public List listCopyrightService(CopyrightServiceM param) {
         param.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_SEARCH);
@@ -58,7 +60,7 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
             return  imakeMessage.getResultListObj();
         else
             return null;
-    }
+    }*/
 
     @Override
     public Integer saveChart(ChartM model){
@@ -380,51 +382,6 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
             return null;
     }
 
-    // Copyright Service
-    @Override
-    public Integer saveCopyrightService(CopyrightServiceM model) {
-        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_SAVE);
-        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
-        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
-            return ((CopyrightServiceM) imakeMessage.getResultListObj().get(0)).getUpdateRecord();
-        else
-            return null;
-    }
-
-    @Override
-    public Integer updateCopyrightService(CopyrightServiceM model) {
-        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_UPDATE);
-        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
-        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
-            return ((CopyrightServiceM) imakeMessage.getResultListObj().get(0)).getUpdateRecord();
-        else
-            return null;
-    }
-
-    @Override
-    public Integer deleteCopyrightService(CopyrightServiceM model) {
-        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_DELETE);
-        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
-        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
-            return ((CopyrightServiceM) imakeMessage.getResultListObj().get(0)).getUpdateRecord();
-        else
-            return null;
-    }
-
-    @Override
-    public CopyrightServiceM findCopyrightServiceById(Integer type, Integer year, Integer month) {
-        CopyrightServiceM model = new CopyrightServiceM();
-        model.setType(type);
-        model.setYear(year);
-        model.setMonth(month);
-        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_FIND_BY_ID);
-        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
-        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
-            return (CopyrightServiceM) imakeMessage.getResultListObj().get(0);
-        else
-            return null;
-    }
-
     // Feature
     @Override
     public Integer saveFeature(FeatureM model) {
@@ -573,7 +530,7 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
         else
             return null;
     }
-
+/*
     // Funding
     @Override
     public Integer saveFundingResourceService(FundingResourceServiceM model) {
@@ -661,6 +618,47 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
         else
             return null;
     }
+    // Copyright Service
+    @Override
+    public Integer saveCopyrightService(CopyrightServiceM model) {
+        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_SAVE);
+        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
+        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
+            return ((CopyrightServiceM) imakeMessage.getResultListObj().get(0)).getUpdateRecord();
+        else
+            return null;
+    }
+    @Override
+    public Integer updateCopyrightService(CopyrightServiceM model) {
+        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_UPDATE);
+        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
+        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
+            return ((CopyrightServiceM) imakeMessage.getResultListObj().get(0)).getUpdateRecord();
+        else
+            return null;
+    }
+    @Override
+    public Integer deleteCopyrightService(CopyrightServiceM model) {
+        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_DELETE);
+        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
+        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
+            return ((CopyrightServiceM) imakeMessage.getResultListObj().get(0)).getUpdateRecord();
+        else
+            return null;
+    }
+    @Override
+    public CopyrightServiceM findCopyrightServiceById(Integer type, Integer year, Integer month) {
+        CopyrightServiceM model = new CopyrightServiceM();
+        model.setType(type);
+        model.setYear(year);
+        model.setMonth(month);
+        model.setServiceName(ServiceConstant.COPYRIGHT_SERVICE_FIND_BY_ID);
+        ImakeResultMessage imakeMessage = postMessage(model, model.getClass().getName(), "copyright", true);
+        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
+            return (CopyrightServiceM) imakeMessage.getResultListObj().get(0);
+        else
+            return null;
+    }*/
 
     // Service Chart Mapping
     @Override
@@ -811,6 +809,37 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
         else
             return null;
 	}
-    
-    
+
+	@Override
+	public FusionChartM getFusionChart(FusionChartM obj) {
+		obj.setServiceName(ServiceConstant.FUSION_CHART_OBJECT);
+			ImakeResultMessage imakeMessage = postMessage(obj, obj.getClass().getName(), "fusionchart", true);
+	        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
+	        {   List<FusionChartM> returnObj =    imakeMessage.getResultListObj();
+	        	obj = returnObj.get(0);
+	        }
+        return obj;
+	}    
+	@Override
+	public List<FilterInstanceM> getAllFilterInstance(FilterInstanceM obj){
+		obj.setServiceName(ServiceConstant.FILTER_GET_INSTANCE_FILTER);
+		List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
+		ImakeResultMessage imakeMessage = postMessage(obj, obj.getClass().getName(), "filterInstance", true);
+        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
+        {   fins =    imakeMessage.getResultListObj();
+        }
+		return fins;
+	}
+
+	@Override
+	public List<FilterM> getGlobalFilter() {
+		List<FilterM> filters = new ArrayList<FilterM>();
+		FilterM filter = new FilterM();
+		filter.setServiceName(ServiceConstant.FILTER_GET_GLOBAL_FILTER);
+		ImakeResultMessage imakeMessage = postMessage(filter, filter.getClass().getName(), "filter", true);
+		 if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0){
+			 filters =    imakeMessage.getResultListObj();
+		 }
+		return filters;
+	}
 }

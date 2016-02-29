@@ -1,9 +1,12 @@
 package th.ac.kmutt.chart.model;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import th.ac.kmutt.chart.xstream.common.ImakeXML;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by imake on 20/10/2015.
@@ -15,6 +18,7 @@ public class FilterInstanceM extends ImakeXML implements Serializable {
     private Integer filterId;
     private String value;
     private FilterM filterM;
+    private List<FilterValueM> items; 
     public String getInstanceId() {
         return instanceId;
     }
@@ -30,20 +34,22 @@ public class FilterInstanceM extends ImakeXML implements Serializable {
     public void setFilterId(Integer filterId) {
         this.filterId = filterId;
     }
-
     public String getValue() {
         return value;
     }
-
     public FilterM getFilterM() {
         return filterM;
     }
-
     public void setFilterM(FilterM filterM) {
         this.filterM = filterM;
     }
-
     public void setValue(String value) {
         this.value = value;
     }
+	public List<FilterValueM> getItems() {
+		return items;
+	}
+	public void setItems(List<FilterValueM> items) {
+		this.items = items;
+	}
 }

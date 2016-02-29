@@ -11,6 +11,7 @@
 <portlet:actionURL var="formAction">
     <portlet:param name="action" value="doSubmit"/>
 </portlet:actionURL>
+<portlet:resourceURL var="loadChartProp" id="loadChartProp" ></portlet:resourceURL>
 <head>
     <title></title>
     <script src="<c:url value="/dwr/engine.js"/>"></script>
@@ -33,7 +34,7 @@
 <form:form id="chartSettingForm" modelAttribute="chartSettingForm" method="post" name="chartSettingFormm"
            action="${formAction}" enctype="multipart/form-data">
     <b>Chart Type :</b>
-    <form:select path="chartType" id="${ns}chartType" >
+    <form:select path="chartType" id="${ns}chartType" onchange="${ns}loadChartProp('chartJson')" >
         <form:options items="${chartList}" itemValue="chartType" itemLabel="chartName"/>
     </form:select>
     <%--
@@ -89,7 +90,7 @@
 
     <span style="padding-left: 10px" ><button  class="btn btn-default" type="button" onclick="${ns}listServiceFilterMapping()">Load Filter</button></span><br/><br/>
     &nbsp;&nbsp;<form:radiobutton path="dataSourceType" value="2"/>
-    <b>Ad hoc Data : </b>&nbsp;&nbsp;<button class="btn btn-default" onclick="${ns}findChartById('1')" type="button">Load Default</button><br/>
+    <b>Ad hoc Data </b>&nbsp;&nbsp;<button class="btn btn-default" onclick="${ns}findChartById('1')" type="button">Load Default</button><br/>
     <form:textarea path="dataAdhoc" id="${ns}dataAdhoc" cssStyle="width: 451px; height: 91px;"></form:textarea>
     </div>
     <br/>
@@ -101,14 +102,13 @@
     &nbsp;&nbsp; Height:<form:input path="chartHeight"  cssStyle="width:100px" />
     </div>
     <br/>
-
     <br/>
-
-    <b>Advance Property: </b>&nbsp;&nbsp;<button class="btn btn-default"  onclick="${ns}findChartById('2')" type="button">Load Default</button>
-    <br/>
-    <div class="border_chart_setting">
-    <form:textarea path="advProp" id="${ns}advProp" cssStyle="height: 107px; width: 451px;"></form:textarea><br/>
-    </div>
+    <b>Override Property</b> 
+		&nbsp;&nbsp;<button class="btn btn-default"  onclick="${ns}loadChartProp('chartJson')" type="button">Load Default</button>
+	<br/>
+	<div class="border_chart_setting">
+	    <form:textarea path="chartJson" id="${ns}chartJson" cssStyle="height: 107px; width: 451px;"></form:textarea><br/>
+	</div>
     <br/>
     &nbsp;&nbsp;<form:checkbox path="showFilter"  value="1"/>&nbsp;<b>Show Filter on Front Page</b><br/><br/>
     <b id="${ns}filter_element">Filters for this chart </b><br/>
@@ -168,6 +168,29 @@
     <button class="btn btn-primary" type="submit">Submit</button>
 </form:form>
 <script>
+	function ${ns}toggleOverrideChartJson(current){
+		/*if(current.checked){ // not use anymore
+			$("#${ns}chartJson").attr("disabled",false);
+		}else{
+			$("#${ns}chartJson").attr("disabled",true);
+		}*/
+	}
+	function ${ns}loadChartProp(prop){ // create by GJ
+		var chartType=$('#${ns}chartType').val();
+		$.ajax({
+   	 		dataType: "json",
+   	 		url:"<%=loadChartProp%>",
+   	 		data: { chartType : chartType , prop: prop },
+   	 		success:function(data){
+   	 			if(data["header"]["success"]>0){
+   	 				if( prop =='chartJson'){
+   	 				 $("#${ns}chartJson").val(data["content"]);
+   	 				}
+   	 			}
+   	 		} 
+   	 	});
+		
+	}
     function ${ns}findChartById(type){
         var chartType=$('#${ns}chartType').val();
         //alert(chartType)
@@ -180,11 +203,7 @@
             //  data = data.resultListObj;
                 if (data != null && data.length>0) {
                     if(type=='1')
-                        $("#${ns}dataAdhoc").val(data[0].dataJson)
-                        //alert(data[0].dataJson)
-                    else if(type=='2')
-                        $("#${ns}advProp").val(data[0].advProp)
-                        //alert(data[0].advProp)
+                        $("#${ns}dataAdhoc").val(data[0].dataJson);
                 }
             }
          });

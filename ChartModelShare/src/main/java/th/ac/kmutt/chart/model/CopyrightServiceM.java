@@ -1,6 +1,7 @@
 package th.ac.kmutt.chart.model;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import th.ac.kmutt.chart.xstream.common.ImakeXML;
 
 import java.io.Serializable;
@@ -16,7 +17,7 @@ public class CopyrightServiceM extends ImakeXML implements Serializable {
     private Integer month;
     private Integer value;
     private String monthDesc;
-
+    
     public Integer getType() {
         return type;
     }
@@ -56,4 +57,5 @@ public class CopyrightServiceM extends ImakeXML implements Serializable {
     public void setMonthDesc(String monthDesc) {
         this.monthDesc = monthDesc;
     }
+    
 }

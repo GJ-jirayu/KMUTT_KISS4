@@ -62,48 +62,40 @@
 
 </div>
 <c:if test="${chartSettingForm.dataSourceType=='1' && chartSettingForm.showFilter=='1' }">
-<c:if test="${not empty  serviceFilterMappingMList}">
     <portlet:actionURL var="formAction">
         <portlet:param name="action" value="doSubmit"/>
     </portlet:actionURL>
     <form:form id="chartSettingForm" modelAttribute="chartSettingForm" method="post" name="chartSettingFormm"
                action="${formAction}" enctype="multipart/form-data">
-        <form:hidden path="dataSource"/>
+        <form:hidden path="dataSourceType"/>
         <form:hidden path="chartInstance"/>
 
-    <c:forEach items="${serviceFilterMappingMList}" var="filter" varStatus="loop">
-        &nbsp;&nbsp;${filter.filterM.filterName}:&nbsp;
-        <select name="aoe_internal"  >
-            <option value="-1_-1">ทั้งหมด</option>
-            <c:if test="${not empty filter.filterM.filterValues}">
-                <c:forEach items="${filter.filterM.filterValues}" var="filterValue" varStatus="loop2">
-                    <c:set var="filter_check">${filter.filterM.filterId}_${filterValue.keyMapping}</c:set>
-                    <c:if test="${ not empty filterMap[filter_check] }">
-                        <option value="${filter.filterM.filterId}_${filterValue.keyMapping}" selected>${filterValue.valueMapping}</option>
-                    </c:if>
-                    <c:if test="${  empty filterMap[filter_check] }">
-                        <option value="${filter.filterM.filterId}_${filterValue.keyMapping}" >${filterValue.valueMapping}</option>
-                    </c:if>
-                </c:forEach>
-            </c:if>
-        </select>
-        <!--
+	    <c:forEach items="${filters}" var="filter" varStatus="loop">
+	        &nbsp;&nbsp;${filter.filterM.filterName}:&nbsp;
+	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterM.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterM.filterId}" >
+	        	<c:forEach items="${filter.items}" var="item" varStatus="loop2">
+		        	<c:choose>
+					    <c:when test="${filter.filterM.selectedValue.equals(item.keyMapping)}">
+					        <option value="${item.keyMapping}" selected>${item.valueMapping}</option>
+					    </c:when>    
+					    <c:otherwise>
+					            <option value="${item.keyMapping}">${item.valueMapping}</option>
+					    </c:otherwise>
+					</c:choose>
+	        	</c:forEach>
+        	</select>
         &nbsp;&nbsp;
-        <br/>
-        -->
-        &nbsp;&nbsp;
-    </c:forEach>
-    <table width="100%">
-        <tr>
-            <td align="left">
-                <button type="submit"
-                        class="btn btn-primary">Submit
-                </button>
-            </td>
-        </tr>
-    </table>
+    	</c:forEach>
+	    <table width="100%">
+	        <tr>
+	            <td align="left">
+	                <button type="submit"
+	                        class="btn btn-primary">Submit
+	                </button>
+	            </td>
+	        </tr>
+	    </table>
     </form:form>
-</c:if>
 </c:if>
 <table border="0" width="100%">
 <div align="center" id="${ns}chart_table_caption"></div>

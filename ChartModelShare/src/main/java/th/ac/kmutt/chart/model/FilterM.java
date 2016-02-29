@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Created by imake on 20/10/2015.
+ * Edited by gj  > filterValues , selectValue, instanceid  attr
  */
 @XStreamAlias("FilterM")
 public class FilterM extends ImakeXML implements Serializable {
@@ -20,6 +21,8 @@ public class FilterM extends ImakeXML implements Serializable {
     private String activeFlag;
     private String type;
     private List<FilterValueM> filterValues;
+    private String selectedValue;
+    private String sqlQuery;
     public Integer getFilterId() {
         return filterId;
     }
@@ -83,4 +86,16 @@ public class FilterM extends ImakeXML implements Serializable {
     public void setFilterValues(List<FilterValueM> filterValues) {
         this.filterValues = filterValues;
     }
+	public String getSelectedValue() {
+		return selectedValue;
+	}
+	public void setSelectedValue(String selectedValue) {
+		this.selectedValue = selectedValue;
+	}
+	public String getSqlQuery() {
+		return sqlQuery;
+	}
+	public void setSqlQuery(String sqlQuery) {
+		this.sqlQuery = sqlQuery;
+	}
 }

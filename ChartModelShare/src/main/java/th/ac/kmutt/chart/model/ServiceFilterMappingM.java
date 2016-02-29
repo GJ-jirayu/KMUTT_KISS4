@@ -22,7 +22,7 @@ public class ServiceFilterMappingM extends ImakeXML implements Serializable {
     public FilterM getFilterM() {
         return filterM;
     }
-
+    
     public void setFilterM(FilterM filterM) {
         this.filterM = filterM;
     }

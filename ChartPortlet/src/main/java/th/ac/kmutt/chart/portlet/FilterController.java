@@ -3,6 +3,7 @@ package th.ac.kmutt.chart.portlet;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
+
 import th.ac.kmutt.chart.form.FilterForm;
 import th.ac.kmutt.chart.model.FilterInstanceM;
 import th.ac.kmutt.chart.model.FilterM;
@@ -28,6 +30,7 @@ import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.print.attribute.HashAttributeSet;
 import javax.xml.namespace.QName;
+
 import java.util.*;
 
 /*import com.opencsv.CSVReader;
@@ -52,23 +55,7 @@ import th.ac.kmutt.research.xstream.common.ImakeResultMessage;
 @SessionAttributes({"filterForm"})
 public class FilterController {
 
-    private static final Logger logger = Logger
-            .getLogger(FilterController.class);
-
-    // 'เลือกตามปี'
-    private static final String[] YEAR_FILTER_KEY={"2550","2551","2552","2553","2554","2555","2556","2557","2558"};
-    private static final String[] YEAR_FILTER_VALUE={"2550","2551","2552","2553","2554","2555","2556","2557","2558"};
-    // ''เลือกตามเดือน''
-    private static final String[] MONTH_FILTER_KEY={"1","2","3","4","5","6","7","8","9","10","11","12"};
-    private static final String[] MONTH_FILTER_VALUE={"ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."};
-
-    //'แหล่งที่ได้รับการเผยแพร่'
-    private static final String[] PUBLISH_RESOURCE_FILTER_KEY={"1","2","3","4"};
-    private static final String[] PUBLISH_RESOURCE_FILTER_VALUE={"วารสารนานาชาติ","ประชุมนานาชาติ","วารสารในประเทศ","ประชุมระดับประเทศ"};
-
-    //'แหล่งเงินทุน'
-    private static final String[] FUNDING_RESOURCE_FILTER_KEY={"1","2","3"};
-    private static final String[] FUNDING_RESOURCE_FILTER_VALUE={"เงินรายได้ มจธ.","รัฐ ว.1","แหล่งทุนภายนอก"};
+    private static final Logger logger = Logger.getLogger(FilterController.class);
 
 
     @Autowired
@@ -98,61 +85,15 @@ public class FilterController {
         } else {
             filterForm = (FilterForm) model.asMap().get("filterForm");
         }
-        String keySearch = filterForm.getKeySearch();
-    ThemeDisplay themeDisplay = (ThemeDisplay) request
-            .getAttribute(WebKeys.THEME_DISPLAY);
-    String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
-
-        FilterInstanceM filterInstanceM=new FilterInstanceM();
-        filterInstanceM.setInstanceId(instanceId);
-
-       List<FilterInstanceM> filterList= chartService.listFilterInstance(filterInstanceM);
-        if(filterList!=null && filterList.size()>0){
-            for (int i=0;i<filterList.size();i++){
-                FilterM filterM=filterList.get(i).getFilterM();
-                Integer filterId=filterM.getFilterId();
-                List<FilterValueM> filterValues=null;
-                if(filterId.intValue()==1){//เลือกตามปี
-                    filterValues=new ArrayList<FilterValueM>(YEAR_FILTER_KEY.length);
-                  for (int j=0;j<YEAR_FILTER_KEY.length;j++){
-                      FilterValueM filterValueM=new FilterValueM();
-                      filterValueM.setKeyMapping(YEAR_FILTER_KEY[j]);
-                      filterValueM.setValueMapping(YEAR_FILTER_VALUE[j]);
-                      filterValues.add(filterValueM);
-                  }
-
-                }else if(filterId.intValue()==2){//แหล่งที่ได้รับการเผยแพร่
-                    filterValues=new ArrayList<FilterValueM>(PUBLISH_RESOURCE_FILTER_KEY.length);
-                    for (int j=0;j<PUBLISH_RESOURCE_FILTER_KEY.length;j++){
-                        FilterValueM filterValueM=new FilterValueM();
-                        filterValueM.setKeyMapping(PUBLISH_RESOURCE_FILTER_KEY[j]);
-                        filterValueM.setValueMapping(PUBLISH_RESOURCE_FILTER_VALUE[j]);
-                        filterValues.add(filterValueM);
-                    }
-                }
-                else if(filterId.intValue()==3){//แหล่งเงินทุน
-                    filterValues=new ArrayList<FilterValueM>(FUNDING_RESOURCE_FILTER_KEY.length);
-                    for (int j=0;j<FUNDING_RESOURCE_FILTER_KEY.length;j++){
-                        FilterValueM filterValueM=new FilterValueM();
-                        filterValueM.setKeyMapping(FUNDING_RESOURCE_FILTER_KEY[j]);
-                        filterValueM.setValueMapping(FUNDING_RESOURCE_FILTER_VALUE[j]);
-                        filterValues.add(filterValueM);
-                    }
-                }
-                else if(filterId.intValue()==4){//เลือกตามเดือน
-                    filterValues=new ArrayList<FilterValueM>(MONTH_FILTER_KEY.length);
-                    for (int j=0;j<MONTH_FILTER_KEY.length;j++){
-                        FilterValueM filterValueM=new FilterValueM();
-                        filterValueM.setKeyMapping(MONTH_FILTER_KEY[j]);
-                        filterValueM.setValueMapping(MONTH_FILTER_VALUE[j]);
-                        filterValues.add(filterValueM);
-                    }
-                }
-                filterM.setFilterValues(filterValues);
-            }
+        // retrive submit global filter value
+        List<FilterM> globalFilter = new ArrayList<FilterM>();
+        if (model.containsAttribute("FilterMList")) {
+        	globalFilter = (ArrayList<FilterM>) model.asMap().get("FilterMList");
         }
-        model.addAttribute("filterList",filterList);
-        logger.info("into list Filter");
+        else{ // visit first  No submit action
+        	globalFilter= chartService.getGlobalFilter();
+        }
+        model.addAttribute("filterList",globalFilter);
         return "filter/showFilter";
     }
 
@@ -161,36 +102,25 @@ public class FilterController {
                              @ModelAttribute("filterForm") FilterForm filterForm,
                              BindingResult result, Model model) {
 
-        //response.setRenderParameter("nfaqSiteId",faqform.getNfaqSiteId());
        String command = "list";
-        //}
-        //String[] filterGolbals=filterForm.getFilterGlobals();
-        String[] aoe_global=request.getParameterValues("aoe_global");
-        /*
-        logger.info("into doSubmit filterGolbals=>"+filterGolbals);
-        if(filterGolbals!=null && filterGolbals.length>0){
-            for (int i=0;i<filterGolbals.length;i++)
-                logger.info(" filterGolbals["+i+"]"+filterGolbals[i]);
-        }
-    */
-        logger.info("into doSubmit aoe_global=>"+aoe_global);
-        Map filterMap=new HashMap();
-        if(aoe_global!=null && aoe_global.length>0){
-            for (int i=0;i<aoe_global.length;i++) {
-                logger.info(" aoe_global[" + i + "]" + aoe_global[i]);
-                filterMap.put(aoe_global[i],aoe_global[i]);
-            }
-        }
-        String mode=filterForm.getMode();
-        logger.info("into doSubmit mode=>"+mode);
-       // logger.info("into doSubmitn "+filterForm.getCommand());
+       
+       List<FilterM> gFilters = chartService.getGlobalFilter();
+       logger.info("global filter size:"+gFilters.size());
+       for(int i = 0 ; i<gFilters.size();i++){
+    	   // map  name select in view showfilter.jsp  format  g_filter_+filterM.filterId
+    	  
+    	   logger.info("global target:"+ "g_filter_"+gFilters.get(i).getFilterId());
+    	   String val = request.getParameter("g_filter_"+gFilters.get(i).getFilterId());
+    	   gFilters.get(i).setSelectedValue(val);
+    	   logger.info("global value:"+gFilters.get(i).getSelectedValue());
+       	}
+       // portlet to portlet  require configuration  portlet.xml
         QName qname = new QName("http://liferay.com/events","empinfo","x");
-        //QName qname = new QName("http://liferay.com/events","empinfo");
         th.ac.kmutt.chart.fusion.model.FilterFusionM filterFusionM=new th.ac.kmutt.chart.fusion.model.FilterFusionM();
-        filterFusionM.setFilters(aoe_global);
+        filterFusionM.setFilterMList(gFilters);
         response.setEvent(qname, filterFusionM);
-       // status.setComplete();
-        model.addAttribute("filterMap",filterMap);
+        // status.setComplete();
+        model.addAttribute("FilterMList", gFilters);
         response.setRenderParameter("action", command);
     }
 

@@ -1,6 +1,7 @@
 package th.ac.kmutt.chart.form;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by imake on 13/09/2015.
@@ -23,6 +24,7 @@ public class ChartSettingForm extends CommonForm implements Serializable {
     private String chartTitle;
     private String chartSubTitle;
     private String titleFromFilter;
+    private List<String> filterValue;
     public String getChartType() {
         return chartType;
     }
@@ -158,4 +160,10 @@ public class ChartSettingForm extends CommonForm implements Serializable {
     public void setDataSourceType(String dataSourceType) {
         this.dataSourceType = dataSourceType;
     }
+	public List<String> getFilterValue() {
+		return filterValue;
+	}
+	public void setFilterValue(List<String> filterValue) {
+		this.filterValue = filterValue;
+	}
 }
