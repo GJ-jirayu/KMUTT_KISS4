@@ -881,4 +881,13 @@ public class ChartRepository {
 		}
 		return filters;
 	}
+	public List<FilterM> fetchFilterOfService(Integer serviceId){
+		List<FilterM> filters = new ArrayList<FilterM>();
+		String sql = "select sfm from SERVICE_FILTE where SERVICE_ID = ";
+		Query q =  entityManager.createNativeQuery(sql);
+		@SuppressWarnings("unchecked")
+		List<Object[]> sfm = q.getResultList();
+		//
+		return filters;
+	}
 }

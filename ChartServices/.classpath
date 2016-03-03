@@ -28,5 +28,7 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/pongkorn/app/driver/db2jcc_license_cu-9.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/pongkorn/app/driver/db2jcc-9.7FP3a.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

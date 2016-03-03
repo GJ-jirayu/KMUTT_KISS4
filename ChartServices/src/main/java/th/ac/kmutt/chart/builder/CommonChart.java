@@ -55,7 +55,7 @@ public class CommonChart implements Chart {
 		} catch (Exception e) {
 			chartJson  = new JSONObject();
 		}
-		this.chartJson = chartJson;
+		this.chartJson = chartJson; 
 	}
 	@Override
 	public void setData(List<Object[]> data) {

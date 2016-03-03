@@ -12,6 +12,7 @@
     <portlet:param name="action" value="doSubmit"/>
 </portlet:actionURL>
 <portlet:resourceURL var="loadChartProp" id="loadChartProp" ></portlet:resourceURL>
+<portlet:resourceURL var="loadServiceFilter" id="loadServiceFilter" ></portlet:resourceURL>
 <head>
     <title></title>
     <script src="<c:url value="/dwr/engine.js"/>"></script>
@@ -190,6 +191,21 @@
    	 		} 
    	 	});
 		
+	}
+	function ${ns}loadServiceFilter(){
+	    var serviceId=$('#${ns}dataSource').val();
+	    $.ajax({
+   	 		dataType: "json",
+   	 		url:"<%=loadServiceFilter%>",
+   	 		data: { serviceId : serviceId },
+   	 		success:function(data){
+   	 			if(data["header"]["success"]>0){
+   	 				if( prop =='chartJson'){
+   	 				 $("#${ns}chartJson").val(data["content"]);
+   	 				}
+   	 			}
+   	 		} 
+   	 	});
 	}
     function ${ns}findChartById(type){
         var chartType=$('#${ns}chartType').val();

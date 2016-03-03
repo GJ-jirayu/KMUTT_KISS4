@@ -131,4 +131,5 @@ public interface ChartService {
 	public FusionChartM buildChartObject(FusionChartM xsource);
 	public List<FilterInstanceM> getAllFilterInstance(String instanceId);
 	public List<FilterM> getGlobalFilter();
+	public List<FilterM> getFilterOfService(Integer serviceId);
 }

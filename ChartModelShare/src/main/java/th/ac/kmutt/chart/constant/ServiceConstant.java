@@ -195,6 +195,7 @@ public class ServiceConstant {
     public static final String FUSION_CHART_OBJECT  = "retriveFusionChartObject";
     public static final String FILTER_GET_INSTANCE_FILTER = "filterGetInstanceFilter";
     public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
+    public static final String FILTER_GET_FILTER_SERVICE = "filterGetFilterOfService";
    // public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
 
 }

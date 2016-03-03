@@ -136,87 +136,14 @@ public class ChartCommonSettingController {
         /*
         FilterM filterM=new FilterM();
         filterM.setType("global");
-        List<FilterM> filterList= chartService.listFilter(filterM);
-        */
-        Map filterMap=new HashMap();
-        List<ServiceFilterMappingM> serviceFilterMappingMList =null;
-        if(dataSourceType.equals("1")){// webservice Type
-            if(serviceId!=null){
-                ServiceFilterMappingM param=new ServiceFilterMappingM();
-                param.setServiceId(serviceId);
-                serviceFilterMappingMList=chartService.listServiceFilterMapping(param);
-                if(serviceFilterMappingMList!=null && serviceFilterMappingMList.size()>0){
-                    for (int i=0;i<serviceFilterMappingMList.size();i++){
-                        FilterM filterM=serviceFilterMappingMList.get(i).getFilterM();
-                        Integer filterId=filterM.getFilterId();
-                        List<FilterValueM> filterValues=null;
-                        if(filterId.intValue()==1){//เลือกตามปี
-                            filterValues=new ArrayList<FilterValueM>(YEAR_FILTER_KEY.length);
-                            for (int j=0;j<YEAR_FILTER_KEY.length;j++){
-                                FilterValueM filterValueM=new FilterValueM();
-                                filterValueM.setKeyMapping(YEAR_FILTER_KEY[j]);
-                                filterValueM.setValueMapping(YEAR_FILTER_VALUE[j]);
-                                filterValues.add(filterValueM);
-                            }
-
-                        }else if(filterId.intValue()==2){//แหล่งที่ได้รับการเผยแพร่
-                            filterValues=new ArrayList<FilterValueM>(PUBLISH_RESOURCE_FILTER_KEY.length);
-                            for (int j=0;j<PUBLISH_RESOURCE_FILTER_KEY.length;j++){
-                                FilterValueM filterValueM=new FilterValueM();
-                                filterValueM.setKeyMapping(PUBLISH_RESOURCE_FILTER_KEY[j]);
-                                filterValueM.setValueMapping(PUBLISH_RESOURCE_FILTER_VALUE[j]);
-                                filterValues.add(filterValueM);
-                            }
-                        }
-                        else if(filterId.intValue()==3){//แหล่งเงินทุน
-                            filterValues=new ArrayList<FilterValueM>(FUNDING_RESOURCE_FILTER_KEY.length);
-                            for (int j=0;j<FUNDING_RESOURCE_FILTER_KEY.length;j++){
-                                FilterValueM filterValueM=new FilterValueM();
-                                filterValueM.setKeyMapping(FUNDING_RESOURCE_FILTER_KEY[j]);
-                                filterValueM.setValueMapping(FUNDING_RESOURCE_FILTER_VALUE[j]);
-                                filterValues.add(filterValueM);
-                            }
-                        }
-                        else if(filterId.intValue()==4){//เลือกตามเดือน
-                            filterValues=new ArrayList<FilterValueM>(MONTH_FILTER_KEY.length);
-                            for (int j=0;j<MONTH_FILTER_KEY.length;j++){
-                                FilterValueM filterValueM=new FilterValueM();
-                                filterValueM.setKeySearch(MONTH_FILTER_KEY[j]);
-                                filterValueM.setValueMapping(MONTH_FILTER_VALUE[j]);
-                                filterValues.add(filterValueM);
-                            }
-                        }
-                        filterM.setFilterValues(filterValues);
-                    }
-                }
-
-                ChartFilterInstanceM chartFilterInstanceM =new ChartFilterInstanceM();
-                chartFilterInstanceM.setServiceId(serviceId);
-                chartFilterInstanceM.setInstanceId(instanceId);
-               List<ChartFilterInstanceM> chartFilterInstanceList= chartService.listChartFilterInstance(chartFilterInstanceM);
-                if(chartFilterInstanceList!=null && chartFilterInstanceList.size()>0){
-                    for (int i=0;i<chartFilterInstanceList.size();i++) {
-                        String key=chartFilterInstanceList.get(i).getFilterM().getFilterId()+"_"+chartFilterInstanceList.get(i).getValue();
-                        logger.info(" aoe_internal[" + i + "]" + key);
-
-                        filterMap.put(key,key);
-                    }
-                }
-            }
-        }
-        model.addAttribute("filterMap",filterMap);
-        model.addAttribute("serviceFilterMappingMList",serviceFilterMappingMList);
-
-
+        List<FilterM> filterList= chartService.listFilter(filterM);*/
+        
         ChartM chartM=new ChartM();
         chartM.setActiveFlag("1");
         List<ChartM> chartList= chartService.listChart(chartM);
         model.addAttribute("chartList", chartList);
-        //logger.info("listServices-->"+listServices.size());
-        //logger.info("filterList-->"+filterList.size());
-        //logger.info("serviceFilterMappingList-->"+serviceFilterMappingList.size());
+        model.addAttribute("serviceFilterMappingMList",serviceFilterMappingMList);
         model.addAttribute("chartSettingForm", chartSettingForm);
-        model.addAttribute("dataSourceJson",json);
 
         return "chart/settingChart";
     }
@@ -299,4 +226,31 @@ public class ChartCommonSettingController {
 		json.put("header",header);
 		response.getWriter().write(json.toString());
     }
+    @ResourceMapping(value="loadServiceFilter")
+   	@ResponseBody 
+   	public void loadSericeFilter(ResourceRequest request,ResourceResponse response) throws IOException{
+   		HttpServletRequest httpReq = PortalUtil.getHttpServletRequest(request);
+   		HttpServletRequest normalRequest	=	PortalUtil.getOriginalServletRequest(httpReq);
+   		String serviceId = normalRequest.getParameter("serviceId");
+   		com.liferay.portal.kernel.json.JSONObject json = JSONFactoryUtil.createJSONObject();
+   		com.liferay.portal.kernel.json.JSONObject header = JSONFactoryUtil.createJSONObject();
+   		header.put("serviceId", serviceId);
+   		
+   		FilterM filter = new FilterM();
+   		filter.setServiceId(Integer.valueOf(serviceId));
+   		
+   		List<ChartM> charts = chartService.findF
+   		if( charts!=null & charts.size()>0 ){
+   			ChartM chart = charts.get(0);
+   			if(prop.equals("chartJson")){
+   				json.put("content", chart.getChartJson());
+   			}
+   			header.put("success","1" );
+   		}else{
+
+   			header.put("success","0" );
+   		}
+   		json.put("header",header);
+   		response.getWriter().write(json.toString());
+       }
 }

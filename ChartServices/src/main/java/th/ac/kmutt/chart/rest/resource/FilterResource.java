@@ -174,6 +174,14 @@ public class FilterResource  extends BaseResource {
                             imakeMessage.setResultListObj(globalFilters);
                             return getRepresentation(entity, imakeMessage, xstream);
                         }
+                        else if( serviceName.equals(ServiceConstant.FILTER_GET_FILTER_SERVICE)){
+                            List<FilterM> filters = chartService.getFilterOfService(xsource.getServiceId());
+                            ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                            imakeMessage.setResultListObj(filters);
+                            // waiting
+                            
+                            return getRepresentation(entity, imakeMessage, xstream);
+                        }
                     } else { // else serviceName null
                     }
                 }
