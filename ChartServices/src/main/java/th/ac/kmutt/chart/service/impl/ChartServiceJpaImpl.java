@@ -351,8 +351,14 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		rta.setTemplate(chartInsEnt.getChartJson());
 		    		rta.setData(results);
 		    		chartJson = rta.build();
-		    	} else{
-		    		
+		    	} else if(chartInsEnt.getChartType().toLowerCase().equals("mscolumn2d")) {
+		    		Mscolumn2d col2d = new Mscolumn2d();
+		    		col2d.setTemplate(chartInsEnt.getChartJson());
+		    		System.out.println("result:"+results.get(0)[1]);
+		    		col2d.setData(results);
+		    		chartJson = col2d.build();
+
+		    		System.out.println("chartJson:"+chartJson);
 		    	}
 		    	// add json
 		    	source.setChartJson(chartJson);
@@ -387,5 +393,8 @@ public class ChartServiceJpaImpl implements ChartService {
     	List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
      	fins = chartRepository.fetchAllFilterInstance(instanceId);
     	return fins;
+    }
+    public List<FilterM> getFilterOfService(Integer serviceId){
+    	return 	chartRepository.fetchFilterOfService(serviceId);
     }
 }
