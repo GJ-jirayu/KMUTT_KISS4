@@ -133,8 +133,7 @@
 		<property name="password" value="gxHoc=,xN" />
 	</bean> -->
 	
-		<bean id="dataSourceDwh"
-		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+	<bean id="dataSourceDwh"	class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://localhost:3306/CHART_DB" />
 		<property name="username" value="root" />
