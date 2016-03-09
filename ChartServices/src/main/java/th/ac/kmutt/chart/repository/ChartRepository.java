@@ -33,6 +33,7 @@ import th.ac.kmutt.chart.domain.CommentEntity;
 import th.ac.kmutt.chart.domain.FeatureEntity;
 import th.ac.kmutt.chart.domain.FilterEntity;
 import th.ac.kmutt.chart.domain.FilterInstanceEntity;
+import th.ac.kmutt.chart.domain.FilterInstanceEntityPK;
 import th.ac.kmutt.chart.dwh.domain.InboundOutboundStudent;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntityPK;
@@ -40,6 +41,7 @@ import th.ac.kmutt.chart.domain.ServiceEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntityPK;
 import th.ac.kmutt.chart.fusion.model.FilterFusionM;
+import th.ac.kmutt.chart.model.ChartFilterInstanceM;
 import th.ac.kmutt.chart.model.CopyrightServiceM;
 import th.ac.kmutt.chart.model.FilterInstanceM;
 import th.ac.kmutt.chart.model.FilterM;
@@ -87,11 +89,9 @@ public class ChartRepository {
     public List listFilterInstanceEntity(th.ac.kmutt.chart.model.FilterInstanceM param)throws DataAccessException{
         StringBuffer sb = new StringBuffer(" select p from FilterInstanceEntity p  where 1=1 ");
         String instanceId= param.getInstanceId();
-
         if (instanceId != null ) {
             sb.append(" and p.id.instanceId='" + instanceId + "' ");
         }
-
         Query query = entityManager.createQuery(sb.toString(), FilterInstanceEntity.class);
         return query.getResultList();
     }
@@ -404,7 +404,6 @@ public class ChartRepository {
     public FilterInstanceEntity findFilterInstanceEntityById(String instanceId) throws DataAccessException{
         return entityManager.find(FilterInstanceEntity.class, instanceId);
     }
-
 
     //SERVICE_CHART_MAPPING
     public Integer saveServiceChartMappingEntity(ServiceChartMappingEntity transientInstance) throws DataAccessException{
@@ -783,32 +782,48 @@ public class ChartRepository {
 		return results;
 	}
 	@SuppressWarnings("unchecked")
-	public List<FilterM> fetchInstanceFilters(String instanceId){
+	public FilterInstanceM fetchFilterInstance(String instanceId){
 		 List<FilterM> filters = new ArrayList<FilterM>();  
 		 // [filter_name,column_name,value]
-		String sql = "SELECT f.FILTER_NAME,f.COLUMN_NAME, coalesce( cfi.VALUE , f.SUBSTITUTE_DEFAULT) as filter_value "
-				+ "	FROM CHART_FILTER_INSTANCE cfi inner join  FILTER f on cfi.FILTER_ID = f.FILTER_ID "
-				+ "   WHERE cfi.instance_id = '"+instanceId+"'";
-		try{
+		String sql = "SELECT f.FILTER_ID,f.FILTER_NAME,f.COLUMN_NAME, coalesce( fi.VALUE , f.SUBSTITUTE_DEFAULT) as filter_value,f.SQL_QUERY "
+				+ "	FROM FILTER_INSTANCE fi inner join  FILTER f on fi.FILTER_ID = f.FILTER_ID "
+				+ "   WHERE fi.instance_id = '"+instanceId+"'";
+	//	try{
 		Query query = entityManager.createNativeQuery(sql);
 		List<Object[]> resultSet = query.getResultList();
 		for( Object[] result :  resultSet){
 			FilterM f = new FilterM();
-			f.setFilterName( (String)result[0]);
-			f.setColumnName((String)result[1]);
-			f.setSelectedValue( (String)result[2] );
+			f.setFilterId((Integer)result[0] );
+			f.setFilterName( (String)result[1]);
+			f.setColumnName((String)result[2]);
+			f.setSelectedValue( (String)result[3] );
+			String sqlItem = (String)result[4];
+			// filter value
+			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
+			if(  sqlItem!=null   ){
+				Query qf =   entityManager.createNativeQuery( sqlItem);
+				List<Object[]> resultFilter =  qf.getResultList();
+				for( Object[] rf : resultFilter ){
+					fvs.add( buildFilterItems(rf) );
+				}
+			}else{
+				fvs.add(buildFilterItems(new Object[]{}));
+			}
+			f.setFilterValues(fvs);
 			filters.add(f);
 		}
-		}catch(Exception ex){
-			filters = new ArrayList<FilterM>();  
-		}
-		return filters;
+	//	}catch(Exception ex){
+		//	filters = new ArrayList<FilterM>();  
+		//}
+		FilterInstanceM fim = new FilterInstanceM();
+		fim.setFilterList(filters);
+		return fim;
 	}
-	public List<FilterInstanceM> fetchAllFilterInstance(String instanceId){
-		//  no try exception
+	public List<FilterInstanceM> fetchFilterInstanceWithItem(String instanceId){
+		//  no try exception // fetch with ValueItem
 		List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
 		String sql = "SELECT f.filter_id,f.filter_name,f.sql_query,cfi.VALUE "
-				+ "	FROM CHART_FILTER_INSTANCE cfi inner join FILTER f on cfi.FILTER_ID  = f.FILTER_ID "
+				+ "	FROM FILTER_INSTANCE cfi inner join FILTER f on cfi.FILTER_ID  = f.FILTER_ID "
 				+ " where INSTANCE_ID =  '"+instanceId+"'";
 		Query query = entityManager.createNativeQuery(sql);
 		List<Object[]> resultSet = query.getResultList();
@@ -821,7 +836,6 @@ public class ChartRepository {
 			f.setFilterName( (String) result[1]);
 			f.setSqlQuery((String) result[2]);
 			f.setSelectedValue((String)result[3]);
-			fin.setFilterM(f);	//set fin Filter
 			
 			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 			if(  f.getSqlQuery()!=null   ){
@@ -833,7 +847,8 @@ public class ChartRepository {
 			}else{
 				fvs.add(buildFilterItems(new Object[]{}));
 			}
-			fin.setItems(fvs);  // set fin FilterValue
+			f.setFilterValues(fvs);
+			fin.setFilterM(f);	//set fin Filter
 			fins.add(fin);
 		}
 		return fins;
@@ -883,11 +898,117 @@ public class ChartRepository {
 	}
 	public List<FilterM> fetchFilterOfService(Integer serviceId){
 		List<FilterM> filters = new ArrayList<FilterM>();
-		String sql = "select sfm from SERVICE_FILTE where SERVICE_ID = ";
+		String sql = "SELECT f.filter_id,filter_name,column_name,SUBSTITUTE_DEFAULT,f.SQL_QUERY FROM SERVICE_FILTER_MAPPING sfm "
+				+ " left join FILTER f on sfm.filter_id = f.filter_id  "
+				+ " where f.type = 'internal' and  sfm.service_id = "+serviceId;
 		Query q =  entityManager.createNativeQuery(sql);
 		@SuppressWarnings("unchecked")
-		List<Object[]> sfm = q.getResultList();
-		//
+		List<Object[]> results = q.getResultList();
+		for(Object[] result : results){
+			FilterM filter = new FilterM();
+			filter.setFilterId( (Integer)result[0]); 
+			filter.setFilterName((String)result[1]);
+			filter.setColumnName((String)result[2]);
+			filter.setSelectedValue((String)result[3]);
+			filter.setSqlQuery((String)result[4]);
+			//filterValue
+			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
+			if(  filter.getSqlQuery()!=null   ){
+				Query qf =   entityManager.createNativeQuery( filter.getSqlQuery());
+				List<Object[]> resultFilter =  qf.getResultList();
+				for( Object[] rf : resultFilter ){
+					fvs.add( buildFilterItems(rf) );
+				}
+			}else{
+				fvs.add(buildFilterItems(new Object[]{}));
+			}
+			filter.setFilterValues(fvs);
+			
+			filters.add(filter);
+		}
 		return filters;
+	}
+	public List<ChartFilterInstanceM> fetchChartFilterInstance(ChartFilterInstanceM chartFilterInstance){
+		//sql change to FILTER_INSTANCE  03/2559
+		List<ChartFilterInstanceM> cfi = new ArrayList<ChartFilterInstanceM>();
+		String sql = "select fs.service_id,fs.FILTER_ID,FILTER_NAME,COLUMN_NAME,IF(fi.FILTER_ID is null,'0','1') actFlag ,fs.SQL_QUERY"
+				+ " ,IF(fi.value is null,fs.SUBSTITUTE_DEFAULT,fi.value) as default_value from "
+				+ " (select sfm.service_id,sfm.FILTER_ID,f.FILTER_NAME,f.COLUMN_NAME,f.SUBSTITUTE_DEFAULT,f.SQL_QUERY "
+				+ " from SERVICE_FILTER_MAPPING sfm INNER JOIN FILTER f on sfm.filter_id = f.filter_id  "
+				+ " where sfm.service_id = "+chartFilterInstance.getServiceId()+" ) fs left join "
+				+ " (select FILTER_ID,VALUE from FILTER_INSTANCE fi where instance_id = '"+chartFilterInstance.getInstanceId()+"'"
+				+ " ) fi on fs.filter_id = fi.filter_id ";
+		Query query = entityManager.createNativeQuery(sql);
+		List<Object[]> results = query.getResultList();
+		for(Object[] result : results){
+			ChartFilterInstanceM im = new ChartFilterInstanceM();
+			im.setServiceId((Integer)result[0]);
+			im.setFilterId((Integer)result[1]);
+			FilterM f = new FilterM();
+			f.setFilterId((Integer)result[1]);
+			f.setFilterName((String)result[2]);
+			f.setColumnName((String)result[3]);
+			f.setActiveFlag( (String)result[4]);
+			f.setSqlQuery((String)result[5]);
+			f.setSelectedValue( (String)result[6] );
+			
+			// find filter Item
+			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
+			try{
+				if(  f.getSqlQuery()!=null   ){
+					Query qf =   entityManager.createNativeQuery( f.getSqlQuery());
+					List<Object[]> resultFilter =  qf.getResultList();
+					for( Object[] rf : resultFilter ){
+						fvs.add( buildFilterItems(rf) );
+					}
+				}else{
+					fvs.add(buildFilterItems(new Object[]{}));
+				}
+			}catch(Exception ex){
+				 fvs = new ArrayList<FilterValueM>();
+			}
+			f.setFilterValues(fvs);
+			im.setFilterM(f);
+			cfi.add(im);
+		}
+		return cfi;
+	}
+
+    public FilterInstanceM saveFilterInstance(FilterInstanceM fim){
+    	for(FilterM filter : fim.getFilterList()){
+    		FilterInstanceEntity fie = new FilterInstanceEntity();
+	    	FilterInstanceEntityPK id = new FilterInstanceEntityPK();
+	    	id.setInstanceId(fim.getInstanceId());
+	    	id.setFilterId(filter.getFilterId());
+	    	fie.setId(id);
+	    	fie.setValue(filter.getSelectedValue());
+	    	entityManager.persist(fie);
+    	}
+    	return fim;
+    }
+    public Integer deleteFilterInstance(String instanceId){
+    	  int deletedCount = 0;
+    	  String sql = "delete from FILTER_INSTANCE where INSTANCE_ID = '"+instanceId+"'";
+    	  deletedCount = entityManager.createNativeQuery(sql).executeUpdate();
+          return deletedCount;
+    }
+	public Integer updateFilterInstance(FilterInstanceM fim) {
+		Integer successNo  = 0;
+//		try{
+			for(FilterM filter : fim.getFilterList()){
+				FilterInstanceEntity fie = new FilterInstanceEntity();
+				FilterInstanceEntityPK fiePK = new FilterInstanceEntityPK();
+				fiePK.setFilterId(filter.getFilterId());
+				fiePK.setInstanceId(fim.getInstanceId());
+				fie.setId(fiePK);
+				fie.setValue(filter.getSelectedValue());
+				entityManager.merge(fie);
+				successNo++;
+			}
+		/*}catch(Exception ex){
+			System.out.println("test:exception");
+			logger.info("service updateFilterInstance have exception :"+ex.getMessage());
+		}*/
+		return successNo;
 	}
 }

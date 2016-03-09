@@ -819,10 +819,20 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
 	        	obj = returnObj.get(0);
 	        }
         return obj;
-	}    
+	}
 	@Override
-	public List<FilterInstanceM> getAllFilterInstance(FilterInstanceM obj){
-		obj.setServiceName(ServiceConstant.FILTER_GET_INSTANCE_FILTER);
+	public FilterInstanceM getFilterInstance(FilterInstanceM obj){
+		obj.setServiceName(ServiceConstant.FILTER_INSTANCE_GET);
+		FilterInstanceM fin = new FilterInstanceM();
+		ImakeResultMessage imakeMessage = postMessage(obj, obj.getClass().getName(), "filterInstance", true);
+        if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
+        {   fin =    (FilterInstanceM) imakeMessage.getResultListObj().get(0);
+        }
+		return fin;
+	}
+	@Override
+	public List<FilterInstanceM> getFilterInstanceWithItem(FilterInstanceM obj){
+		obj.setServiceName(ServiceConstant.FILTER_INSTANCE_WITH_ITEM);
 		List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
 		ImakeResultMessage imakeMessage = postMessage(obj, obj.getClass().getName(), "filterInstance", true);
         if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0)
@@ -837,6 +847,28 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
 		FilterM filter = new FilterM();
 		filter.setServiceName(ServiceConstant.FILTER_GET_GLOBAL_FILTER);
 		ImakeResultMessage imakeMessage = postMessage(filter, filter.getClass().getName(), "filter", true);
+		 if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0){
+			 filters =    imakeMessage.getResultListObj();
+		 }
+		return filters;
+	}
+
+	@Override
+	public List<FilterM> getFilterService(FilterM obj) {
+		List<FilterM> filters = new ArrayList<FilterM>();
+		obj.setServiceName(ServiceConstant.FILTER_GET_FILTER_SERVICE);
+		ImakeResultMessage imakeMessage = postMessage(obj, obj.getClass().getName(), "filter", true);
+		 if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0){
+			 filters =    imakeMessage.getResultListObj();
+		 }
+		return filters;
+	}
+
+	@Override
+	public List<ChartFilterInstanceM> getChartFilterInstance(ChartFilterInstanceM obj) {
+		List<ChartFilterInstanceM> filters = new ArrayList<ChartFilterInstanceM>();
+		obj.setServiceName(ServiceConstant.CHART_FILTER_INSTANCE_GET_ALL_FILTER);
+		ImakeResultMessage imakeMessage = postMessage(obj, obj.getClass().getName(), "chartfilterinstance", true);
 		 if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0){
 			 filters =    imakeMessage.getResultListObj();
 		 }

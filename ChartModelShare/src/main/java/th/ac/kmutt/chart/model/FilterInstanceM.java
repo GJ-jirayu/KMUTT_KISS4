@@ -18,7 +18,7 @@ public class FilterInstanceM extends ImakeXML implements Serializable {
     private Integer filterId;
     private String value;
     private FilterM filterM;
-    private List<FilterValueM> items; 
+    private List<FilterM> filterList;
     public String getInstanceId() {
         return instanceId;
     }
@@ -46,10 +46,10 @@ public class FilterInstanceM extends ImakeXML implements Serializable {
     public void setValue(String value) {
         this.value = value;
     }
-	public List<FilterValueM> getItems() {
-		return items;
+	public List<FilterM> getFilterList() {
+		return filterList;
 	}
-	public void setItems(List<FilterValueM> items) {
-		this.items = items;
+	public void setFilterList(List<FilterM> filterList) {
+		this.filterList = filterList;
 	}
 }

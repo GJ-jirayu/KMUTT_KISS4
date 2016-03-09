@@ -89,7 +89,7 @@
         <form:options items="${serviceList}" itemValue="serviceId" itemLabel="serviceName"/>
     </form:select>
 
-    <span style="padding-left: 10px" ><button  class="btn btn-default" type="button" onclick="${ns}listServiceFilterMapping()">Load Filter</button></span><br/><br/>
+    <span style="padding-left: 10px" ><button  class="btn btn-default" type="button" onclick="${ns}loadServiceFilter()">Load Filter</button></span><br/><br/>
     &nbsp;&nbsp;<form:radiobutton path="dataSourceType" value="2"/>
     <b>Ad hoc Data </b>&nbsp;&nbsp;<button class="btn btn-default" onclick="${ns}findChartById('1')" type="button">Load Default</button><br/>
     <form:textarea path="dataAdhoc" id="${ns}dataAdhoc" cssStyle="width: 451px; height: 91px;"></form:textarea>
@@ -113,31 +113,43 @@
     <br/>
     &nbsp;&nbsp;<form:checkbox path="showFilter"  value="1"/>&nbsp;<b>Show Filter on Front Page</b><br/><br/>
     <b id="${ns}filter_element">Filters for this chart </b><br/>
-    <c:if test="${not empty  serviceFilterMappingMList}">
+    <c:if test="${not empty  chartFilterInstance}">
     <div id="${ns}filterMapping_element" class="border_chart_setting">
     </c:if>
-    <c:if test="${empty  serviceFilterMappingMList}">
+    <c:if test="${empty  chartFilterInstance}">
         <div id="${ns}filterMapping_element"  >
     </c:if>
     <span id="${ns}filter_section">
-    <c:if test="${not empty  serviceFilterMappingMList}">
-        <c:forEach items="${serviceFilterMappingMList}" var="filter" varStatus="loop">
-            &nbsp;&nbsp;${filter.filterM.filterName}:&nbsp;
-        <select name="aoe_internal"  >
-            <option value="-1_-1">ทั้งหมด</option>
-            <c:if test="${not empty filter.filterM.filterValues}">
-                <c:forEach items="${filter.filterM.filterValues}" var="filterValue" varStatus="loop2">
-                    <c:set var="filter_check">${filter.filterM.filterId}_${filterValue.keyMapping}</c:set>
-                    <c:if test="${ not empty filterMap[filter_check] }">
-                        <option value="${filter.filterM.filterId}_${filterValue.keyMapping}" selected>${filterValue.valueMapping}</option>
-                    </c:if>
-                    <c:if test="${  empty filterMap[filter_check] }">
-                        <option value="${filter.filterM.filterId}_${filterValue.keyMapping}" >${filterValue.valueMapping}</option>
-                    </c:if>
-                </c:forEach>
-            </c:if>
-        </select>&nbsp;&nbsp;
+    <c:if test="${not empty  chartFilterInstance}">
+    	<table>
+        <c:forEach items="${chartFilterInstance}" var="filter" varStatus="loop">
+        	<tr><td>
+        	<c:choose>
+        		<c:when test="${filter.filterM.activeFlag==1}">
+        			<input id="filter_active_${filter.filterM.filterId}" name="filter_active_${filter.filterM.filterId}" type="checkbox" value="1" checked/> &nbsp;${filter.filterM.filterName}&nbsp;&nbsp;&nbsp;
+        		</c:when>
+        		<c:otherwise>
+        			<input id="filter_active_${filter.filterM.filterId}" name="filter_active_${filter.filterM.filterId}" type="checkbox" value="1" /> &nbsp;${filter.filterM.filterName}&nbsp;&nbsp;&nbsp;
+        		</c:otherwise>
+        	</c:choose>
+        	<!-- select filter item -->
+        		<select id="filter_selection_${filter.filterM.filterId}" name="filter_selection_${filter.filterM.filterId}" >
+			    	<c:forEach items="${filter.filterM.filterValues}" var="item" varStatus="loop2">
+				    	<c:choose>
+							<c:when test="${filter.filterM.selectedValue.equals(item.keyMapping)}">
+								<option value="${item.keyMapping}" selected>${item.valueMapping}</option>
+							</c:when>    
+							<c:otherwise>
+							  	<option value="${item.keyMapping}">${item.valueMapping}</option>
+							</c:otherwise>
+						</c:choose>
+			        </c:forEach>
+		        </select>
+        	</td>
+        	<td></td>
+        	</tr>
         </c:forEach>
+        </table>
     </c:if>
     </span>
   </div>
@@ -169,15 +181,9 @@
     <button class="btn btn-primary" type="submit">Submit</button>
 </form:form>
 <script>
-	function ${ns}toggleOverrideChartJson(current){
-		/*if(current.checked){ // not use anymore
-			$("#${ns}chartJson").attr("disabled",false);
-		}else{
-			$("#${ns}chartJson").attr("disabled",true);
-		}*/
-	}
 	function ${ns}loadChartProp(prop){ // create by GJ
 		var chartType=$('#${ns}chartType').val();
+		$("#${ns}chartJson").val("");
 		$.ajax({
    	 		dataType: "json",
    	 		url:"<%=loadChartProp%>",
@@ -190,24 +196,48 @@
    	 			}
    	 		} 
    	 	});
-		
 	}
 	function ${ns}loadServiceFilter(){
 	    var serviceId=$('#${ns}dataSource').val();
+	    var containerName = "${ns}filter_section";
+	    $("#"+containerName).empty();
 	    $.ajax({
    	 		dataType: "json",
    	 		url:"<%=loadServiceFilter%>",
    	 		data: { serviceId : serviceId },
    	 		success:function(data){
    	 			if(data["header"]["success"]>0){
-   	 				if( prop =='chartJson'){
-   	 				 $("#${ns}chartJson").val(data["content"]);
+   	 				$("#${ns}filterMapping_element").addClass("border_chart_setting")
+   	 				var table = $('<table></table>');
+	   	 			for(i = 0 ; i< data["data"].length ;i++){
+	   	 				var input = $('<input type="checkbox" value="1" />');
+	   	 				input.attr("id","filter_active_"+data["data"][i]["id"]);
+	   	 				input.attr("name","filter_active_"+data["data"][i]["id"]);
+	   	 				var tr = $('<tr></tr>');
+	   	 				var td = $('<td></td>');
+	   	 				td.append(input);
+	   	 				td.append(" "+data["data"][i]["name"]+"  ");
+	   	 				tr.append(td);
+	   	 				var td2 = $('<td></td>');
+	   	 				var select = $('<select></select>');
+	   	 				for(var j = 0 ; j<data["data"][i]["item"].length ;j++){
+	   	 					var opt = $('<option></option>');
+	   	 					opt.attr("value",data["data"][i]["item"][j].value);
+	   	 					opt.html(data["data"][i]["item"][j]["display"]);
+	   	 					select.append(opt);
+	   	 				}
+	   	 				td2.append(select);
+	   	 				tr.append(td2);
+	   	 				table.append(tr);
    	 				}
-   	 			}
+   	 				$("#"+containerName).append(table);
+   	 			}else{
+	 				$("#${ns}filterMapping_element").removeClass("border_chart_setting");
+	 			}
    	 		} 
    	 	});
 	}
-    function ${ns}findChartById(type){
+    function ${ns}findChartById(type){ // deprecate
         var chartType=$('#${ns}chartType').val();
         //alert(chartType)
         var chartM={
@@ -223,9 +253,8 @@
                 }
             }
          });
-
     }
-    function ${ns}listServiceFilterMapping(){
+    function ${ns}listServiceFilterMapping(){ // deprecate
         var serviceId=$('#${ns}dataSource').val();
         var serviceFilterMapping={
             serviceId:serviceId
@@ -268,7 +297,7 @@
         ChartAjax.testCall(filterM, {
             callback: function (data) {
               //  data = data.resultListObj;
-                if (data != null && data.length > 0) {
+              	if (data != null && data.length > 0) {
                    alert(data.length)
                 }
             }

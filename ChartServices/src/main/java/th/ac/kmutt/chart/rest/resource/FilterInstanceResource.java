@@ -90,37 +90,16 @@ public class FilterInstanceResource  extends BaseResource {
                                 imakeMessage.setResultListObj(models);
                             }
                             return getRepresentation(entity, imakeMessage, xstream);
-                        } else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_SAVE)) {
-                            //java.sql.Timestamp now = new java.sql.Timestamp(new Date().getTime());
-                            // domain.setCreatedDate(now);
-                            //domain.setUpdatedDate(now);
-                            int updateRecord = chartService.saveFilterInstanceEntity(domain);
+                        }else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_SAVE)) {
+                        	chartService.deleteFilterInstance(xsource.getInstanceId());
+                        	FilterInstanceM fim = chartService.saveFilterInstance(xsource);
+                        	int updateRecord = fim!=null? 1 : 0;
                             return returnUpdateRecord(entity, xsource, updateRecord);
                         } else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_UPDATE)) {
-                            //java.sql.Timestamp updatedDate = new java.sql.Timestamp(new Date().getTime());
-                            //domain.setUpdatedDate(updatedDate);
-                            int updateRecord=0;
-                            // int updateRecord = chartService.updateChartFilterInstanceEntity(domain);
-                            logger.info("deleteFilterInstanceEntity->"+domain.getId().getInstanceId());
-                            chartService.deleteFilterInstanceEntity(domain);
-                            String[] ids=xsource.getIds();
-                            for (int i=0;i<ids.length;i++){
-                                FilterInstanceEntity domain_inner = new FilterInstanceEntity();
-                                BeanUtils.copyProperties(xsource, domain_inner);
-
-                                FilterInstanceEntityPK pk_inner = new FilterInstanceEntityPK();
-                                logger.info("xsource.getInstanceId->"+xsource.getInstanceId());
-                                if (xsource.getInstanceId() != null)
-                                    pk_inner.setInstanceId(xsource.getInstanceId());
-                                //if (xsource.getFilterId() != null)
-                                pk_inner.setFilterId(Integer.valueOf(ids[i]));
-                                domain_inner.setId(pk_inner);
-                                updateRecord = chartService.saveFilterInstanceEntity(domain_inner);
-                            }
-                            return returnUpdateRecord(entity, xsource, updateRecord);
-
-                        } else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_ITEMS_DELETE)) {
-
+                        	chartService.deleteFilterInstance(xsource.getInstanceId());
+                        	Integer rec = chartService.updateFilterInstance(xsource);
+                        	int updateRecord = rec!=null? rec : 0;
+                        	return returnUpdateRecord(entity, xsource, updateRecord);
                         } else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_DELETE)) {
                             int updateRecord = 0;
                             try {
@@ -139,23 +118,28 @@ public class FilterInstanceResource  extends BaseResource {
                             return returnUpdateRecord(entity, xsource, updateRecord);
                         } else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_SEARCH)) {
 
-                             @SuppressWarnings("rawtypes")
-                             java.util.ArrayList<FilterInstanceEntity> domains = (java.util.ArrayList<FilterInstanceEntity>)
-                                     chartService.listFilterInstanceEntity(xsource);
+                             @SuppressWarnings({ "rawtypes", "unchecked" })
+                             List<FilterInstanceEntity> domains =  chartService.listFilterInstanceEntity(xsource);
                             List<FilterInstanceM> models = new ArrayList<FilterInstanceM>(domains.size());
                             models = getFilterInstanceModels(domains);
                             ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                            System.out.println("size:"+models.get(0).getFilterM().getFilterId());
                             imakeMessage.setResultListObj(models);
                             return getRepresentation(entity, imakeMessage, xstream);
 
-                        } else if (serviceName.equals(ServiceConstant.FILTER_GET_INSTANCE_FILTER)) {
+                        }else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_GET)) {
                             ImakeResultMessage imakeMessage = new ImakeResultMessage();
-                        	List<FilterInstanceM> fins = chartService.getAllFilterInstance(xsource.getInstanceId());
+                        	FilterInstanceM fin = chartService.getFilterInstance(xsource);
+                        	List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
+                        	fins.add(fin);
                             imakeMessage.setResultListObj(fins);
-
+                            return getRepresentation(entity, imakeMessage, xstream); 
+                    	}else if (serviceName.equals(ServiceConstant.FILTER_INSTANCE_WITH_ITEM)) {
+                            ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                        	List<FilterInstanceM> fins = chartService.getFilterInstanceWithItem(xsource.getInstanceId());
+                            imakeMessage.setResultListObj(fins);
                             return getRepresentation(entity, imakeMessage, xstream);
                         }
-
                     } else {
                     }
                 }
@@ -179,8 +163,7 @@ public class FilterInstanceResource  extends BaseResource {
 
     }
 
-    private List<FilterInstanceM> getFilterInstanceModels(
-            java.util.ArrayList<FilterInstanceEntity> domains) {
+	private List<FilterInstanceM> getFilterInstanceModels(List<FilterInstanceEntity> domains) {
         List<FilterInstanceM> models = new ArrayList<FilterInstanceM>(
                 domains.size());
         for (FilterInstanceEntity domain : domains) {

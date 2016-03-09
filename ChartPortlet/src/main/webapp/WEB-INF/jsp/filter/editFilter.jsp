@@ -31,15 +31,10 @@
   </tr>
   </thead>
   <tbody>
-  <c:if test="${not empty filterList}">
-    <c:forEach items="${filterList}" var="filter" varStatus="loop">
+  <c:if test="${not empty filterForm.filterList}">
+    <c:forEach items="${filterForm.filterList}" var="filter" varStatus="loop">
       <tr style="cursor: pointer;">
-        <td>
-
-          <form:checkbox path="ids"
-                           id="${ns}_x_${filter.filterId}" value="${filter.filterId}" />
-                          </td>
-
+        <td><form:checkbox path="filterGlobals" value="${filter.filterId}"/> </td>
         <td style="text-align: left">${filter.filterName}</td>
       </tr>
 

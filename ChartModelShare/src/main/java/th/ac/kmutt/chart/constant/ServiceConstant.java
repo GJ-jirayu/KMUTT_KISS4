@@ -193,9 +193,10 @@ public class ServiceConstant {
     
     //FUSION CHART SERVICE
     public static final String FUSION_CHART_OBJECT  = "retriveFusionChartObject";
-    public static final String FILTER_GET_INSTANCE_FILTER = "filterGetInstanceFilter";
-    public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
-    public static final String FILTER_GET_FILTER_SERVICE = "filterGetFilterOfService";
-   // public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
-
+    public static final String FILTER_INSTANCE_GET = "getFilterInstance";
+    public static final String FILTER_INSTANCE_WITH_ITEM = "getFilterInstanceWithItems";
+    public static final String FILTER_GET_GLOBAL_FILTER = "getGlobalFilter";
+    public static final String FILTER_GET_FILTER_SERVICE = "getFilterOfService";
+    public static final String CHART_FILTER_INSTANCE_GET_ALL_FILTER = "chartFilterInstanceGetAllFilter";
+    // public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
 }

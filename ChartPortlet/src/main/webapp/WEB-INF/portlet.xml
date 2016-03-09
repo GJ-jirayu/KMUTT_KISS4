@@ -79,6 +79,6 @@
     -->
     <event-definition>
         <qname xmlns:x="http://liferay.com/events">x:empinfo</qname>
-        <value-type>th.ac.kmutt.chart.fusion.model.FilterFusionM</value-type>
+        <value-type>th.ac.kmutt.chart.model.FilterInstanceM</value-type>
     </event-definition>
 </portlet-app>

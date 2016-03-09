@@ -10,6 +10,7 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -95,25 +96,20 @@ public class ChartCommonSettingController {
             chartSettingForm = (ChartSettingForm) model.asMap().get("chartSettingForm");
         }
         //get liferay interface
-        ThemeDisplay themeDisplay = (ThemeDisplay) request
-                .getAttribute(WebKeys.THEME_DISPLAY);
+        ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
        // logger.info("themeDisplay->"+themeDisplay);
 
-        String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
+        String instanceId=themeDisplay.getPortletDisplay().getInstanceId(); 
         ChartInstanceM chartInstanceM=chartService.findChartInstanceById(instanceId);
-        chartSettingForm.setChartInstance(instanceId);
-        String json="";
-        String dataSourceType="1";  //default
-        Integer serviceId=null;
-        if(chartInstanceM!=null){  
-            json=chartInstanceM.getChartJson();
-            dataSourceType=chartInstanceM.getDataSourceType();
+        List<ChartFilterInstanceM>  chartFilterInstance = new ArrayList<ChartFilterInstanceM>();
+        if(chartInstanceM!=null ){
+            chartSettingForm.setChartInstance(instanceId);
             chartSettingForm.setAdvProp(chartInstanceM.getAdvProp());
             chartSettingForm.setDataAdhoc(chartInstanceM.getDataAdhoc());
             chartSettingForm.setChartType(chartInstanceM.getChartType());
             chartSettingForm.setChartJson(chartInstanceM.getChartJson());
-            chartSettingForm.setJsonStr(json);
-            chartSettingForm.setDataSourceType(dataSourceType);
+            chartSettingForm.setJsonStr(chartInstanceM.getChartJson());
+            chartSettingForm.setDataSourceType(chartInstanceM.getDataSourceType());
             chartSettingForm.setLinkTo(chartInstanceM.getLinkTo());
             chartSettingForm.setFilterRole(chartInstanceM.getFilterRole());
             chartSettingForm.setSubFromFilter(chartInstanceM.getSubFromFilter());
@@ -122,29 +118,27 @@ public class ChartCommonSettingController {
             chartSettingForm.setChartTitle(chartInstanceM.getChartTitle());
             chartSettingForm.setChartSubTitle(chartInstanceM.getChartSubTitle());
             chartSettingForm.setShowFilter(chartInstanceM.getShowFilter());
-            serviceId=chartInstanceM.getServiceId();
-
+            // chart filter instance
+            ChartFilterInstanceM cfi = new ChartFilterInstanceM();
+            cfi.setInstanceId(instanceId);
+            cfi.setServiceId(chartInstanceM.getServiceId());
+            chartFilterInstance = chartService.getChartFilterInstance(cfi);
         }
-        // list service 
+        model.addAttribute("chartFilterInstance",chartFilterInstance);
+        model.addAttribute("chartSettingForm", chartSettingForm);
+        
+        // list service & chart
         ServiceM  serviceM=new ServiceM();
         serviceM.setType("chart");
         @SuppressWarnings("unchecked")
 		List<ServiceM> listServices=  chartService.listService(serviceM);
-        model.addAttribute("serviceList",listServices);
-        // find chart default properties
-        
-        /*
-        FilterM filterM=new FilterM();
-        filterM.setType("global");
-        List<FilterM> filterList= chartService.listFilter(filterM);*/
-        
+        model.addAttribute("serviceList",listServices);      
         ChartM chartM=new ChartM();
         chartM.setActiveFlag("1");
         List<ChartM> chartList= chartService.listChart(chartM);
         model.addAttribute("chartList", chartList);
-        model.addAttribute("serviceFilterMappingMList",serviceFilterMappingMList);
-        model.addAttribute("chartSettingForm", chartSettingForm);
-
+        
+        //model.addAttribute("serviceFilterMappingMList",serviceFilterMappingMList);
         return "chart/settingChart";
     }
     @RequestMapping(params = "action=doSubmit") // action phase
@@ -152,19 +146,16 @@ public class ChartCommonSettingController {
                              @ModelAttribute("chartSettingForm") ChartSettingForm chartSettingForm,
                              BindingResult result, Model model) {
         //logger.info("into do submit instance =>"+chartSettingForm.getChartInstance()+" ,new json "+chartSettingForm.getJsonStr());
-        boolean isSave=false;
+        boolean isNew=false;
         ChartInstanceM chartInstanceM=chartService.findChartInstanceById(chartSettingForm.getChartInstance());
-        if(chartInstanceM==null) { // new instance
+        if(chartInstanceM==null) { // check new instance or not
             chartInstanceM = new ChartInstanceM();
-            chartInstanceM.setInstanceId(chartSettingForm.getChartInstance());
-            isSave=true;
+            isNew=true;
         }
-
+        chartInstanceM.setInstanceId(chartSettingForm.getChartInstance());
         chartInstanceM.setChartType(chartSettingForm.getChartType());
         chartInstanceM.setDataSourceType(chartSettingForm.getDataSourceType());
         if(chartSettingForm.getDataSourceType().equals("1")){ // choose use datasource
-            ServiceM serviceM=new ServiceM();
-            serviceM.setServiceId(Integer.valueOf(chartSettingForm.getDataSource()));
             chartInstanceM.setServiceId(Integer.valueOf(chartSettingForm.getDataSource()));
         }
         chartInstanceM.setChartJson(chartSettingForm.getChartJson());
@@ -184,12 +175,41 @@ public class ChartCommonSettingController {
             commentM.setComment(chartSettingForm.getComment());
             chartInstanceM.setComment(commentM);
         }
-        //  save&update
-        if(isSave)
+        //  insertNew or update ChartInstance
+        if(isNew)
             chartService.saveChartInstance(chartInstanceM);
         else
             chartService.updateChartInstance(chartInstanceM);
 
+        // save FilterInstance
+        ServiceFilterMappingM sfm = new ServiceFilterMappingM();
+        sfm.setServiceId(Integer.valueOf(chartSettingForm.getDataSource()));
+        @SuppressWarnings("unchecked")
+		List<ServiceFilterMappingM> sfmList = chartService.listServiceFilterMapping(sfm);
+        List<FilterM> filterList = new ArrayList<FilterM>();
+        if(sfmList!=null){
+	        for( ServiceFilterMappingM sfmItem : sfmList){
+	        	FilterM readFilter = sfmItem.getFilterM();
+	        	String filterActiveFlag = request.getParameter("filter_active_"+readFilter.getFilterId());
+	        	logger.info("filterM=>"+readFilter.getFilterId()+":"+filterActiveFlag);
+	        	String filterSelectValue  = request.getParameter("filter_selection_"+readFilter.getFilterId());
+	        	logger.info("filterM=>"+readFilter.getFilterId()+":"+filterSelectValue);
+	        	if(filterActiveFlag!=null ){ // insert checked only
+	        		if(filterActiveFlag.equals("1")){
+	        			readFilter.setActiveFlag(filterActiveFlag);
+	    	        	if(filterSelectValue!=null ){ // insert checked only
+	    	        			readFilter.setSelectedValue(filterSelectValue);
+	    	        	}	// end have value
+	        			filterList.add(readFilter);
+	        		}// end  active = 1
+	        	} // end have active
+	        } // end serviceMappingList
+        }
+        FilterInstanceM fim = new FilterInstanceM();
+        fim.setInstanceId(chartSettingForm.getChartInstance());
+        fim.setFilterList(filterList);
+        chartService.saveFilterInstance(fim);
+        // end save Filter Instance
         try {
             response.setPortletMode(PortletMode.VIEW);
             response.setRenderParameter("action", "list");
@@ -213,7 +233,7 @@ public class ChartCommonSettingController {
 		param.setChartType(chartType);
 		@SuppressWarnings("unchecked")
 		List<ChartM> charts = chartService.listChart(param);
-		if( charts!=null & charts.size()>0 ){
+		if( charts!=null && charts.size()>0 ){
 			ChartM chart = charts.get(0);
 			if(prop.equals("chartJson")){
 				json.put("content", chart.getChartJson());
@@ -234,23 +254,36 @@ public class ChartCommonSettingController {
    		String serviceId = normalRequest.getParameter("serviceId");
    		com.liferay.portal.kernel.json.JSONObject json = JSONFactoryUtil.createJSONObject();
    		com.liferay.portal.kernel.json.JSONObject header = JSONFactoryUtil.createJSONObject();
+   		com.liferay.portal.kernel.json.JSONArray data = JSONFactoryUtil.createJSONArray();
    		header.put("serviceId", serviceId);
    		
    		FilterM filter = new FilterM();
    		filter.setServiceId(Integer.valueOf(serviceId));
-   		
-   		List<ChartM> charts = chartService.findF
-   		if( charts!=null & charts.size()>0 ){
-   			ChartM chart = charts.get(0);
-   			if(prop.equals("chartJson")){
-   				json.put("content", chart.getChartJson());
-   			}
+   		List<FilterM> filters = chartService.getFilterService(filter);
+   		if( filters!=null && filters.size()>0 ){
    			header.put("success","1" );
+   			for( FilterM readFilter : filters){
+   				com.liferay.portal.kernel.json.JSONObject row = JSONFactoryUtil.createJSONObject();
+   				row.put("id", readFilter.getFilterId() );
+   				row.put("name", readFilter.getFilterName() );
+   				row.put("param", readFilter.getColumnName() );
+   				com.liferay.portal.kernel.json.JSONArray items = JSONFactoryUtil.createJSONArray();
+   				if(readFilter.getFilterValues() !=null){
+	   				for( FilterValueM fv : readFilter.getFilterValues() ){
+	   					com.liferay.portal.kernel.json.JSONObject item = JSONFactoryUtil.createJSONObject();
+	   					item.put("value", fv.getKeyMapping());
+	   					item.put("display",fv.getValueMapping() );
+	   					items.put(item);
+	   				}
+   				}
+   				row.put("item", items);
+   	   			data.put(row);
+   			}
    		}else{
-
    			header.put("success","0" );
    		}
    		json.put("header",header);
+   		json.put("data",data);
    		response.getWriter().write(json.toString());
        }
 }

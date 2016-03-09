@@ -20,6 +20,7 @@ import th.ac.kmutt.chart.domain.ServiceChartMappingEntityPK;
 import th.ac.kmutt.chart.domain.ServiceEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntityPK;
+import th.ac.kmutt.chart.model.ChartFilterInstanceM;
 import th.ac.kmutt.chart.model.ChartM;
 import th.ac.kmutt.chart.model.CopyrightServiceM;
 import th.ac.kmutt.chart.model.FilterInstanceM;
@@ -129,7 +130,12 @@ public interface ChartService {
     public List InternationalCompareAllEmpByFaculty(InBoundOutBoundServiceM transientInstance);
 	*/
 	public FusionChartM buildChartObject(FusionChartM xsource);
-	public List<FilterInstanceM> getAllFilterInstance(String instanceId);
+	public FilterInstanceM getFilterInstance(FilterInstanceM fim);
+	public List<FilterInstanceM> getFilterInstanceWithItem(String instanceId); 
 	public List<FilterM> getGlobalFilter();
 	public List<FilterM> getFilterOfService(Integer serviceId);
+	public List<ChartFilterInstanceM> getChartFilterInstance(ChartFilterInstanceM chartFilterInstance);
+	public FilterInstanceM saveFilterInstance(FilterInstanceM fim);
+	public Integer deleteFilterInstance(String instanceId);
+	public Integer updateFilterInstance(FilterInstanceM fim);
 }

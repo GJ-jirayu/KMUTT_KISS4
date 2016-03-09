@@ -24,7 +24,7 @@ public class ChartSettingForm extends CommonForm implements Serializable {
     private String chartTitle;
     private String chartSubTitle;
     private String titleFromFilter;
-    private List<String> filterValue;
+    private String globalFilterString; // manual
     public String getChartType() {
         return chartType;
     }
@@ -88,6 +88,7 @@ public class ChartSettingForm extends CommonForm implements Serializable {
     public String getComment() {
         return comment;
     }
+    private List<String> filterValue;
 
     public void setComment(String comment) {
         this.comment = comment;
@@ -160,10 +161,10 @@ public class ChartSettingForm extends CommonForm implements Serializable {
     public void setDataSourceType(String dataSourceType) {
         this.dataSourceType = dataSourceType;
     }
-	public List<String> getFilterValue() {
-		return filterValue;
+	public String getGlobalFilterString() {
+		return globalFilterString;
 	}
-	public void setFilterValue(List<String> filterValue) {
-		this.filterValue = filterValue;
+	public void setGlobalFilterString(String globalFilterString) {
+		this.globalFilterString = globalFilterString;
 	}
 }

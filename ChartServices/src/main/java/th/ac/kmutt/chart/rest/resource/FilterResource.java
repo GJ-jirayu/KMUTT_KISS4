@@ -178,8 +178,6 @@ public class FilterResource  extends BaseResource {
                             List<FilterM> filters = chartService.getFilterOfService(xsource.getServiceId());
                             ImakeResultMessage imakeMessage = new ImakeResultMessage();
                             imakeMessage.setResultListObj(filters);
-                            // waiting
-                            
                             return getRepresentation(entity, imakeMessage, xstream);
                         }
                     } else { // else serviceName null

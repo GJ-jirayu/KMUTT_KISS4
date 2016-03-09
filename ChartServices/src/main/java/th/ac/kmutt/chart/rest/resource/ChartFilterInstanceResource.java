@@ -81,8 +81,6 @@ public class ChartFilterInstanceResource  extends BaseResource {
                         pk.setFilterId(xsource.getFilterId());
                     domain.setId(pk);
 
-
-
                     if (xsource.getServiceName() != null
                             && xsource.getServiceName().length() != 0) {
                         String serviceName = xsource.getServiceName();
@@ -179,7 +177,12 @@ public class ChartFilterInstanceResource  extends BaseResource {
                             }
                             */
                         }
-
+                        else if( serviceName.equals(ServiceConstant.CHART_FILTER_INSTANCE_GET_ALL_FILTER)){
+                            List<ChartFilterInstanceM> filters = chartService.getChartFilterInstance(xsource);
+                            ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                            imakeMessage.setResultListObj(filters);
+                            return getRepresentation(entity, imakeMessage, xstream);
+                        }
                     } else {
                     }
                 }

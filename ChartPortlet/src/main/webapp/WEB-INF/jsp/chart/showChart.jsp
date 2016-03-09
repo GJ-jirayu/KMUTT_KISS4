@@ -4,6 +4,7 @@
   Date: 07/09/2015
   Time: 19:10
   To change this template use File | Settings | File Templates.
+  EDIT BY GJ.PK.m
 --%>
 <%@ include file="/WEB-INF/jsp/include.jsp" %>
 <%@ page contentType="text/html; charset=utf-8" %>
@@ -20,6 +21,32 @@
     <meta http-equiv="Cache-Control" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title></title>
+    <style type="text/css">
+	    	.aui .table td{
+	    	background-color:transparent;
+	    	}
+    	 .aui .table thead th {
+	     	background-color:transparent;
+	     }
+	     .chartContainer .aui .table thead th {
+	     	background-color:transparent;
+	     }
+	    .chartContainer .aui .table{
+	    background-color:transparent;
+	    }
+	    .chartContainer .aui .table tbody{
+	    background-color:transparent;
+	    }
+	     .chartContainer .aui .table tbody td {
+	     	background-color:transparent;
+	     }
+	      .chartContainer .aui .table thead{
+	      background-color:transparent;
+	      }
+	     .chartContainer .aui .table thead td {
+	     	background-color:transparent;
+	     }
+    </style>
     <!-- Bootstrap core CSS -->
     <%--
     <link rel="stylesheet" href="<c:url value="/resources/bootstrap/css/bootstrap.min.css"/>" type="text/css"/>
@@ -69,13 +96,13 @@
                action="${formAction}" enctype="multipart/form-data">
         <form:hidden path="dataSourceType"/>
         <form:hidden path="chartInstance"/>
-
+        <form:hidden path="globalFilterString"/>
 	    <c:forEach items="${filters}" var="filter" varStatus="loop">
-	        &nbsp;&nbsp;${filter.filterM.filterName}:&nbsp;
-	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterM.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterM.filterId}" >
-	        	<c:forEach items="${filter.items}" var="item" varStatus="loop2">
+	        &nbsp;&nbsp;${filter.filterName}:&nbsp;
+	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterId}" >
+	        	<c:forEach items="${filter.filterValues}" var="item" varStatus="loop2">
 		        	<c:choose>
-					    <c:when test="${filter.filterM.selectedValue.equals(item.keyMapping)}">
+					    <c:when test="${filter.selectedValue.equals(item.keyMapping)}">
 					        <option value="${item.keyMapping}" selected>${item.valueMapping}</option>
 					    </c:when>    
 					    <c:otherwise>
@@ -101,7 +128,7 @@
 <div align="center" id="${ns}chart_table_caption"></div>
 <div align="center" id="${ns}chart_table_subCaption"></div>
 </table>
-<div id="${ns}chartContainer"> Please Config Chart!</div>
+<div id="${ns}chartContainer" class="chartContainer"> Please Config Chart!</div>
 <%--
 <span id="${ns}chartContainer" style="line-height: 100%; display:
 inline-block; zoom: 1; width: 99%; height: 34.65px; background-color: rgb(255, 255, 255);">
@@ -168,52 +195,84 @@ Please Config Chart!
         window.open(link_url,"_blank");
     }
     function ${ns}renderTable(){
-        var jsonStrObj=${chartSettingForm.jsonStr};
-        var headers_title =jsonStrObj.chart.header_title;
-        var header_width =jsonStrObj.chart.header_width;
-        var row_position=jsonStrObj.chart.row_position;
-        var caption=jsonStrObj.chart.caption;
-        var subCaption=jsonStrObj.chart.subCaption;
-        var row_picture=jsonStrObj.chart.row_picture;
-        var datas= jsonStrObj.data;
-        $("#${ns}chart_table_caption").html("<b>"+caption+"</b><br/>");
-        $("#${ns}chart_table_subCaption").html(subCaption);
-        //alert(datas)
-        var str="<table class=\"table table-bordered\">"+
-                "<thead>"+
-                " <tr>";
-        for(var i=0;i<headers_title.length;i++){
-            str=str+""+
-                "<th class=\"th_class\" width=\""+header_width[i]+"%\" style=\"text-align:center\" >"+headers_title[i]+"</th>";
-        }
-        for(var i=0;i<datas.length;i++){
-            var values=datas[i].value;
-           // alert(row_picture[i])
-            str=str+""+
-                    " <tr style=\"cursor: pointer;\" \">";
-            for(var j=0;j<values.length;j++){
-                str=str+""+
-                        "<td  style=\"text-align:"+row_position[j]+"\">";
-
-                if(row_picture[j]=='1' && values[j].length>0){
-                    str=str+"<img src=\"/ChartPortlet/resources/images/"+values[j]+"\" style=\"cursor:pointer;width:16px;height: 16px;\" />";
-                }else{
-                    str=str+""+values[j];
-
-                }
-                str=str+""+"</td>";
-            }
-            str=str+"</tr>";
-        }
-        str=str+"</tbody>"+
-                        "</table>";
-        $("#${ns}chartContainer").html(str);
-        //alert(jsonStrObj.chart.header_title)
+    	 var jsonStrObj=${chartSettingForm.jsonStr};
+         var caption=jsonStrObj.table.caption;
+         var subCaption=jsonStrObj.table.subCaption;
+         var header =jsonStrObj.header;
+         var dataset= jsonStrObj.dataset;
+         $("#${ns}chart_table_caption").html("<b>"+caption+"</b><br/>");
+         $("#${ns}chart_table_subCaption").html(subCaption);
+         var str="<table class=\"table table-bordered\">";
+         //header
+         if(header.length>0){
+             str=str+"<thead bgcolor=\""+jsonStrObj.table.headerBgColor+"\">"+"<tr>";
+	         for(var i=0;i<header.length;i++){
+	             str=str+""+
+	                 "<th class=\"th_class\"  style=\"text-align:center\" >"+header[i].cell+"</th>";
+	         }
+	         //check extra
+	         if(jsonStrObj.extra!=null){
+	        	 for(var i=0;i<jsonStrObj.extra.length;i++){
+	        		 str=str+"<th></th>";
+	        	 }
+	         }//end check extra
+	         str=str+"</tr></thead>";
+    	}
+         //data
+         str=str+"<tbody bgcolor=\""+jsonStrObj.table.bodyBgColor+"\">";
+         for(var i=0;i<dataset.length;i++){
+             var datarow=dataset[i].data;
+             str=str+""+ " <tr style=\"cursor: pointer;\" \">";
+             for(var j=0;j<datarow.length;j++){
+                 str=str+""+"<td  style=\"text-align:left\">";
+                 if( datarow.length>0){
+                     str=str+""+datarow[j].value;
+                 }
+                 str=str+""+"</td>";
+             }//end td data
+             //compare
+             if(jsonStrObj.extra!=null){
+            	 for(var j=0;j<jsonStrObj.extra.length;j++){
+                	 str=str+"<td width=\"50\" style=\"text-align:center\">";
+            		 if(jsonStrObj.extra[j].type=='growth'){
+            			if(datarow[Number(jsonStrObj.extra[j].cellA)-1].value<datarow[Number(jsonStrObj.extra[j].cellB)-1].value){
+		            	      str=str+"<img src=\"<c:url value="/resources/images/sort_up_green.png"/>\" style=\"width:20px;height: 20px;\" />";
+		            	 }else{
+		            		    str=str+"<img src=\"<c:url value="/resources/images/sort_down_red.png"/>\" style=\"width:20px;height: 20px;\" />";
+		            	 }
+            		 }//end growth
+                	 str=str+"</td>";
+            	 }//end extra list
+             }//end extra
+             str=str+"</tr>";
+         }
+         str=str+"</tbody>";
+         str=str+"</table>";
+         $("#${ns}chartContainer").html(str);
+     	 //function
+		var tgr =	$("#${ns}chartContainer>table>tbody");
+         //footer
+         if(jsonStrObj.footer.length>0){
+        	 var footer = jsonStrObj.footer;
+        	 var trNew = tgr.children("tr:last-child").clone();
+        	 trNew.attr("bgcolor",jsonStrObj.table.footerBgColor);
+        	 trNew.children("td").empty();//clear content
+        	for(var i = 0 ;i<jsonStrObj.footer.length;i++){
+        		if(footer[i].type == "sum"){
+        			trNew.children("td:nth-child(1)").html("รวม");
+        			var total = 0;
+        			tgr.children("tr").children("td:nth-child("+footer[i].cell+")").each(function(){
+        				total=Number(total)+Number($(this).html());
+        			})
+        			trNew.children("td:nth-child("+footer[i].cell+")").html(total);
+        		}//if sum
+        	}//end loop
+        	tgr.append(trNew);
+         }
     }
 </script>
 <script>
     $(document).ready(function () {
-
         $("#${ns}comment_bt").popover({
             html:true
         });
@@ -221,20 +280,11 @@ Please Config Chart!
             html:true
         });
         var dataSource;
-        var chartype="";
-
-        var chartHeight="300";
-        <c:if test="${chartSettingForm.chartType=='gantt'}">
-        chartHeight="600";
-
-        </c:if>
-        <c:if test="${chartSettingForm.chartType=='hbullet'}">
-        chartHeight="150";
-
-        </c:if>
-
-
-        <c:if test="${not empty chartSettingForm.jsonStr && chartSettingForm.chartType!='table' }">
+        var chartype="${chartSettingForm.chartType}";
+        var chartHeight="300"; //default
+        if(chartype=="gantt"){ chartHeight="600"; }
+        else if(chartype=="hbullet"){ chartHeight="150"; }
+        <c:if test="${not empty chartSettingForm.jsonStr && chartSettingForm.chartType!='table'}">
         var revenueChart = new FusionCharts({
             "type": "${chartSettingForm.chartType}",
             "renderAt": "${ns}chartContainer",
@@ -245,8 +295,17 @@ Please Config Chart!
 
         });
         revenueChart.render();
-
-        </c:if>
+        /*
+        var revenueChart = new FusionCharts({
+            "type": chartype,
+            "renderAt": "${ns}chartContainer",
+            "width": "100%", // 500
+            "height": chartHeight, 
+            "dataFormat": "json",
+            "dataSource":${chartSettingForm.jsonStr}
+        });
+        revenueChart.render();*/
+        </c:if>        
         <c:if test="${chartSettingForm.chartType=='table' }">
             ${ns}renderTable();
         </c:if>

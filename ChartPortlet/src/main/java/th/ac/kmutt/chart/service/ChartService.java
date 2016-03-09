@@ -128,10 +128,14 @@ public interface ChartService {
 	public Integer updateServiceFilterMapping(ServiceFilterMappingM model) ;
 	public Integer deleteServiceFilterMapping(ServiceFilterMappingM model) ;
 	public ServiceFilterMappingM findServiceFilterMappingById(Integer serviceId,Integer filterId) ;
-	public List listServiceFilterMapping(th.ac.kmutt.chart.model.ServiceFilterMappingM param);
+	public List listServiceFilterMapping(ServiceFilterMappingM param);
 	
 	//new service by pk
 	public List<FilterM> getGlobalFilter();
 	public FusionChartM getFusionChart(FusionChartM obj);
-	public List<FilterInstanceM> getAllFilterInstance(FilterInstanceM obj);
+	public FilterInstanceM getFilterInstance(FilterInstanceM obj); // get Filter instance
+	public List<FilterInstanceM> getFilterInstanceWithItem(FilterInstanceM obj); // get filter instance with item
+	public List<FilterM> getFilterService(FilterM obj);
+	public List<ChartFilterInstanceM> getChartFilterInstance(ChartFilterInstanceM obj);
+
 }

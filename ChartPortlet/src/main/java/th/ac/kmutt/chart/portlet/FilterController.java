@@ -77,6 +77,10 @@ public class FilterController {
     @RequestMapping
     // default (action=list)
     public String showFilter(PortletRequest request, Model model) {
+    	ThemeDisplay themeDisplay = (ThemeDisplay) request
+                .getAttribute(WebKeys.THEME_DISPLAY);
+        String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
+        
         FilterForm filterForm = null;
         if (!model.containsAttribute("filterForm")) {
             filterForm = new FilterForm();
@@ -91,7 +95,14 @@ public class FilterController {
         	globalFilter = (ArrayList<FilterM>) model.asMap().get("FilterMList");
         }
         else{ // visit first  No submit action
-        	globalFilter= chartService.getGlobalFilter();
+        	FilterInstanceM fim = new FilterInstanceM();
+        	fim.setInstanceId(instanceId);
+        	List<FilterInstanceM>  fins = chartService.getFilterInstanceWithItem(fim);
+        	if(fins!=null){
+	        	for(FilterInstanceM fin : fins){
+	        		globalFilter.add(fin.getFilterM());
+	        	}
+        	} // have fins
         }
         model.addAttribute("filterList",globalFilter);
         return "filter/showFilter";
@@ -108,17 +119,17 @@ public class FilterController {
        logger.info("global filter size:"+gFilters.size());
        for(int i = 0 ; i<gFilters.size();i++){
     	   // map  name select in view showfilter.jsp  format  g_filter_+filterM.filterId
-    	  
-    	   logger.info("global target:"+ "g_filter_"+gFilters.get(i).getFilterId());
     	   String val = request.getParameter("g_filter_"+gFilters.get(i).getFilterId());
     	   gFilters.get(i).setSelectedValue(val);
-    	   logger.info("global value:"+gFilters.get(i).getSelectedValue());
        	}
        // portlet to portlet  require configuration  portlet.xml
         QName qname = new QName("http://liferay.com/events","empinfo","x");
-        th.ac.kmutt.chart.fusion.model.FilterFusionM filterFusionM=new th.ac.kmutt.chart.fusion.model.FilterFusionM();
-        filterFusionM.setFilterMList(gFilters);
-        response.setEvent(qname, filterFusionM);
+     //   th.ac.kmutt.chart.fusion.model.FilterFusionM filterFusionM=new th.ac.kmutt.chart.fusion.model.FilterFusionM();
+     //   filterFusionM.setFilterMList(gFilters);
+     //   response.setEvent(qname, filterFusionM);
+        FilterInstanceM globalFilterIns = new FilterInstanceM();
+        globalFilterIns.setFilterList(gFilters);
+        response.setEvent(qname, globalFilterIns); // send event to all portlet 
         // status.setComplete();
         model.addAttribute("FilterMList", gFilters);
         response.setRenderParameter("action", command);

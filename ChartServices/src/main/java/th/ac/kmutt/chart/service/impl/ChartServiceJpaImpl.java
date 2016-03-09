@@ -315,15 +315,11 @@ public class ChartServiceJpaImpl implements ChartService {
     	if(chartInsEnt!=null){
 	    	source.setChartType(chartInsEnt.getChartType());
 	    	source.setServiceId(chartInsEnt.getServiceId());
-	    	
 	    	try {
-	    		//find datasource 
-	    		ServiceEntity serviceEnt = chartRepository.findServiceEntityById(chartInsEnt.getServiceId());
-	    		ServiceM datasource = new ServiceM();
-	    		BeanUtils.copyProperties(serviceEnt, datasource);
 	    		//find filter
-		    	List<FilterM> filters = chartRepository.fetchInstanceFilters(chartInsEnt.getInstanceId());
-		    	List<FilterM> allFilters = new ArrayList<FilterM>(filters);
+		    	FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId());
+		    	List<FilterM> allFilters = new ArrayList<FilterM>(fim.getFilterList());
+		    	System.out.println("filter"+fim.getFilterList().size()+":"+fim.getFilterList().get(0).getColumnName());
 		    	if(source.getFilters()==null | source.getFilters().size()==0  ){ // portlet only send global filters 
 		    		List<FilterM> globalFilters = chartRepository.fetchGlobalFilter();
 		    		allFilters.addAll(globalFilters);
@@ -335,6 +331,10 @@ public class ChartServiceJpaImpl implements ChartService {
 		    	// retrive data in chart
 		    	List<Object[]> results = new ArrayList<Object[]>();
 		    	if(chartInsEnt.getDataSourceType().equals("1")){
+		    		//retrive datasource 
+		    		ServiceEntity serviceEnt = chartRepository.findServiceEntityById(chartInsEnt.getServiceId());
+		    		ServiceM datasource = new ServiceM();
+		    		BeanUtils.copyProperties(serviceEnt, datasource);
 			    	//fetch  result
 		    		results = chartRepository.fetchChartResultSet(datasource, allFilters);
 		    	}else if(chartInsEnt.getDataSourceType().equals("2")){
@@ -354,14 +354,18 @@ public class ChartServiceJpaImpl implements ChartService {
 		    	} else if(chartInsEnt.getChartType().toLowerCase().equals("mscolumn2d")) {
 		    		Mscolumn2d col2d = new Mscolumn2d();
 		    		col2d.setTemplate(chartInsEnt.getChartJson());
-		    		System.out.println("result:"+results.get(0)[1]);
 		    		col2d.setData(results);
 		    		chartJson = col2d.build();
-
-		    		System.out.println("chartJson:"+chartJson);
+		    		System.out.println("line:"+chartJson);
+		    	} else if(chartInsEnt.getChartType().toLowerCase().equals("table")) {
+		    		Table table = new Table();
+		    		//table.setTemplate(chartInsEnt.getChartJson());
+		    		//table.setData(results);
+		    		chartJson = table.build();	
 		    	}
 		    	// add json
 		    	source.setChartJson(chartJson);
+		    	System.out.println(chartJson);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -389,12 +393,30 @@ public class ChartServiceJpaImpl implements ChartService {
 		}
     	return dataList;
     }
-    public List<FilterInstanceM> getAllFilterInstance(String instanceId){
+    public List<FilterInstanceM> getFilterInstanceWithItem(String instanceId){
     	List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
-     	fins = chartRepository.fetchAllFilterInstance(instanceId);
+     	fins = chartRepository.fetchFilterInstanceWithItem(instanceId);
     	return fins;
     }
     public List<FilterM> getFilterOfService(Integer serviceId){
     	return 	chartRepository.fetchFilterOfService(serviceId);
     }
+    public List<ChartFilterInstanceM> getChartFilterInstance(ChartFilterInstanceM chartFilterInstance){
+    	return chartRepository.fetchChartFilterInstance(chartFilterInstance);
+    }
+    @Override 
+    public FilterInstanceM getFilterInstance(FilterInstanceM fim){
+    	return chartRepository.fetchFilterInstance(fim.getInstanceId());
+    }
+	@Override
+	public FilterInstanceM saveFilterInstance(FilterInstanceM fim) {
+		return chartRepository.saveFilterInstance(fim);
+	}
+	public Integer deleteFilterInstance(String instanceId){
+		return chartRepository.deleteFilterInstance(instanceId);
+	}
+	@Override
+	public Integer updateFilterInstance(FilterInstanceM fim) {
+		return chartRepository.updateFilterInstance(fim);
+	}
 }

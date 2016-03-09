@@ -1,6 +1,9 @@
 package th.ac.kmutt.chart.form;
 
 import java.io.Serializable;
+import java.util.List;
+
+import th.ac.kmutt.chart.model.FilterM;
 
 public class FilterForm extends CommonForm implements Serializable {
 
@@ -11,10 +14,10 @@ public class FilterForm extends CommonForm implements Serializable {
 
     private String instanceId;
     private String[] filterGlobals;
+    private List<FilterM> filterList;
 
     public FilterForm() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public String[] getFilterGlobals() {
@@ -32,4 +35,13 @@ public class FilterForm extends CommonForm implements Serializable {
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
     }
+
+	public List<FilterM> getFilterList() {
+		return filterList;
+	}
+
+	public void setFilterList(List<FilterM> filterList) {
+		this.filterList = filterList;
+	}
+    
 }

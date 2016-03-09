@@ -18,9 +18,6 @@ public class FilterInstanceEntity  implements Serializable {
     @JoinColumn(name = "FILTER_ID", referencedColumnName = "FILTER_ID",insertable = false,updatable = false)
     private FilterEntity filterByFilterId;
 
-
-
-
     public String getValue() {
         return value;
     }

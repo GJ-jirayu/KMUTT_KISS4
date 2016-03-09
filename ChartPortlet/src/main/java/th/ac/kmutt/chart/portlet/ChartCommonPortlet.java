@@ -57,9 +57,9 @@ public class ChartCommonPortlet {
     @Qualifier("chartServiceWSImpl")
     private ChartService chartService;
 
-    @Autowired
+   /* @Autowired
     @Qualifier("mscolumn2d")
-    private MultiSeriesColumn2D mscolumn2d;
+    private MultiSeriesColumn2D mscolumn2d;*/
     @InitBinder
     public void initBinder(PortletRequestDataBinder binder, PortletPreferences preferences) {
         logger.debug("initBinder");
@@ -77,7 +77,6 @@ public class ChartCommonPortlet {
     @RequestMapping
     // default (action=list)
     public String displayChart(PortletRequest request, Model model) {
-      
         ThemeDisplay themeDisplay = (ThemeDisplay) request
                 .getAttribute(WebKeys.THEME_DISPLAY);
         String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
@@ -131,18 +130,33 @@ public class ChartCommonPortlet {
         chartSettingForm.setShowFilter(showFilter);
         chartSettingForm.setLinkTo(linkTo);
         
-        //get global filter to pass into service Build Chart
+        //retrive global filter 
         List<FilterM> globalFilter = new ArrayList<FilterM>();
-        FilterFusionM filterFusionM = null;
-        if (model.containsAttribute("filterFusionM")) {
-            filterFusionM = (FilterFusionM) model.asMap().get("filterFusionM");
-            globalFilter = filterFusionM.getFilterMList();
+        if (model.containsAttribute("globalFilter")) {
+            FilterInstanceM filterIns = (FilterInstanceM) model.asMap().get("globalFilter");
+            globalFilter = filterIns.getFilterList();
+            chartSettingForm.setGlobalFilterString(encrptGlobalFilterString(globalFilter));//  store global filter
+        }else{
+        	globalFilter = chartService.getGlobalFilter(); // default all  global filter
         }
-      
+        // retrive internal filter 
+        List<FilterM> internalFilter = new ArrayList<FilterM>();
+        if (model.containsAttribute("submitFilter")) {
+        	internalFilter = (ArrayList<FilterM>)model.asMap().get("submitFilter");
+        }else{
+            FilterInstanceM filterInstance = new FilterInstanceM();
+            filterInstance.setInstanceId(instanceId);
+            filterInstance = chartService.getFilterInstance(filterInstance);
+            internalFilter = filterInstance.getFilterList();
+        }
+        
         //get chart object
+        List<FilterM> allFilter = new ArrayList<FilterM>();
+        allFilter.addAll(globalFilter);
+        allFilter.addAll(internalFilter);
         FusionChartM fusionChart = new FusionChartM();
         fusionChart.setInstanceId(instanceId);
-        fusionChart.setFilters(globalFilter);  // set only global filter 
+        fusionChart.setFilters(allFilter);  // 
         fusionChart = chartService.getFusionChart(fusionChart);
  
         // setting chart & title
@@ -150,7 +164,6 @@ public class ChartCommonPortlet {
         try{
 	        JSONObject ChartJson = new JSONObject(fusionChart.getChartJson());
 	        String newTitle =  generateChartTitle(chartInstanceM.getChartTitle(),fusionChart.getFilters(),chartSettingForm.getTitleFromFilter());
-	        logger.info("test:"+chartInstanceM.getChartSubTitle());
 	        String newSub = generateChartSubTitle(chartInstanceM.getChartSubTitle(),fusionChart.getFilters(),chartSettingForm.getSubFromFilter());
 	        JSONObject chart = (JSONObject) ChartJson.get("chart");
 	        chart.put("caption", newTitle);
@@ -163,13 +176,8 @@ public class ChartCommonPortlet {
         // set chart object 
         chartSettingForm.setJsonStr( ChartJsonString );
         
-        //get filter to display param select
-        FilterInstanceM filterInstance = new FilterInstanceM();
-        filterInstance.setInstanceId(instanceId);
-        List<FilterInstanceM> AllfilterInstance = chartService.getAllFilterInstance(filterInstance);
-      
         // add model into view
-        model.addAttribute("filters",AllfilterInstance);
+        model.addAttribute("filters",internalFilter);
         //model.addAttribute("serviceFilterMappingMList",serviceFilterMappingMList);
         model.addAttribute("chartSettingForm", chartSettingForm);
         return "chart/showChart";
@@ -178,33 +186,30 @@ public class ChartCommonPortlet {
     public void doSubmit(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
                          @ModelAttribute("chartSettingForm") ChartSettingForm chartSettingForm,
                          BindingResult result, Model model) {
-    	//String[] filters=request.getParameterValues("filters_"+chartSettingForm.getChartInstance());
-    	// format filter select id  in view [filter_instanceId_filterid] *important*
     	String instanceId = chartSettingForm.getChartInstance();
-    	//get Instance
-        ChartInstanceM inst = chartService.findChartInstanceById(instanceId);
-    	//get filter
-        FilterInstanceM filterInstance = new FilterInstanceM();
-        filterInstance.setInstanceId(instanceId);
-        List<FilterInstanceM> filters = chartService.getAllFilterInstance(filterInstance);
-    	for(FilterInstanceM filter : filters){
-    		String val = request.getParameter("filter_"+instanceId+"_"+filter.getFilterId());
-    	//	HttpServletRequest httpReq = PortalUtil.getHttpServletRequest(request);
-    //		HttpServletRequest normalRequest =PortalUtil.getOriginalServletRequest(httpReq);
-    //		String val = normalRequest.getParameter("filter_"+instanceId+"_"+filter.getFilterId());
-    		logger.info("submit value:"+"filter_"+instanceId+"_"+filter.getFilterId()+":"+val);
-    		if(val!=null){
-    			ChartFilterInstanceM chartFilterInstanceM = new ChartFilterInstanceM();
-    	        chartFilterInstanceM.setInstanceId(instanceId);
-    	        chartFilterInstanceM.setServiceId(inst.getServiceId());
-    	        chartFilterInstanceM.setFilterId(filter.getFilterId());
-    	        chartFilterInstanceM.setValue(val);
-    	        chartService.updateChartFilterInstance(chartFilterInstanceM);
-    		}// end exist value
-    		else{
-    			logger.info("not exist"+filter.getFilterId());
+    	//retrive global Filter from view
+    	String globalString = chartSettingForm.getGlobalFilterString();
+    	if(globalString!=null){
+	    	if(!globalString.equals("")){
+	    		FilterInstanceM globalFilter = new FilterInstanceM();
+	    		globalFilter.setFilterList(decodeGlobalFilterString(globalString));
+	    		model.addAttribute("globalFilter", globalFilter);
     		}
     	}
+    	//retrive Internal Filter  from view
+        FilterInstanceM filterInstance = new FilterInstanceM();
+        filterInstance.setInstanceId(instanceId);
+        List<FilterM> submitFilterList = new ArrayList<FilterM>(); 
+        List<FilterInstanceM> filters = chartService.getFilterInstanceWithItem(filterInstance);
+        for(FilterInstanceM filter : filters){
+        	FilterM sumbitFilter = filter.getFilterM();
+    		String val = request.getParameter("filter_"+instanceId+"_"+filter.getFilterId());
+    		if(val!=null){
+    			sumbitFilter.setSelectedValue(val);
+    		}// end exist value
+    		submitFilterList.add(sumbitFilter);
+    	}
+        model.addAttribute("submitFilter", submitFilterList);
         response.setRenderParameter("action", "list");
     }
     @EventMapping(value ="{http://liferay.com/events}empinfo")
@@ -212,9 +217,9 @@ public class ChartCommonPortlet {
     public void receiveEvent(EventRequest request, EventResponse response, ModelMap map)
     {
         Event event = request.getEvent();
-        FilterFusionM filterFusionM = (FilterFusionM) event.getValue();
-        map.put("empinfo", filterFusionM);
-        map.addAttribute("filterFusionM", filterFusionM);
+        FilterInstanceM globalFilter = (FilterInstanceM) event.getValue();
+        map.put("empinfo", globalFilter);
+        map.addAttribute("globalFilter", globalFilter);
         response.setRenderParameter("action", "list");
     }
     public String generateChartTitle(String titleString , List<FilterM> filters,String flag){
@@ -240,5 +245,32 @@ public class ChartCommonPortlet {
 	    	 }
     	 }
     	return newSub;
+    }
+    public String encrptGlobalFilterString(List<FilterM> globalFilter){
+    	String filterString = "";
+    	String nextLimit = ":next:";
+    	String valLimit = ":val:";
+    	for(FilterM gm : globalFilter){
+    		filterString  = filterString+nextLimit+gm.getColumnName()+valLimit+gm.getSelectedValue();
+    	}
+    	//example  paramYear:val:2560:next:paramType:val:1
+    	return filterString;
+    }
+    public List<FilterM> decodeGlobalFilterString(String filerString){
+    	List<FilterM> globalFilter = new ArrayList<FilterM>();
+    	String nextLimit = ":next:";
+    	String valLimit = ":val:";
+    	String[] gs = filerString.split(nextLimit);
+    	for( String g : gs){
+    		try{
+	    		String[] gkv = g.split(valLimit);  // [0] = key , [1] = value
+	    		FilterM gm = new FilterM();
+	    		gm.setColumnName(gkv[0]);
+	    		gm.setSelectedValue(gkv[1]);
+	    		globalFilter.add(gm);
+    		}catch(Exception ex){
+    		}
+    	} // end loop
+    	return globalFilter;
     }
 }
