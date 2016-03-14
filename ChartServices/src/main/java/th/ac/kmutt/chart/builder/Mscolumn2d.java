@@ -20,7 +20,7 @@ import com.google.gson.JsonArray;
 public class Mscolumn2d extends CommonChart implements Chart {
 	List<Object[]> data;
 	public Mscolumn2d(){
-		super("Bar");  
+		super("Mscolumn2d");  
 	}
 	@Override
 	public void setData(List<Object[]> data){
