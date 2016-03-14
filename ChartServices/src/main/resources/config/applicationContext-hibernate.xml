@@ -80,8 +80,8 @@
 	<tx:annotation-driven transaction-manager="transactionManagerLegacy" />
 	<!-- <jee:jndi-lookup id="dataSource" resource-ref="true" jndi-name="jdbc/chartdb"/> 
 		<jee:jndi-lookup id="liferayDataSource" resource-ref="true" jndi-name="jdbc/chartportaldb"/> -->
-	<!-- -->
-<!-- 	
+	
+<!--   	
 	 <bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -96,11 +96,11 @@
 		<property name="username" value="root" />
 		<property name="password" value="password" />
 	</bean>
--->
+-->  
 	 <bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://10.1.130.242:3306/RESEARCH_DB" />
+		<property name="url" value="jdbc:mysql://10.1.130.242:3306/CHART_DB" />
 		<property name="username" value="root" />
 		<property name="password" value="015482543" />
 	</bean>
@@ -113,7 +113,6 @@
 		<property name="password" value="015482543" />
 	</bean>  
 		
-		
 		<!--============================== Connection for KMUTT_DWH =================================-->
 	<bean id="entityManagerFactoryDwh"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -124,7 +123,7 @@
 		<property name="jpaDialect" ref="jpaDialect" />
 		<property name="packagesToScan" value="th.ac.kmutt.chart.dwh.domain.*" />
 	</bean>
- 
+   
 	<bean id="dataSourceDwh"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.ibm.db2.jcc.DB2Driver" />
@@ -132,7 +131,7 @@
 		<property name="username" value="kissusr1" />
 		<property name="password" value="gxHoc=,xN" />
 	</bean> 
-	<!--  
+	<!-- 
 	<bean id="dataSourceDwh"	class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://localhost:3306/CHART_DB" />

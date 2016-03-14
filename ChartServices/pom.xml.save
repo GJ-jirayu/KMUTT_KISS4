@@ -16,7 +16,7 @@
             <name>Restlet repository</name>
             <url>http://maven.restlet.com</url>
         </repository>
-    </repositories>
+2    </repositories>
     <properties>
         <junit.version>4.11</junit.version>
         <spring.version>4.2.2.RELEASE</spring.version>
@@ -240,11 +240,6 @@
             <groupId>th.ac.kmutt.chart</groupId>
             <artifactId>ChartModelShare</artifactId>
             <version>${ChartModelShare-version}</version>
-        </dependency>
-        <dependency>
-        	<groupId>com.ibm.db2</groupId>
-        	<artifactId>db2jcc</artifactId>
-        	<version>9.7</version>
         </dependency>
     </dependencies>
     <build>

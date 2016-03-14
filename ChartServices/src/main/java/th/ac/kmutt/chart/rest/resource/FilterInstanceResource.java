@@ -123,7 +123,7 @@ public class FilterInstanceResource  extends BaseResource {
                             List<FilterInstanceM> models = new ArrayList<FilterInstanceM>(domains.size());
                             models = getFilterInstanceModels(domains);
                             ImakeResultMessage imakeMessage = new ImakeResultMessage();
-                            System.out.println("size:"+models.get(0).getFilterM().getFilterId());
+                           // System.out.println("size:"+models.get(0).getFilterM().getFilterId());
                             imakeMessage.setResultListObj(models);
                             return getRepresentation(entity, imakeMessage, xstream);
 

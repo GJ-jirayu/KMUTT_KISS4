@@ -4,7 +4,9 @@
         "subCaption": "Last month",
         "headerBgColor": "#efefef",
         "bodyBgColor":"#efefef",
-        "footerBgColor": "#efefef"
+        "footerBgColor": "#efefef",
+        "font": "tahoma",
+        "fontSize" : "12"
     },"header":[
     	{ "cell": "category name", "type": "text" }
     	,{ "cell": "this year", "type": "number" }  

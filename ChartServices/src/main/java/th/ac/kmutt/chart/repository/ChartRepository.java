@@ -769,7 +769,6 @@ public class ChartRepository {
 	@SuppressWarnings("unchecked")
 	public List<Object[]> fetchChartResultSet(ServiceM datasource,List<FilterM> filters){
 		List<Object[]>  results  = new ArrayList<Object[]>();
-
 			String sql = datasource.getSqlString();
 			Query query = entityManagerDwh.createNativeQuery(sql);
 			for( FilterM filter : filters ){

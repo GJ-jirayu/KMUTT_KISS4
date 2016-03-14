@@ -19,7 +19,6 @@ public class Bar extends CommonChart implements Chart {
 	@Override
 	public String build() {
 		JSONObject chartJson = super.getChartJson(); // retriveJSONObject
-		System.out.println("fv:"+this.data.toString());
 		try{
 			JSONArray dataJson = new  JSONArray();
 			for( Object[] resultRow : this.data){

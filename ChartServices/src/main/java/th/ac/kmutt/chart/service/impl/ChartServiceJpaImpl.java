@@ -1,5 +1,6 @@
 package th.ac.kmutt.chart.service.impl;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import th.ac.kmutt.chart.builder.*;
+import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.domain.*;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.repository.ChartRepository;
@@ -27,6 +29,9 @@ public class ChartServiceJpaImpl implements ChartService {
     @Qualifier("chartRepository")
     private ChartRepository chartRepository;
 
+    private static final Logger logger = Logger.getLogger(ServiceConstant.LOG_APPENDER);
+    
+    
     public List aew()throws DataAccessException{
         List<ChartEntity> list = chartRepository.aew();
         return list;
@@ -319,7 +324,6 @@ public class ChartServiceJpaImpl implements ChartService {
 	    		//find filter
 		    	FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId());
 		    	List<FilterM> allFilters = new ArrayList<FilterM>(fim.getFilterList());
-		    	System.out.println("filter"+fim.getFilterList().size()+":"+fim.getFilterList().get(0).getColumnName());
 		    	if(source.getFilters()==null | source.getFilters().size()==0  ){ // portlet only send global filters 
 		    		List<FilterM> globalFilters = chartRepository.fetchGlobalFilter();
 		    		allFilters.addAll(globalFilters);
@@ -356,7 +360,6 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		col2d.setTemplate(chartInsEnt.getChartJson());
 		    		col2d.setData(results);
 		    		chartJson = col2d.build();
-		    		System.out.println("line:"+chartJson);
 		    	} else if(chartInsEnt.getChartType().toLowerCase().equals("table")) {
 		    		Table table = new Table();
 		    		//table.setTemplate(chartInsEnt.getChartJson());
@@ -365,8 +368,9 @@ public class ChartServiceJpaImpl implements ChartService {
 		    	}
 		    	// add json
 		    	source.setChartJson(chartJson);
-		    	System.out.println(chartJson);
+		    	logger.info("object of "+source.getInstanceId()+" => "+chartJson);
 			} catch (Exception e) {
+				logger.info("exception of "+source.getInstanceId()+" => "+e);
 				e.printStackTrace();
 			}
     	}//check exist
@@ -382,7 +386,11 @@ public class ChartServiceJpaImpl implements ChartService {
 				 JSONObject row = rows.getJSONObject(i);
 				 JSONArray rw = row.getJSONArray("row");
 				 if(rw.length()>1){
-					 dataList.add(new Object[]{  rw.toString() });
+					 String[] a = new String[rw.length()];
+					 for(int as = 0 ;as<rw.length();as++){
+						 a[as] = rw.get(as).toString();
+					 }
+					 dataList.add(a);
 				 }else{
 					 dataList.add(rw.getString(0));
 				 }
