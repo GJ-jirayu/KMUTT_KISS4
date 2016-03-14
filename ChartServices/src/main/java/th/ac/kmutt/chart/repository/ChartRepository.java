@@ -838,7 +838,7 @@ public class ChartRepository {
 			
 			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 			if(  f.getSqlQuery()!=null   ){
-				Query qf =   entityManager.createNativeQuery( f.getSqlQuery());
+				Query qf =   entityManagerDwh.createNativeQuery( f.getSqlQuery());
 				List<Object[]> resultFilter =  qf.getResultList();
 				for( Object[] rf : resultFilter ){
 					fvs.add( buildFilterItems(rf) );
@@ -881,7 +881,7 @@ public class ChartRepository {
 			//filterValue
 			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 			if(  fm.getSqlQuery()!=null   ){
-				Query qf =   entityManager.createNativeQuery( fm.getSqlQuery());
+				Query qf =   entityManagerDwh.createNativeQuery( fm.getSqlQuery());
 				List<Object[]> resultFilter =  qf.getResultList();
 				for( Object[] rf : resultFilter ){
 					fvs.add( buildFilterItems(rf) );
@@ -913,7 +913,7 @@ public class ChartRepository {
 			//filterValue
 			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 			if(  filter.getSqlQuery()!=null   ){
-				Query qf =   entityManager.createNativeQuery( filter.getSqlQuery());
+				Query qf =   entityManagerDwh.createNativeQuery( filter.getSqlQuery());
 				List<Object[]> resultFilter =  qf.getResultList();
 				for( Object[] rf : resultFilter ){
 					fvs.add( buildFilterItems(rf) );
@@ -955,7 +955,7 @@ public class ChartRepository {
 			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 			try{
 				if(  f.getSqlQuery()!=null   ){
-					Query qf =   entityManager.createNativeQuery( f.getSqlQuery());
+					Query qf =   entityManagerDwh.createNativeQuery( f.getSqlQuery());
 					List<Object[]> resultFilter =  qf.getResultList();
 					for( Object[] rf : resultFilter ){
 						fvs.add( buildFilterItems(rf) );
