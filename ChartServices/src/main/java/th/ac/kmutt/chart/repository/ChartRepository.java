@@ -1,25 +1,17 @@
 package th.ac.kmutt.chart.repository;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Formatter.BigDecimalLayoutForm;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
-
-import com.liferay.mail.model.Filter;
 
 import th.ac.kmutt.chart.constant.ServiceConstant;
 import th.ac.kmutt.chart.domain.ChartEntity;
@@ -34,19 +26,15 @@ import th.ac.kmutt.chart.domain.FeatureEntity;
 import th.ac.kmutt.chart.domain.FilterEntity;
 import th.ac.kmutt.chart.domain.FilterInstanceEntity;
 import th.ac.kmutt.chart.domain.FilterInstanceEntityPK;
-import th.ac.kmutt.chart.dwh.domain.InboundOutboundStudent;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceChartMappingEntityPK;
 import th.ac.kmutt.chart.domain.ServiceEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntity;
 import th.ac.kmutt.chart.domain.ServiceFilterMappingEntityPK;
-import th.ac.kmutt.chart.fusion.model.FilterFusionM;
 import th.ac.kmutt.chart.model.ChartFilterInstanceM;
-import th.ac.kmutt.chart.model.CopyrightServiceM;
 import th.ac.kmutt.chart.model.FilterInstanceM;
 import th.ac.kmutt.chart.model.FilterM;
 import th.ac.kmutt.chart.model.FilterValueM;
-import th.ac.kmutt.chart.model.FundingResourceServiceM;
 import th.ac.kmutt.chart.model.ServiceM;
 
 @Repository("chartRepository")
