@@ -328,7 +328,7 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		List<FilterM> globalFilters = chartRepository.fetchGlobalFilter();
 		    		allFilters.addAll(globalFilters);
 		    	}else{
-		    		List<FilterM> globalFilters = source.getFilters();  
+		    		List<FilterM> globalFilters = source.getFilters();
 		    		allFilters.addAll(globalFilters);
 		    	}
 		    	source.setFilters(allFilters);  // set Filters for generate Title in  portlet app side
@@ -365,7 +365,36 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		//table.setTemplate(chartInsEnt.getChartJson());
 		    		//table.setData(results);
 		    		chartJson = table.build();	
+		    	} 
+		    	/*Multi serial line 2d*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("mslinea")){		    		
+		    		MultiSeriesLine2D multiSeriesLine2D = new MultiSeriesLine2D();
+		    		multiSeriesLine2D.setTemplate(chartInsEnt.getChartJson());
+		    		multiSeriesLine2D.setData(results);
+		    		chartJson = multiSeriesLine2D.build();
+		    	} 
+		    	/*Multi serial Stack Column 2d*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("msstackedcolumn2d")){		    		
+		    		MultiSeriesStackColumn2D multiSeriesStackColumn2D = new MultiSeriesStackColumn2D();
+		    		multiSeriesStackColumn2D.setTemplate(chartInsEnt.getChartJson());
+		    		multiSeriesStackColumn2D.setData(results);
+		    		chartJson = multiSeriesStackColumn2D.build();
+		    	} 
+		    	/*Multi Pie 3D*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("pie3d")){		    		
+		    		Pie3D pie3d = new Pie3D();
+		    		pie3d.setTemplate(chartInsEnt.getChartJson());
+		    		pie3d.setData(results);
+		    		chartJson = pie3d.build();
+		    	} 
+		    	/*Vertical LED*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("vled")){		    		
+		    		VerticalLed verticalLed = new VerticalLed();
+		    		verticalLed.setTemplate(chartInsEnt.getChartJson());
+		    		verticalLed.setData(results);
+		    		chartJson = verticalLed.build();
 		    	}
+		    	
 		    	// add json
 		    	source.setChartJson(chartJson);
 		    	logger.info("object of "+source.getInstanceId()+" => "+chartJson);
