@@ -356,10 +356,10 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		rta.setData(results);
 		    		chartJson = rta.build();
 		    	} else if(chartInsEnt.getChartType().toLowerCase().equals("mscolumn2d")) {
-		    		Mscolumn2d col2d = new Mscolumn2d();
-		    		col2d.setTemplate(chartInsEnt.getChartJson());
-		    		col2d.setData(results);
-		    		chartJson = col2d.build();
+		    		MultiSeriesColumn2D multiSeriesColumn2D = new MultiSeriesColumn2D();
+		    		multiSeriesColumn2D.setTemplate(chartInsEnt.getChartJson());
+		    		multiSeriesColumn2D.setData(results);
+		    		chartJson = multiSeriesColumn2D.build();
 		    	} else if(chartInsEnt.getChartType().toLowerCase().equals("table")) {
 		    		Table table = new Table();
 		    		//table.setTemplate(chartInsEnt.getChartJson());
