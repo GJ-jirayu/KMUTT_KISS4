@@ -14,7 +14,7 @@ public class Pie3D extends CommonChart implements Chart {
 	
 	List<Object[]> data;
 	public Pie3D(){
-		super("VerticalLed");  
+		super("Pie3D");  
 	}
 	@Override
 	public void setData(List<Object[]> data){
@@ -23,9 +23,15 @@ public class Pie3D extends CommonChart implements Chart {
 	@Override
 	public String build(){
 		JSONObject chartJson = super.getChartJson(); // retriveJSONObject		
-		try{			
-			chartJson.put("value", data.get(0));
-			logger.info("\n super.getChartJson(): "+chartJson.toString()+"\n");
+		try{
+			JSONArray dataJson = new  JSONArray();
+			for( Object[] resultRow : this.data){
+				JSONObject attr = new JSONObject();
+				attr.put("label", resultRow[0] );
+				attr.put("value",resultRow[1] );
+				dataJson.put(attr);
+			}
+			chartJson.put("data", dataJson);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
