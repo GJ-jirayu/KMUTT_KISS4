@@ -367,7 +367,7 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		chartJson = table.build();	
 		    	} 
 		    	/*Multi serial line 2d*/
-		    	else if(chartInsEnt.getChartType().toLowerCase().equals("mslinea")){		    		
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("msline")){		    		
 		    		MultiSeriesLine2D multiSeriesLine2D = new MultiSeriesLine2D();
 		    		multiSeriesLine2D.setTemplate(chartInsEnt.getChartJson());
 		    		multiSeriesLine2D.setData(results);
@@ -393,6 +393,34 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		verticalLed.setTemplate(chartInsEnt.getChartJson());
 		    		verticalLed.setData(results);
 		    		chartJson = verticalLed.build();
+		    	}
+		    	/*Column 2D*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("column2d")){		    		
+		    		Column2D column2d = new Column2D();
+		    		column2d.setTemplate(chartInsEnt.getChartJson());
+		    		column2d.setData(results);
+		    		chartJson = column2d.build();
+		    	}
+		    	/*Radar*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("radar")){		    		
+		    		Radar radar = new Radar();
+		    		radar.setTemplate(chartInsEnt.getChartJson());
+		    		radar.setData(results);
+		    		chartJson = radar.build();
+		    	}
+		    	/*Horizontal Linear Gauge*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("hlineargauge")){		    		
+		    		HorizontalLinearGauge hLinearGauge = new HorizontalLinearGauge();
+		    		hLinearGauge.setTemplate(chartInsEnt.getChartJson());
+		    		hLinearGauge.setData(results);
+		    		chartJson = hLinearGauge.build();
+		    	}
+		    	/*Horizontal LED*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("hled")){		    		
+		    		HorizontalLED horizontalLED = new HorizontalLED();
+		    		horizontalLED.setTemplate(chartInsEnt.getChartJson());
+		    		horizontalLED.setData(results);
+		    		chartJson = horizontalLED.build();
 		    	}
 		    	
 		    	// add json
