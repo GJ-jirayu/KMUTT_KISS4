@@ -4,7 +4,7 @@
   Date: 07/09/2015
   Time: 19:10
   To change this template use File | Settings | File Templates.
-  EDIT BY GJ.PK.m  2016-03
+  EDIT BY GJ.PK.m
 --%>
 <%@ include file="/WEB-INF/jsp/include.jsp" %>
 <%@ page contentType="text/html; charset=utf-8" %>
@@ -138,6 +138,7 @@ Please Config Chart!
 
 <script type="text/javascript" src="<c:url value="/resources/js/jquery-1.11.2.min.js"/>"></script>
 <script type="text/javascript" src="<c:url value="/resources/fusioncharts/js/fusioncharts.js" />"></script>
+<%-- --%>
 <script type="text/javascript" src="<c:url value="/resources/fusioncharts/js/themes/fusioncharts.theme.fint.js"/>"></script>
 <script type="text/javascript" src="<c:url value="/resources/js/wtpTable.js"/>"></script>
 
@@ -147,7 +148,49 @@ Please Config Chart!
 <script src="<c:url value='/resources/js/bootbox.min.js'/>" type="text/javascript"></script>
 --%>
 <script type="text/javascript">
-   
+    <%-- pie3d column2d --%>
+    FusionCharts.ready(function(){
+        <%--
+        var dataSource;
+        var chartype="";
+
+        var chartHeight="300";
+        <c:if test="${chartSettingForm.chartType=='gantt'}">
+        chartHeight="600";
+
+        </c:if>
+        <c:if test="${chartSettingForm.chartType=='hbullet'}">
+        chartHeight="150";
+
+        </c:if>
+        <c:if test="${not empty chartSettingForm.jsonStr}">
+        var revenueChart = new FusionCharts({
+            "type": "${chartSettingForm.chartType}",
+            "renderAt": "${ns}chartContainer",
+            "width": "100%", // 500
+            "height": "${chartSettingForm.chartHeight}", // chartHeight,
+            "dataFormat": "json",
+            "dataSource":${chartSettingForm.jsonStr}
+
+        });
+        revenueChart.render();
+
+        </c:if>
+        --%>
+        <%--
+        YUI().use(
+                'aui-tooltip',
+                function(Y) {
+                    new Y.TooltipDelegate(
+                            {
+                                trigger: '#${ns}myTooltip',
+                                position: 'right'
+                            }
+                    );
+                }
+        );
+   --%>
+    })
     function ${ns}linkto(link_url){
         window.open(link_url,"_blank");
     }
@@ -156,7 +199,85 @@ Please Config Chart!
 		var x = new wtpTable("#${ns}chartContainer",jsonStrObj);
 		x.updatePath("<%=request.getContextPath()%>");
 		x.render();
+		//alert("<c:url value="/"/>");
+    	/*
+    	 var jsonStrObj=${chartSettingForm.jsonStr};
+         var caption=jsonStrObj.table.caption;
+         var subCaption=jsonStrObj.table.subCaption;
+         var header =jsonStrObj.header;
+         var dataset= jsonStrObj.dataset;
+         $("#${ns}chart_table_caption").html("<b>"+caption+"</b><br/>");
+         $("#${ns}chart_table_subCaption").html(subCaption);
+         var str="<table class=\"table table-bordered\">";
+         //header
+         if(header.length>0){
+             str=str+"<thead bgcolor=\""+jsonStrObj.table.headerBgColor+"\">"+"<tr>";
+	         for(var i=0;i<header.length;i++){
+	             str=str+""+
+	                 "<th class=\"th_class\"  style=\"text-align:center\" >"+header[i].cell+"</th>";
+	         }
+	         //check extra
+	         if(jsonStrObj.extra!=null){
+	        	 for(var i=0;i<jsonStrObj.extra.length;i++){
+	        		 str=str+"<th></th>";
+	        	 }
+	         }//end check extra
+	         str=str+"</tr></thead>";
+    	}
+         //data
+         str=str+"<tbody bgcolor=\""+jsonStrObj.table.bodyBgColor+"\">";
+         for(var i=0;i<dataset.length;i++){
+             var datarow=dataset[i].data;
+             str=str+""+ " <tr style=\"cursor: pointer;\" \">";
+             for(var j=0;j<datarow.length;j++){
+                 str=str+""+"<td  style=\"text-align:left\">";
+                 if( datarow.length>0){
+                     str=str+""+datarow[j].value;
+                 }
+                 str=str+""+"</td>";
+             }//end td data
+             //compare
+             if(jsonStrObj.extra!=null){
+            	 for(var j=0;j<jsonStrObj.extra.length;j++){
+                	 str=str+"<td width=\"50\" style=\"text-align:center\">";
+            		 if(jsonStrObj.extra[j].type=='growth'){
+            			if(datarow[Number(jsonStrObj.extra[j].cellA)-1].value<datarow[Number(jsonStrObj.extra[j].cellB)-1].value){
+		            	      str=str+"<img src=\"<c:url value="/resources/images/sort_up_green.png"/>\" style=\"width:20px;height: 20px;\" />";
+		            	 }else{
+		            		    str=str+"<img src=\"<c:url value="/resources/images/sort_down_red.png"/>\" style=\"width:20px;height: 20px;\" />";
+		            	 }
+            		 }//end growth
+                	 str=str+"</td>";
+            	 }//end extra list
+             }//end extra
+             str=str+"</tr>";
+         }
+         str=str+"</tbody>";
+         str=str+"</table>";
+         $("#${ns}chartContainer").html(str);
+     	 //function
+		var tgr =	$("#${ns}chartContainer>table>tbody");
+         //footer
+         if(jsonStrObj.footer.length>0){
+        	 var footer = jsonStrObj.footer;
+        	 var trNew = tgr.children("tr:last-child").clone();
+        	 trNew.attr("bgcolor",jsonStrObj.table.footerBgColor);
+        	 trNew.children("td").empty();//clear content
+        	for(var i = 0 ;i<jsonStrObj.footer.length;i++){
+        		if(footer[i].type == "sum"){
+        			trNew.children("td:nth-child(1)").html("รวม");
+        			var total = 0;
+        			tgr.children("tr").children("td:nth-child("+footer[i].cell+")").each(function(){
+        				total=Number(total)+Number($(this).html());
+        			})
+        			trNew.children("td:nth-child("+footer[i].cell+")").html(total);
+        		}//if sum
+        	}//end loop
+        	tgr.append(trNew);
+         }*/
     }
+</script>
+<script>
     $(document).ready(function () {
         $("#${ns}comment_bt").popover({
             html:true
@@ -180,10 +301,21 @@ Please Config Chart!
 
         });
         revenueChart.render();
+        /*
+        var revenueChart = new FusionCharts({
+            "type": chartype,
+            "renderAt": "${ns}chartContainer",
+            "width": "100%", // 500
+            "height": chartHeight, 
+            "dataFormat": "json",
+            "dataSource":${chartSettingForm.jsonStr}
+        });
+        revenueChart.render();*/
         </c:if>        
         <c:if test="${chartSettingForm.chartType=='table' }">
             ${ns}renderTable();
         </c:if>
+
     });
 </script>
         </body>

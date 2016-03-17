@@ -1,11 +1,8 @@
 package th.ac.kmutt.chart.portlet;
 
-import com.google.gson.Gson;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
 
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,27 +17,14 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
-
 import th.ac.kmutt.chart.form.ChartSettingForm;
-import th.ac.kmutt.chart.fusion.model.*;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.service.ChartService;
-
 import javax.portlet.*;
-import javax.servlet.http.HttpServletRequest;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
-import th.co.imake.chart.services.MultiSeriesColumn2D;
-
-/**
- * Created by imake on 07/09/2015.
- */
 
 @Controller("chartCommonController")
 @RequestMapping("VIEW")
@@ -82,7 +66,6 @@ public class ChartCommonPortlet {
         String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
         // get chartInstance prop
         ChartInstanceM chartInstanceM=chartService.findChartInstanceById(instanceId);
-        String jsonStr="";
         String chartType="";
         String chartHeight="300";
         String comment="";
@@ -91,13 +74,9 @@ public class ChartCommonPortlet {
         String titleFromFilter="0";
         String showFilter="0";
         String linkTo="";
-        String chartTitle="";
-        String chartSubTitle="";
-        Integer serviceId=null;
 
         if(chartInstanceM!=null){
             chartType=chartInstanceM.getChartType();
-            jsonStr=chartInstanceM.getChartJson();  // template
             chartHeight=chartInstanceM.getChartHeight();
             if(chartInstanceM.getComment()!=null && chartInstanceM.getComment().getComment()!=null)
                 comment=chartInstanceM.getComment().getComment();
@@ -106,9 +85,6 @@ public class ChartCommonPortlet {
             titleFromFilter=chartInstanceM.getTitleFromFilter();
             showFilter=chartInstanceM.getShowFilter();
             linkTo=chartInstanceM.getLinkTo();
-            serviceId =chartInstanceM.getServiceId();
-            chartTitle=chartInstanceM.getChartTitle();
-            chartSubTitle=chartInstanceM.getChartSubTitle();
         }
         
         // chart Setting
@@ -161,18 +137,24 @@ public class ChartCommonPortlet {
  
         // setting chart & title
         String ChartJsonString = "";
-        try{
-	        JSONObject ChartJson = new JSONObject(fusionChart.getChartJson());
-	        String newTitle =  generateChartTitle(chartInstanceM.getChartTitle(),fusionChart.getFilters(),chartSettingForm.getTitleFromFilter());
-	        String newSub = generateChartSubTitle(chartInstanceM.getChartSubTitle(),fusionChart.getFilters(),chartSettingForm.getSubFromFilter());
-	        JSONObject chart = (JSONObject) ChartJson.get("chart");
-	        chart.put("caption", newTitle);
-	        chart.put("subCaption", newSub);
-	        ChartJsonString = ChartJson.toString();    
-        }catch(Exception ex){
-        	  ChartJsonString = fusionChart.getChartJson();
+        if(chartInstanceM!=null){
+	        try{
+		        JSONObject ChartJson = new JSONObject(fusionChart.getChartJson());
+	        	JSONObject chart = (JSONObject) ChartJson.get("chart");
+		        if(chartInstanceM.getChartTitle()!=null && ! chartInstanceM.getChartTitle().trim().equals("")){
+		        	String newTitle =  generateChartTitle(chartInstanceM.getChartTitle(),fusionChart.getFilters(),chartSettingForm.getTitleFromFilter());      
+		        	chart.put("caption", newTitle);
+		        }
+		        if(chartInstanceM.getChartSubTitle()!=null && !chartInstanceM.getChartSubTitle().trim().equals("")){
+		        	String newSub = generateChartSubTitle(chartInstanceM.getChartSubTitle(),fusionChart.getFilters(),chartSettingForm.getSubFromFilter());
+		        	chart.put("subCaption", newSub);
+		        }
+		        ChartJsonString = ChartJson.toString();    
+	        }catch(Exception ex){
+	        	  logger.info("WARNING! Exception Instance title generator : ["+chartInstanceM.getInstanceId()+"] \r\n reason => "+ex.getMessage()); 
+	        	  ChartJsonString = fusionChart.getChartJson();
+	        }
         }
-        
         // set chart object 
         chartSettingForm.setJsonStr( ChartJsonString );
         
@@ -224,26 +206,30 @@ public class ChartCommonPortlet {
     }
     public String generateChartTitle(String titleString , List<FilterM> filters,String flag){
     	 String newTitle = titleString;
-    	 if(flag!=null & flag.equals("1")){
-	    	 for( FilterM filter : filters ){
-	    		 CharSequence  check = "_"+filter.getColumnName()+"_";
-	    		 if(    newTitle.contains(check)    ){
-	    			 newTitle = newTitle.replaceAll(check.toString(),filter.getSelectedValue());
-	    		 }
-	    	 }
-    	 }
+    	 if(flag!=null ){
+    		 if( flag.equals("1")){
+		    	 for( FilterM filter : filters ){
+		    		 CharSequence  check = "_"+filter.getColumnName()+"_";
+		    		 if(    newTitle.contains(check)    ){
+		    			 newTitle = newTitle.replaceAll(check.toString(),filter.getSelectedValue());
+		    		 }
+		    	 }
+    		 }
+    	 }//end check null
     	  return newTitle;
     }
     public String generateChartSubTitle(String subTitleString , List<FilterM> filters,String flag ){
     	String newSub = subTitleString;
-    	if(flag!=null & flag.equals("1")){
-    		 for( FilterM filter : filters ){
-	    		 CharSequence  check = "_"+filter.getColumnName()+"_";
-	    		 if(    newSub.contains(check)    ){
-	    			 newSub = newSub.replaceAll(check.toString(),filter.getSelectedValue());
-	    		 }
-	    	 }
-    	 }
+    	if(flag!=null ){
+    		if(flag.equals("1")){
+	    		for( FilterM filter : filters ){
+		    		 CharSequence  check = "_"+filter.getColumnName()+"_";
+		    		 if(    newSub.contains(check)    ){
+		    			 newSub = newSub.replaceAll(check.toString(),filter.getSelectedValue());
+		    		 }
+		    	}
+    		}//end check enable
+    	 }// end check null
     	return newSub;
     }
     public String encrptGlobalFilterString(List<FilterM> globalFilter){

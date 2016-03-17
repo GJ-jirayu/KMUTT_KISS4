@@ -32,7 +32,7 @@
         }
     </style>
 </head>
-<form:form id="${ns}chartSettingForm" modelAttribute="chartSettingForm" method="post" name="chartSettingFormm"
+<form:form id="chartSettingForm" modelAttribute="chartSettingForm" method="post" name="chartSettingFormm"
            action="${formAction}" enctype="multipart/form-data">
     <b>Chart Type :</b>
     <form:select path="chartType" id="${ns}chartType" onchange="${ns}loadChartProp('chartJson')" >
@@ -84,18 +84,33 @@
     <input type="radio" name="service_select"/>
     --%>
     <div class="border_chart_setting">
-    &nbsp;&nbsp;<form:radiobutton name="dataSourceType" path="dataSourceType" value="1"/> <b>Services: </b>
+    &nbsp;&nbsp;<form:radiobutton path="dataSourceType" value="1"/> <b>Services: </b>
     <form:select path="dataSource" id="${ns}dataSource" >
         <form:options items="${serviceList}" itemValue="serviceId" itemLabel="serviceName"/>
     </form:select>
 
-    <span style="padding-left: 10px" ><button  class="btn btn-default" id="${ns}loadServiceBtn" type="button" onclick="${ns}loadServiceFilter()">Load Filter</button></span><br/><br/>
-    &nbsp;&nbsp;<form:radiobutton name="dataSourceType" path="dataSourceType" value="2"/>
+    <span style="padding-left: 10px" ><button  class="btn btn-default" type="button" onclick="${ns}loadServiceFilter()">Load Filter</button></span><br/><br/>
+    &nbsp;&nbsp;<form:radiobutton path="dataSourceType" value="2"/>
     <b>Ad hoc Data </b>&nbsp;&nbsp;<button class="btn btn-default" onclick="${ns}findChartById('1')" type="button">Load Default</button><br/>
     <form:textarea path="dataAdhoc" id="${ns}dataAdhoc" cssStyle="width: 451px; height: 91px;"></form:textarea>
     </div>
     <br/>
-    
+   <br/><br/>
+    <b>Chart</b><br/>
+    <div class="border_chart_setting">
+    &nbsp;&nbsp; Title:<form:input path="chartTitle" />  &nbsp;&nbsp;<form:checkbox path="titleFromFilter"  value="1"/> &nbsp;Use From Filter<br/>
+    &nbsp;&nbsp; Sub Title:<form:input path="chartSubTitle"/> &nbsp;&nbsp;<form:checkbox path="subFromFilter"  value="1"/> &nbsp;Use From Filter<br/>
+    &nbsp;&nbsp; Height:<form:input path="chartHeight"  cssStyle="width:100px" />
+    </div>
+    <br/>
+    <br/>
+    <b>Override Property</b> 
+		&nbsp;&nbsp;<button class="btn btn-default"  onclick="${ns}loadChartProp('chartJson')" type="button">Load Default</button>
+	<br/>
+	<div class="border_chart_setting">
+	    <form:textarea path="chartJson" id="${ns}chartJson" cssStyle="height: 107px; width: 451px;"></form:textarea><br/>
+	</div>
+    <br/>
     &nbsp;&nbsp;<form:checkbox path="showFilter"  value="1"/>&nbsp;<b>Show Filter on Front Page</b><br/><br/>
     <b id="${ns}filter_element">Filters for this chart </b><br/>
     <c:if test="${not empty  chartFilterInstance}">
@@ -139,6 +154,12 @@
     </span>
   </div>
 
+    <%--
+    &nbsp;&nbsp; ประเภทผลงาน&nbsp;<select name="aoe_internal" style="width:100px" >
+    <option >  </option>
+    <option value="1">ผลงานวิจัย</option>
+    </select>
+     --%>
      <br/> <br/>
     &nbsp;&nbsp;<form:checkbox path="filterRole"  value="1"/> &nbsp;<b>Enable Role Filter</b><br/>
     <%--
@@ -146,21 +167,6 @@
 
     <br/>
     --%>
-   <br/><br/>
-    <b>Chart</b><br/>
-    <div class="border_chart_setting">
-    &nbsp;&nbsp; Title:<form:input path="chartTitle" />  &nbsp;&nbsp;<form:checkbox path="titleFromFilter"  value="1"/> &nbsp;Use From Filter<br/>
-    &nbsp;&nbsp; Sub Title:<form:input path="chartSubTitle"/> &nbsp;&nbsp;<form:checkbox path="subFromFilter"  value="1"/> &nbsp;Use From Filter<br/>
-    &nbsp;&nbsp; Height:<form:input path="chartHeight"  cssStyle="width:100px" />
-    </div>
-    <br/>
-    <br/>
-    <b>Override Property</b> 
-		&nbsp;&nbsp;<button class="btn btn-default"  onclick="${ns}loadChartProp('chartJson')" type="button">Load Default</button>
-	<br/>
-	<div class="border_chart_setting">
-	    <form:textarea path="chartJson" id="${ns}chartJson" cssStyle="height: 107px; width: 451px;"></form:textarea><br/>
-	</div>
     <br/>
     <b>Comment: </b><br/>
     <form:textarea path="comment" id="${ns}comment" cssStyle="width: 451px; height: 52px;"></form:textarea><br/>
@@ -298,16 +304,6 @@
         });
         */
     }
-    $(document).ready(function(){
-        //interface event handle 
-        $( '#${ns}chartSettingForm input[name="dataSourceType"]' ).change(function(){
-        	if(this.value==2){  /// adhoc
-        		$("#${ns}loadServiceBtn").prop( "disabled", true );
-        	}else{
-        		$("#${ns}loadServiceBtn").prop( "disabled", false );
-        	}
-        });
-    });
 </script>
 </body>
 </html>

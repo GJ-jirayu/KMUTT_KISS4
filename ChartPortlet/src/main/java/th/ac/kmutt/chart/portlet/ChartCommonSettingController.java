@@ -10,7 +10,6 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -36,12 +35,9 @@ import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.servlet.http.HttpServletRequest;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller("chartCommonSettingController")
 @RequestMapping("EDIT")
@@ -54,21 +50,7 @@ public class ChartCommonSettingController {
     @Autowired
     @Qualifier("chartServiceWSImpl")
     private ChartService chartService;
-    // 'เลือกตามปี'
-    private static final String[] YEAR_FILTER_KEY={"2550","2551","2552","2553","2554","2555","2556","2557","2558"};
-    private static final String[] YEAR_FILTER_VALUE={"2550","2551","2552","2553","2554","2555","2556","2557","2558"};
-
-    // ''เลือกตามเดือน''
-    private static final String[] MONTH_FILTER_KEY={"1","2","3","4","5","6","7","8","9","10","11","12"};
-    private static final String[] MONTH_FILTER_VALUE={"ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."};
-
-    //'แหล่งที่ได้รับการเผยแพร่'
-    private static final String[] PUBLISH_RESOURCE_FILTER_KEY={"1","2","3","4"};
-    private static final String[] PUBLISH_RESOURCE_FILTER_VALUE={"วารสารนานาชาติ","ประชุมนานาชาติ","วารสารในประเทศ","ประชุมระดับประเทศ"};
-
-    //'แหล่งเงินทุน'
-    private static final String[] FUNDING_RESOURCE_FILTER_KEY={"1","2","3"};
-    private static final String[] FUNDING_RESOURCE_FILTER_VALUE={"เงินรายได้ มจธ.","รัฐ ว.1","แหล่งทุนภายนอก"};
+    
     @InitBinder
     public void initBinder(PortletRequestDataBinder binder, PortletPreferences preferences) {
         logger.debug("initBinder");

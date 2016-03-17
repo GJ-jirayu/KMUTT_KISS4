@@ -5,18 +5,18 @@
         "headerBgColor": "#efefef",
         "bodyBgColor":"#efefef",
         "footerBgColor": "#efefef",
-        "font": "tahoma",
-        "fontSize" : "12"
+        "font": "Tahoma",
+        "fontSize" : "16"
     },"header":[
     	{ "cell": "category name", "type": "text" }
-    	,{ "cell": "this year", "type": "number" }  
-    	,{ "cell": "last year", "type": "number" }
+    	,{ "cell": "last year", "type": "number" }  
+    	,{ "cell": "this year", "type": "number" }
     ],"dataset": [
-        { "data": [{"value":"cateA"},{"value":"1000"},{"value":"2000"}] }
-        ,{ "data": [{"value":"cateA"},{"value":"1000"},{"value":"2000"}] }
-        ,{ "data": [{"value":"cateA"},{"value":"1000"},{"value":"2000"}] }
-        ,{ "data": [{"value":"cateA"},{"value":"1000"},{"value":"2000"}] }
+        { "data": [{"value":"cateA"},{"value":"500"},{"value":"2000"}] }
+        ,{ "data": [{"value":"cateB"},{"value":"1000"},{"value":"2000"}] }
+        ,{ "data": [{"value":"cateC"},{"value":"1000"},{"value":"2000"}] }
+        ,{ "data": [{"value":"cateD"},{"value":"1000"},{"value":"2000"}] }
     ]
-    ,"extra":[{ "type":"growth" , "cellA":"3", "cellB":"2"}]
+    ,"extra":[{ "type":"growth" , "cellA":"2", "cellB":"3"}]
     ,"footer":[{  "type":"sum" , "cell":"2"  },{  "type":"sum" , "cell":"3"  }]
 }

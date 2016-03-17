@@ -241,24 +241,20 @@ public class ChartRepository {
 
     //CHART_INSTANCE
     public Integer saveChartInstanceEntity(ChartInstanceEntity transientInstance) throws DataAccessException{
-        if(transientInstance.getCommentByInstanceId()!=null) {
+        /*if(transientInstance.getCommentByInstanceId()!=null) {
             logger.info("transientInstance getCommentByInstanceId id->" + transientInstance.getCommentByInstanceId().getInstanceId()+"x");
             logger.info("transientInstance getCommentByInstanceId comment->" + transientInstance.getCommentByInstanceId().getComment()+"x");
-        }
+        }*/
         entityManager.persist(transientInstance);
         if(transientInstance.getCommentByInstanceId()!=null)
             entityManager.persist(transientInstance.getCommentByInstanceId());
         return 1;
     }
     public Integer updateChartInstanceEntity(ChartInstanceEntity transientInstance) throws DataAccessException{
+    	entityManager.merge(transientInstance);
         if(transientInstance.getCommentByInstanceId()!=null && transientInstance.getCommentByInstanceId().getInstanceId()!=null
                 && transientInstance.getCommentByInstanceId().getInstanceId().trim().length()>0)
-       { 	entityManager.merge(transientInstance);
-       }
-        /*
-        if(transientInstance.getCommentByInstanceId()!=null && transientInstance.getCommentByInstanceId().getInstanceId()!=null
-                && transientInstance.getCommentByInstanceId().getInstanceId().trim().length()>0)
-            entityManager.merge(transientInstance.getCommentByInstanceId());*/
+            entityManager.merge(transientInstance.getCommentByInstanceId());
         return 1;
     }
     public Integer deleteChartInstanceEntity(ChartInstanceEntity persistentInstance) throws DataAccessException{
@@ -786,16 +782,7 @@ public class ChartRepository {
 			f.setSelectedValue( (String)result[3] );
 			String sqlItem = (String)result[4];
 			// filter value
-			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
-			if(  sqlItem!=null   ){
-				Query qf =   entityManager.createNativeQuery( sqlItem);
-				List<Object[]> resultFilter =  qf.getResultList();
-				for( Object[] rf : resultFilter ){
-					fvs.add( buildFilterItems(rf) );
-				}
-			}else{
-				fvs.add(buildFilterItems(new Object[]{}));
-			}
+			List<FilterValueM> fvs = fetchFilterValue( sqlItem);
 			f.setFilterValues(fvs);
 			filters.add(f);
 		}
@@ -824,16 +811,7 @@ public class ChartRepository {
 			f.setSqlQuery((String) result[2]);
 			f.setSelectedValue((String)result[3]);
 			
-			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
-			if(  f.getSqlQuery()!=null   ){
-				Query qf =   entityManagerDwh.createNativeQuery( f.getSqlQuery());
-				List<Object[]> resultFilter =  qf.getResultList();
-				for( Object[] rf : resultFilter ){
-					fvs.add( buildFilterItems(rf) );
-				}
-			}else{
-				fvs.add(buildFilterItems(new Object[]{}));
-			}
+			List<FilterValueM> fvs = fetchFilterValue( f.getSqlQuery());
 			f.setFilterValues(fvs);
 			fin.setFilterM(f);	//set fin Filter
 			fins.add(fin);
@@ -853,6 +831,20 @@ public class ChartRepository {
 		}
 		return fv;
 	}
+	/* ! importtant  filter value */
+	public List<FilterValueM> fetchFilterValue(String sql){
+		List<FilterValueM> fvs = new ArrayList<FilterValueM>();
+		if(  sql!=null   ){
+			Query qf =   entityManagerDwh.createNativeQuery( sql);
+			List<Object[]> resultFilter =  qf.getResultList();
+			for( Object[] rf : resultFilter ){
+				fvs.add( buildFilterItems(rf) );
+			}
+		}else{
+			fvs.add(buildFilterItems(new Object[]{}));
+		}// end filterValue
+		return fvs;
+	}
 	public  List<FilterM> fetchGlobalFilter(){
 		List<FilterM> filters = new ArrayList<FilterM>();
 		String sql = "select filter_id,filter_name,column_name,SUBSTITUTE_DEFAULT,SQL_QUERY from FILTER where type = 'global'";
@@ -865,18 +857,8 @@ public class ChartRepository {
 			fm.setColumnName((String) f[2]);
 			fm.setSelectedValue((String) f[3]);
 			fm.setSqlQuery((String) f[4] );
-			
 			//filterValue
-			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
-			if(  fm.getSqlQuery()!=null   ){
-				Query qf =   entityManagerDwh.createNativeQuery( fm.getSqlQuery());
-				List<Object[]> resultFilter =  qf.getResultList();
-				for( Object[] rf : resultFilter ){
-					fvs.add( buildFilterItems(rf) );
-				}
-			}else{
-				fvs.add(buildFilterItems(new Object[]{}));
-			}
+			List<FilterValueM> fvs = fetchFilterValue( fm.getSqlQuery());
 			fm.setFilterValues(fvs);
 			//into list
 			filters.add(fm);
@@ -899,16 +881,7 @@ public class ChartRepository {
 			filter.setSelectedValue((String)result[3]);
 			filter.setSqlQuery((String)result[4]);
 			//filterValue
-			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
-			if(  filter.getSqlQuery()!=null   ){
-				Query qf =   entityManagerDwh.createNativeQuery( filter.getSqlQuery());
-				List<Object[]> resultFilter =  qf.getResultList();
-				for( Object[] rf : resultFilter ){
-					fvs.add( buildFilterItems(rf) );
-				}
-			}else{
-				fvs.add(buildFilterItems(new Object[]{}));
-			}
+			List<FilterValueM> fvs = fetchFilterValue( filter.getSqlQuery());
 			filter.setFilterValues(fvs);
 			
 			filters.add(filter);
@@ -942,15 +915,7 @@ public class ChartRepository {
 			// find filter Item
 			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 			try{
-				if(  f.getSqlQuery()!=null   ){
-					Query qf =   entityManagerDwh.createNativeQuery( f.getSqlQuery());
-					List<Object[]> resultFilter =  qf.getResultList();
-					for( Object[] rf : resultFilter ){
-						fvs.add( buildFilterItems(rf) );
-					}
-				}else{
-					fvs.add(buildFilterItems(new Object[]{}));
-				}
+				fvs = fetchFilterValue( f.getSqlQuery());
 			}catch(Exception ex){
 				 fvs = new ArrayList<FilterValueM>();
 			}

@@ -116,22 +116,25 @@ public class FilterController {
        String command = "list";
        
        List<FilterM> gFilters = chartService.getGlobalFilter();
+       List<FilterM> reRenFilters = new ArrayList<FilterM>();
        logger.info("global filter size:"+gFilters.size());
        for(int i = 0 ; i<gFilters.size();i++){
     	   // map  name select in view showfilter.jsp  format  g_filter_+filterM.filterId
     	   String val = request.getParameter("g_filter_"+gFilters.get(i).getFilterId());
     	   gFilters.get(i).setSelectedValue(val);
+    	   if(val!=null){
+    		   reRenFilters.add(gFilters.get(i));
+    	   }
        	}
        // portlet to portlet  require configuration  portlet.xml
         QName qname = new QName("http://liferay.com/events","empinfo","x");
-     //   th.ac.kmutt.chart.fusion.model.FilterFusionM filterFusionM=new th.ac.kmutt.chart.fusion.model.FilterFusionM();
-     //   filterFusionM.setFilterMList(gFilters);
-     //   response.setEvent(qname, filterFusionM);
-        FilterInstanceM globalFilterIns = new FilterInstanceM();
+       FilterInstanceM globalFilterIns = new FilterInstanceM();
         globalFilterIns.setFilterList(gFilters);
         response.setEvent(qname, globalFilterIns); // send event to all portlet 
         // status.setComplete();
-        model.addAttribute("FilterMList", gFilters);
+        
+        //re show 
+        model.addAttribute("FilterMList", reRenFilters);
         response.setRenderParameter("action", command);
     }
 

@@ -64,7 +64,6 @@ public class ChartInstanceResource  extends BaseResource {
                     BeanUtils.copyProperties(xsource, domain);
                     CommentM commentM= xsource.getComment();
                     ServiceM serviceM= xsource.getService();
-
                     if(commentM!=null){
                         CommentEntity commentEntity=new CommentEntity();
                         BeanUtils.copyProperties(commentM, commentEntity);
