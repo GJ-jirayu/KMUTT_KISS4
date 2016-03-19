@@ -17,17 +17,17 @@
     <portlet:param name="action" value="doSubmit"/>
 </portlet:actionURL>
 <form:form id="filterForm" modelAttribute="filterForm" method="post" name="filterForm"
-           action="${formAction}" enctype="multipart/form-data">
+           action="${formAction}" enctype="multipart/form-data" style="margin:0 0 0 0">
 <b>Filters :</b><br/>
 <%--
 ${filterMap} , ${filterMap["1_1"]} , ${filterMap["1_x"]}
 --%>
-    <table class="table-hover table-striped table-bordered table-condensed" border="0" style="font-size: 12px;width:100%">
+    <table class="" border="0" style="font-size: 14px;width:100%">
     <thead>
     </thead>
     <tbody>
     <c:if test="${not empty filterList}">
-        <tr style="cursor: pointer;">
+        <tr style="">
         <td style="text-align: left">
         <c:forEach items="${filterList}" var="filter" varStatus="loop">
            ${filter.filterName}

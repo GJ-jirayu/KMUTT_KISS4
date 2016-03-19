@@ -4,6 +4,8 @@
   Date: 13/09/2015
   Time: 21:15
   To change this template use File | Settings | File Templates.
+  REVESION BY GJ.PK.m  
+  Date: 2016-03
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/WEB-INF/jsp/include.jsp" %>
@@ -33,7 +35,7 @@
     </style>
 </head>
 <form:form id="${ns}chartSettingForm" modelAttribute="chartSettingForm" method="post" name="chartSettingFormm"
-           action="${formAction}" enctype="multipart/form-data">
+           action="${formAction}" enctype="multipart/form-data" >
     <b>Chart Type :</b>
     <form:select path="chartType" id="${ns}chartType" onchange="${ns}loadChartProp('chartJson')" >
         <form:options items="${chartList}" itemValue="chartType" itemLabel="chartName"/>

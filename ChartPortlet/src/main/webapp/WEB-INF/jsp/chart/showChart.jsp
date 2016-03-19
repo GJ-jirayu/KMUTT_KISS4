@@ -1,10 +1,10 @@
 <%--
-  Created by IntelliJ IDEA.
-  User: imake
+  Created by IntelliJ IDEA. (imake)
   Date: 07/09/2015
   Time: 19:10
   To change this template use File | Settings | File Templates.
-  EDIT BY GJ.PK.m  2016-03
+  REVESION BY GJ.PK.m  
+  Date: 2016-03
 --%>
 <%@ include file="/WEB-INF/jsp/include.jsp" %>
 <%@ page contentType="text/html; charset=utf-8" %>
@@ -22,15 +22,15 @@
     <meta http-equiv="Expires" content="0">
     <title></title>
     <style type="text/css">
-	    	.aui .table td{
+	    .aui .table td{
 	    	background-color:transparent;
-	    	}
-    	 .aui .table thead th {
-	     	background-color:transparent;
-	     }
-	     .chartContainer .aui .table thead th {
-	     	background-color:transparent;
-	     }
+	    }
+    	.aui .table thead th {
+	    	background-color:transparent;
+	    }
+	    .chartContainer .aui .table thead th {
+	    	background-color:transparent;
+	    }
 	    .chartContainer .aui .table{
 	    background-color:transparent;
 	    }
@@ -153,9 +153,9 @@ Please Config Chart!
     }
     function ${ns}renderTable(){
     	var jsonStrObj=${chartSettingForm.jsonStr};
-		var x = new wtpTable("#${ns}chartContainer",jsonStrObj);
-		x.updatePath("<%=request.getContextPath()%>");
-		x.render();
+		var table1 = new wtpTable("#${ns}chartContainer",jsonStrObj);
+		table1.updatePath("<%=request.getContextPath()%>");
+		table1.render();
     }
     $(document).ready(function () {
         $("#${ns}comment_bt").popover({

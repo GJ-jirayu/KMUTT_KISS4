@@ -756,6 +756,7 @@ public class ChartRepository {
 			String sql = datasource.getSqlString();
 			Query query = entityManagerDwh.createNativeQuery(sql);
 			for( FilterM filter : filters ){
+				System.out.println(">>"+filter.getFilterName()+">"+filter.getColumnName()+":"+filter.getSelectedValue());
 				if(  sql.contains(":"+filter.getColumnName())  ){ // check param syntax in sqlQuery
 					query.setParameter(filter.getColumnName(),filter.getSelectedValue());
 				}

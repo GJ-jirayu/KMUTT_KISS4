@@ -30,7 +30,6 @@ public class Mscolumn2d extends CommonChart implements Chart {
 	public String build() {
 	// format	's1', 'A,B,C,D,E', '45,200,2,2,2'
 	//	's2', 'A,B,C', '10,20,30'
-		System.out.println("data"+this.data.size());
 		List<Object[]> data = this.data;
 		HashSet<String> categorySet = new LinkedHashSet<String>();
 		Set<String> seriesSet = new   LinkedHashSet<String>();
@@ -48,7 +47,6 @@ public class Mscolumn2d extends CommonChart implements Chart {
 			}
 			categorys = new ArrayList<String>(categorySet);
 			series = new ArrayList<String>(seriesSet);
-			System.out.print("s2");
 			// Step 2. build valueList Map with category and series default value 0
 			for(  Object[] row : data ){
 				Map<String,String> mapValue = new HashMap<String,String>();
@@ -61,8 +59,6 @@ public class Mscolumn2d extends CommonChart implements Chart {
 				}
 				valueMapper.put((String)row[0], mapValue);
 			}
-
-			System.out.print("s3");
 			//Step 3. build Chart Json
 			JSONObject chartJson = super.getChartJson();
 			//create categorys json
@@ -95,7 +91,6 @@ public class Mscolumn2d extends CommonChart implements Chart {
 			chartJson.put("dataset", datasets);
 			return chartJson.toString();		
 		}catch(Exception ex){
-			System.out.println("found error at "+this.getClass().getName()+" :"+ex.getMessage());
 			return "";
 		}
 	}
