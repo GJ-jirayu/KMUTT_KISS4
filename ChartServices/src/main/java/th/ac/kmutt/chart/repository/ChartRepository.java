@@ -753,16 +753,19 @@ public class ChartRepository {
 	@SuppressWarnings("unchecked")
 	public List<Object[]> fetchChartResultSet(ServiceM datasource,List<FilterM> filters){
 		List<Object[]>  results  = new ArrayList<Object[]>();
+		try{
 			String sql = datasource.getSqlString();
 			Query query = entityManagerDwh.createNativeQuery(sql);
 			for( FilterM filter : filters ){
-				System.out.println(">>"+filter.getFilterName()+">"+filter.getColumnName()+":"+filter.getSelectedValue());
+				System.out.println("code:"+filter.getColumnName()+":"+filter.getSelectedValue());
 				if(  sql.contains(":"+filter.getColumnName())  ){ // check param syntax in sqlQuery
 					query.setParameter(filter.getColumnName(),filter.getSelectedValue());
 				}
 			}
 			results = query.getResultList();
-
+		}catch(Exception ex){
+			logger.info("Exception => Chart Query ResultSet Exception at Instance["+datasource.getInstanceId()+" | Service["+datasource.getServiceId()+":"+ datasource.getServiceName()+"] reason="+ex.getMessage()  );
+		}
 		return results;
 	}
 	@SuppressWarnings("unchecked")
@@ -797,7 +800,7 @@ public class ChartRepository {
 	public List<FilterInstanceM> fetchFilterInstanceWithItem(String instanceId){
 		//  no try exception // fetch with ValueItem
 		List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
-		String sql = "SELECT f.filter_id,f.filter_name,f.sql_query,cfi.VALUE "
+		String sql = "SELECT f.filter_id,f.filter_name,f.column_name,f.sql_query,cfi.VALUE "
 				+ "	FROM FILTER_INSTANCE cfi inner join FILTER f on cfi.FILTER_ID  = f.FILTER_ID "
 				+ " where INSTANCE_ID =  '"+instanceId+"'";
 		Query query = entityManager.createNativeQuery(sql);
@@ -809,8 +812,9 @@ public class ChartRepository {
 			FilterM f = new FilterM();
 			f.setFilterId( (Integer)result[0] );
 			f.setFilterName( (String) result[1]);
-			f.setSqlQuery((String) result[2]);
-			f.setSelectedValue((String)result[3]);
+			f.setColumnName( (String) result[2]);
+			f.setSqlQuery((String) result[3]);
+			f.setSelectedValue((String)result[4]);
 			
 			List<FilterValueM> fvs = fetchFilterValue( f.getSqlQuery());
 			f.setFilterValues(fvs);
@@ -822,12 +826,12 @@ public class ChartRepository {
 	public FilterValueM buildFilterItems(Object[] rf){
 		FilterValueM fv = new FilterValueM();
 		if(rf.length==1){
-			//Can't be because entityManager.createNativeQuery  dose not reture List<Object[]>  for  1 column resultset
+			// Can't be. Always return List<Object[]>
 			//fv.setKeyMapping((String)rf[0]);
 			//fv.setValueMapping((String)rf[0]);
 		}else if(rf.length==2){
-			fv.setKeyMapping((String)rf[0]);
-			fv.setValueMapping((String)rf[1]);
+			fv.setKeyMapping((String)rf[0].toString());   // edit by mike 22/03/2559
+			fv.setValueMapping((String)rf[1].toString());
 		}else{
 		}
 		return fv;
