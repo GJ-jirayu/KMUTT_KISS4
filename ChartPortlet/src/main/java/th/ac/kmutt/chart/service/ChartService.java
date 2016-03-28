@@ -138,4 +138,6 @@ public interface ChartService {
 	public List<FilterM> getFilterService(FilterM obj);
 	public List<ChartFilterInstanceM> getChartFilterInstance(ChartFilterInstanceM obj);
 
+	//cascade
+	public List<FilterM> cascadeFilterItems(FilterInstanceM fin); 
 }

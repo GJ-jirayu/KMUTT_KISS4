@@ -17,12 +17,17 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
+import org.springframework.web.portlet.bind.annotation.RenderMapping;
+
 import th.ac.kmutt.chart.form.ChartSettingForm;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.service.ChartService;
+
 import javax.portlet.*;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.log4j.Logger;
 
 
@@ -58,8 +63,13 @@ public class ChartCommonPortlet {
 
         binder.setAllowedFields(ALLOWED_FIELDS);
     }
-    @RequestMapping
-    // default (action=list)
+    @RequestMapping("VIEW")
+    //@RenderMapping(params="render=show")
+    public String iniPage(PortletRequest request, Model model) {
+    	return "chart/showChart";
+    }
+    @RequestMapping("VIEW")
+    @RenderMapping(params="render=show")
     public String displayChart(PortletRequest request, Model model) {
         ThemeDisplay themeDisplay = (ThemeDisplay) request
                 .getAttribute(WebKeys.THEME_DISPLAY);
@@ -91,7 +101,6 @@ public class ChartCommonPortlet {
         ChartSettingForm chartSettingForm = null;
         if (!model.containsAttribute("chartSettingForm")) {
             chartSettingForm = new ChartSettingForm();
-            model.addAttribute("chartSettingForm", chartSettingForm);
         } else {
             chartSettingForm = (ChartSettingForm) model.asMap().get("chartSettingForm");
         }
@@ -106,6 +115,8 @@ public class ChartCommonPortlet {
         chartSettingForm.setShowFilter(showFilter);
         chartSettingForm.setLinkTo(linkTo);
         
+        
+        if(chartInstanceM!=null){
         //retrive global filter 
         List<FilterM> globalFilter = new ArrayList<FilterM>();
         if (model.containsAttribute("globalFilter")) {
@@ -160,7 +171,7 @@ public class ChartCommonPortlet {
         
         // add model into view
         model.addAttribute("filters",internalFilter);
-        //model.addAttribute("serviceFilterMappingMList",serviceFilterMappingMList);
+        }
         model.addAttribute("chartSettingForm", chartSettingForm);
         return "chart/showChart";
     }
@@ -192,7 +203,7 @@ public class ChartCommonPortlet {
     		submitFilterList.add(sumbitFilter);
     	}
         model.addAttribute("submitFilter", submitFilterList);
-        response.setRenderParameter("action", "list");
+        response.setRenderParameter("render", "show");
     }
     @EventMapping(value ="{http://liferay.com/events}empinfo")
     //@javax.portlet.ProcessEvent(qname = "{http://liferay.com}empinfo")
@@ -202,7 +213,8 @@ public class ChartCommonPortlet {
         FilterInstanceM globalFilter = (FilterInstanceM) event.getValue();
         map.put("empinfo", globalFilter);
         map.addAttribute("globalFilter", globalFilter);
-        response.setRenderParameter("action", "list");
+      //  response.setRenderParameter("action", "list");
+        response.setRenderParameter("render", "show");
     }
     public String generateChartTitle(String titleString , List<FilterM> filters,String flag){
     	 String newTitle = titleString;

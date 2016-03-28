@@ -199,4 +199,7 @@ public class ServiceConstant {
     public static final String FILTER_GET_FILTER_SERVICE = "getFilterOfService";
     public static final String CHART_FILTER_INSTANCE_GET_ALL_FILTER = "chartFilterInstanceGetAllFilter";
     // public static final String FILTER_GET_GLOBAL_FILTER = "filterGetGlobalFilter";
+    
+    //cascade
+    public static final String CASCADE_FILTER = "cascadeFilter";
 }

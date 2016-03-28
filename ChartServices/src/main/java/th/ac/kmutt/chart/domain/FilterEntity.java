@@ -18,6 +18,8 @@ public class FilterEntity  implements Serializable {
     private Integer serviceId;
     private String activeFlag;
     private String type;
+    private String defaultValue;
+    private String sqlQuery;
     /*
     private Collection<ChartFilterInstanceEntity> chartFilterInstancesByFilterId;
     private Collection<FilterInstanceEntity> filterInstancesByFilterId;
@@ -83,8 +85,8 @@ public class FilterEntity  implements Serializable {
     public void setActiveFlag(String activeFlag) {
         this.activeFlag = activeFlag;
     }
-
-    @Basic
+ 
+	@Basic
     @Column(name = "TYPE")
     public String getType() {
         return type;
@@ -93,6 +95,26 @@ public class FilterEntity  implements Serializable {
     public void setType(String type) {
         this.type = type;
     }
+
+	@Basic
+    @Column(name = "SUBSTITUTE_DEFAULT")
+    public String getDefaultValue() {
+		return defaultValue;
+	}
+
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
+	}
+	
+	@Basic
+    @Column(name = "SQL_QUERY")
+	public String getSqlQuery() {
+		return sqlQuery;
+	}
+
+	public void setSqlQuery(String sqlQuery) {
+		this.sqlQuery = sqlQuery;
+	}
 
     @Override
     public boolean equals(Object o) {

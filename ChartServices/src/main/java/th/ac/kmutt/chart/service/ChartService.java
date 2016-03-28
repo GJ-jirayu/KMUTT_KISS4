@@ -138,4 +138,6 @@ public interface ChartService {
 	public FilterInstanceM saveFilterInstance(FilterInstanceM fim);
 	public Integer deleteFilterInstance(String instanceId);
 	public Integer updateFilterInstance(FilterInstanceM fim);
+	
+	public FilterInstanceM cascadeFilter(FilterInstanceM fin);
 }

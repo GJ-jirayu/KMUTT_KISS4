@@ -815,8 +815,8 @@ public class ChartRepository {
 			f.setColumnName( (String) result[2]);
 			f.setSqlQuery((String) result[3]);
 			f.setSelectedValue((String)result[4]);
-			
-			List<FilterValueM> fvs = fetchFilterValue( f.getSqlQuery());
+			List<FilterM> paramFilter = findParamFilterMapping(f.getFilterId());
+			List<FilterValueM> fvs = fetchFilterValueCascade( f.getFilterId(),paramFilter);
 			f.setFilterValues(fvs);
 			fin.setFilterM(f);	//set fin Filter
 			fins.add(fin);
@@ -836,7 +836,6 @@ public class ChartRepository {
 		}
 		return fv;
 	}
-	/* ! importtant  filter value */
 	public List<FilterValueM> fetchFilterValue(String sql){
 		List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 		if(  sql!=null   ){
@@ -849,6 +848,28 @@ public class ChartRepository {
 			fvs.add(buildFilterItems(new Object[]{}));
 		}// end filterValue
 		return fvs;
+	}
+	public List<FilterValueM> fetchFilterValueCascade(Integer filterId,List<FilterM> filters){
+	//	try{
+			FilterEntity fe = findFilterEntityById(filterId);
+			Query query = entityManagerDwh.createNativeQuery(fe.getSqlQuery());
+			System.out.println("---");
+			for( FilterM filter : filters ){
+				System.out.println("filterM:"+filter.getFilterId()+":"+filter.getColumnName()+":"+filter.getSelectedValue());
+				if(  fe.getSqlQuery().contains(":"+filter.getColumnName()) && !filter.getFilterId().equals(filterId) ){ 
+					query.setParameter(filter.getColumnName(),filter.getSelectedValue());
+				}
+			}
+			List<Object[]> results = query.getResultList();
+			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
+			for(Object[] result : results){
+				fvs.add(buildFilterItems(result));
+			}
+			return fvs;
+		/*}catch(Exception ex){
+			System.out.println("exception: filterValue cascade error cause=>"+ex.getMessage());
+			return  new ArrayList<FilterValueM>();
+		}*/
 	}
 	public  List<FilterM> fetchGlobalFilter(){
 		List<FilterM> filters = new ArrayList<FilterM>();
@@ -863,7 +884,8 @@ public class ChartRepository {
 			fm.setSelectedValue((String) f[3]);
 			fm.setSqlQuery((String) f[4] );
 			//filterValue
-			List<FilterValueM> fvs = fetchFilterValue( fm.getSqlQuery());
+			List<FilterM> paramFilter = findParamFilterMapping(fm.getFilterId());
+			List<FilterValueM> fvs = fetchFilterValueCascade( fm.getFilterId(),paramFilter);
 			fm.setFilterValues(fvs);
 			//into list
 			filters.add(fm);
@@ -967,5 +989,38 @@ public class ChartRepository {
 			logger.info("service updateFilterInstance have exception :"+ex.getMessage());
 		}*/
 		return successNo;
+	}
+	public List<FilterM> findParamFilterMapping(Integer filterId){
+		String sql = "SELECT f.FILTER_ID,f.COLUMN_NAME,f.SUBSTITUTE_DEFAULT FROM FILTER_MAPPING fm "
+				+ " left join FILTER f on fm.param_filter_id = f.filter_id "
+				+ " where fm.filter_id = "+filterId;
+		Query query = entityManager.createNativeQuery(sql);
+		List<Object[]> results = query.getResultList();
+		List<FilterM> filters = new ArrayList<FilterM>();
+		for(Object[] result : results){
+			FilterM filter = new FilterM();
+			filter.setFilterId( (Integer)result[0] );
+			filter.setColumnName((String)result[1]);
+			filter.setSelectedValue((String)result[2] );
+			filters.add(filter);
+		}
+		return filters;
+	}
+	public List<FilterM> findFilterByParamMapping(Integer filterId){
+		String sql = "SELECT f.FILTER_ID,f.COLUMN_NAME,f.SUBSTITUTE_DEFAULT FROM FILTER_MAPPING fm "
+				+ " left join FILTER f on fm.filter_id = f.filter_id "
+				+ " where fm.param_filter_id = "+filterId;
+		Query query = entityManager.createNativeQuery(sql);
+		List<Object[]> results = query.getResultList();
+		List<FilterM> filters = new ArrayList<FilterM>();
+		for(Object[] result : results){
+			FilterM filter = new FilterM();
+			filter.setFilterId( (Integer)result[0] );
+			filter.setColumnName((String)result[1]);
+			filter.setSelectedValue((String)result[2] );
+			filters.add(filter);
+		}
+		return filters;
+		
 	}
 }

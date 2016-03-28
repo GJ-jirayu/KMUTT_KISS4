@@ -140,6 +140,14 @@ public class FilterInstanceResource  extends BaseResource {
                             imakeMessage.setResultListObj(fins);
                             return getRepresentation(entity, imakeMessage, xstream);
                         }
+                    	else if (serviceName.equals(ServiceConstant.CASCADE_FILTER)) {
+                            ImakeResultMessage imakeMessage = new ImakeResultMessage();
+                        	FilterInstanceM fin = chartService.cascadeFilter(xsource);
+                        	List<FilterInstanceM> fins = new ArrayList<FilterInstanceM>();
+                        	fins.add(fin);
+                            imakeMessage.setResultListObj(fins);
+                            return getRepresentation(entity, imakeMessage, xstream);
+                        }
                     } else {
                     }
                 }

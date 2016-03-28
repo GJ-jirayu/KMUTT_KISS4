@@ -23,6 +23,8 @@ public class FilterM extends ImakeXML implements Serializable {
     private List<FilterValueM> filterValues;
     private String selectedValue;
     private String sqlQuery;
+    private List<FilterM> filterList;
+    
     public Integer getFilterId() {
         return filterId;
     }
@@ -98,4 +100,13 @@ public class FilterM extends ImakeXML implements Serializable {
 	public void setSqlQuery(String sqlQuery) {
 		this.sqlQuery = sqlQuery;
 	}
+
+	public List<FilterM> getFilter() {
+		return filterList;
+	}
+
+	public void setFilter(List<FilterM> filterList) {
+		this.filterList = filterList;
+	}
+	
 }

@@ -1,8 +1,12 @@
 package th.ac.kmutt.chart.portlet;
 
 
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +17,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
+import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 
 import th.ac.kmutt.chart.form.FilterForm;
 import th.ac.kmutt.chart.model.FilterInstanceM;
@@ -28,9 +34,13 @@ import th.ac.kmutt.chart.service.ChartService;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 import javax.print.attribute.HashAttributeSet;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 
+import java.io.IOException;
 import java.util.*;
 
 /*import com.opencsv.CSVReader;
@@ -74,8 +84,7 @@ public class FilterController {
         binder.setAllowedFields(ALLOWED_FIELDS);
     }
 
-    @RequestMapping
-    // default (action=list)
+    @RequestMapping("VIEW") 
     public String showFilter(PortletRequest request, Model model) {
     	ThemeDisplay themeDisplay = (ThemeDisplay) request
                 .getAttribute(WebKeys.THEME_DISPLAY);
@@ -113,11 +122,8 @@ public class FilterController {
                              @ModelAttribute("filterForm") FilterForm filterForm,
                              BindingResult result, Model model) {
 
-       String command = "list";
-       
        List<FilterM> gFilters = chartService.getGlobalFilter();
        List<FilterM> reRenFilters = new ArrayList<FilterM>();
-       logger.info("global filter size:"+gFilters.size());
        for(int i = 0 ; i<gFilters.size();i++){
     	   // map  name select in view showfilter.jsp  format  g_filter_+filterM.filterId
     	   String val = request.getParameter("g_filter_"+gFilters.get(i).getFilterId());
@@ -131,11 +137,74 @@ public class FilterController {
        FilterInstanceM globalFilterIns = new FilterInstanceM();
         globalFilterIns.setFilterList(gFilters);
         response.setEvent(qname, globalFilterIns); // send event to all portlet 
-        // status.setComplete();
+        //status.setComplete();
         
         //re show 
         model.addAttribute("FilterMList", reRenFilters);
-        response.setRenderParameter("action", command);
+       // response.setRenderParameter("action", "list");
     }
-
+    @ResourceMapping(value="cascadeGlobalFilter")
+	@ResponseBody 
+	public void cascadeGlobalFilter(ResourceRequest request,ResourceResponse response) throws IOException{
+    	//for cascade parameter
+    	JSONObject json = JSONFactoryUtil.createJSONObject();
+    	JSONArray header = JSONFactoryUtil.createJSONArray();
+    	JSONArray content = JSONFactoryUtil.createJSONArray();
+       	
+    	ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
+    	String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
+    	
+    	HttpServletRequest httpReq = PortalUtil.getHttpServletRequest(request);
+		HttpServletRequest normalRequest	=	PortalUtil.getOriginalServletRequest(httpReq);
+    	String causeFilterId = normalRequest.getParameter("filterId");
+    	String factorString = normalRequest.getParameter("factor");
+    	// format factorStrung  =  "filterId::filterValue||filterId::filterValue"
+    	
+    	FilterInstanceM fin = new FilterInstanceM();  
+    	fin.setInstanceId(instanceId);
+    	fin.setFilterList( decriptCascadeString(factorString,causeFilterId) );
+    	List<FilterM> filters = chartService.cascadeFilterItems(fin); //
+    	for(FilterM filter : filters){
+    		if(!filter.getFilterId().equals(causeFilterId)){  // only change element to insert
+	    		JSONObject fo = JSONFactoryUtil.createJSONObject();
+	    		fo.put("id", filter.getFilterId());
+	    		fo.put("value", filter.getSelectedValue());
+	    		JSONArray foItem = JSONFactoryUtil.createJSONArray();
+	    		for(FilterValueM fv : filter.getFilterValues()){
+	    			JSONObject fov = JSONFactoryUtil.createJSONObject();
+	    			fov.put("key",fv.getKeyMapping());
+	    			fov.put("desc", fv.getValueMapping());
+	    			foItem.put(fov);
+	    		}
+	    		fo.put("item", foItem);
+	        	content.put(fo);
+    		}
+    	}
+    	json.put("content", content);
+		response.getWriter().write(json.toString());
+    }
+    private List<FilterM> decriptCascadeString(String cascadeString,String causeFilterId){
+    	 List<FilterM> filters = new ArrayList<FilterM>();
+    	 // example string =  "filterId::filterValue||filterId::filterValue"
+    	String filterLimit = ":#:";
+     	String seperate = ":&:";
+     	
+     	String[] gs = cascadeString.split(filterLimit);
+     	for( String g : gs){
+ 	    		String[] gkv = g.split(seperate);  // [0] = filterId , [1] = value
+ 	    			FilterM gm = new FilterM();
+	 	    		gm.setFilterId( Integer.parseInt( (String)gkv[0] ) );
+	 	    		try{
+	 	    			gm.setSelectedValue( (String)gkv[1] );
+	 	    		}catch(Exception ex){
+	 	    			gm.setSelectedValue(null);
+	 	    		}
+	 	    		gm.setActiveFlag("1");
+	 	    		if( ((String)gkv[0].toString()).equals(causeFilterId)){
+	 	    			gm.setActiveFlag("0"); // important to mark ,this is cause filter 
+	 	    		}
+	 	    		filters.add(gm);
+     	} // end loop
+    	 return filters;
+    }
 }

@@ -484,4 +484,33 @@ public class ChartServiceJpaImpl implements ChartService {
 	public Integer updateFilterInstance(FilterInstanceM fim) {
 		return chartRepository.updateFilterInstance(fim);
 	}
+	@Override
+	public FilterInstanceM cascadeFilter(FilterInstanceM fin) {
+		//add column name
+		for(FilterM filter : fin.getFilterList() ){
+			FilterEntity fe = chartRepository.findFilterEntityById(filter.getFilterId());
+			filter.setColumnName(fe.getColumnName());
+		}
+		
+		//find cause Filter 
+		FilterM causeFilter = new FilterM();
+		for(FilterM filter : fin.getFilterList()){
+			if(filter.getActiveFlag().equals("0")){
+				causeFilter  = filter;
+			//	fin.getFilterList().remove(filter);
+			}
+		}
+		List<FilterM> cascades = chartRepository.findFilterByParamMapping(causeFilter.getFilterId());
+		
+		for(FilterM cascade : cascades){
+			List<FilterM> paramFilterDefault =  chartRepository.findParamFilterMapping(cascade.getFilterId());
+			List<FilterM> paramFilter = new ArrayList<FilterM>(paramFilterDefault);
+			paramFilter.addAll(fin.getFilterList());
+			List<FilterValueM> fv  = chartRepository.fetchFilterValueCascade(cascade.getFilterId(),paramFilter);
+			cascade.setFilterValues(fv);
+		}
+		
+		fin.setFilterList(cascades);
+		return fin;
+	}
 }

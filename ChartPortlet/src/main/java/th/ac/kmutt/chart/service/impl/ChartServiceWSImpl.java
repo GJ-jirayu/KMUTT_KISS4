@@ -874,4 +874,19 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
 		 }
 		return filters;
 	}
+	//cascade
+
+	@Override
+	public List<FilterM> cascadeFilterItems(FilterInstanceM fin) {
+		List<FilterM> filters = new ArrayList<FilterM>();
+		
+		fin.setServiceName(ServiceConstant.CASCADE_FILTER);
+		ImakeResultMessage imakeMessage = postMessage(fin, fin.getClass().getName(), "filterInstance", true);
+		 if (imakeMessage.getResultListObj() != null && imakeMessage.getResultListObj().size() > 0){
+			 @SuppressWarnings("unchecked")
+			List<FilterInstanceM> fins  =    imakeMessage.getResultListObj();
+			 filters = fins.get(0).getFilterList();
+		 }
+		return filters;
+	}
 }

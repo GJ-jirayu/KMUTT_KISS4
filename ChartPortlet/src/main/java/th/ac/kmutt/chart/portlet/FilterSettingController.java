@@ -74,12 +74,6 @@ public class FilterSettingController {
         } else {
             filterForm = (FilterForm) model.asMap().get("filterForm");
         }
-        /*
-        logger.info("getPpidd ==>" + themeDisplay.getPpid());
-        logger.info("getId ==>" + themeDisplay.getPortletDisplay().getId());
-        logger.info("getRootPortletId ==>" + themeDisplay.getPortletDisplay().getRootPortletId());
-        logger.info("instanceId instanceId==>"+instanceId);
-        logger.info("getNamespace ==>" + response.getNamespace());*/
         FilterInstanceM filterInstanceM=new FilterInstanceM();
         filterInstanceM.setInstanceId(instanceId);
 

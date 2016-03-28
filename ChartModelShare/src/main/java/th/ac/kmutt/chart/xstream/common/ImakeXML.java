@@ -23,7 +23,6 @@ public class ImakeXML implements Serializable {
 	private String updateType;	
 	private String[] ids;
 	private String tab;
-	private String filter;
 	private HashMap<String, String> docAssignMapping;
 	private Boolean isdocAssign;
 	public String getUpdateType() {
@@ -213,12 +212,6 @@ public class ImakeXML implements Serializable {
 	}
 	public void setTab(String tab) {
 		this.tab = tab;
-	}
-	public String getFilter() {
-		return filter;
-	}
-	public void setFilter(String filter) {
-		this.filter = filter;
 	}
 	public HashMap<String, String> getDocAssignMapping() {
 		return docAssignMapping;
