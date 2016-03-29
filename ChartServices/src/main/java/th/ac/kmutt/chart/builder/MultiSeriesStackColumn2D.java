@@ -7,7 +7,6 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import th.ac.kmutt.chart.constant.ServiceConstant;
@@ -80,10 +79,36 @@ public class MultiSeriesStackColumn2D extends CommonChart implements Chart {
 			List<Object> UniqueSeries = new ArrayList<Object>(setUniqueSeries);
 			Object[] objUniqueSeries = UniqueSeries.toArray();
 			
+
+			
+			JSONArray objectIndex = new JSONArray();
+			for( Object resultUniqueSeries : objUniqueSeries){
+				
+				/* Put seriesname to JSON */
+				JSONObject objectseries = new JSONObject();
+				objectseries.put("seriesname", resultUniqueSeries);				
+				
+				/*Put Data set to JSON*/
+				JSONArray objectData = new JSONArray();
+				for( Object[] resultData : this.data){									
+					if(resultData[2].equals(resultUniqueSeries)){
+						JSONObject attr = new JSONObject();	
+						attr.put("value",resultData[3] );
+						objectData.put(attr);
+					}
+				}
+				objectseries.put("data", objectData);
+							
+				
+				objectIndex.put(objectseries);
+			}
+			logger.info("\n -- objectIndex -->"+objectIndex+"\n");
+			
+			
 			
 			/* Generate Data group set */
 			//JSONObject tempDataSet = new JSONObject();			
-			JSONArray mainDataSet = new JSONArray();
+			/*JSONArray mainDataSet = new JSONArray();
 			Integer subCategorySize = jsonArrSubCategory.getJSONObject(0).getJSONArray("subCategory").length();
 			
 			for(int i = 0 ; i < subCategorySize; i++){
@@ -97,7 +122,7 @@ public class MultiSeriesStackColumn2D extends CommonChart implements Chart {
 					JSONArray arrData = new JSONArray();
 						
 					for(Object strCatrgory : objUniqueCategory){
-						for(Object[] resultData : this.data){						
+						for(Object[] resultData : this.data){
 							if(resultData[0].toString().equals(strCatrgory) 
 									&& resultData[2].toString().equals(strSeries)
 									&& resultData[1].toString().equals(subCategoryStr)){
@@ -120,8 +145,8 @@ public class MultiSeriesStackColumn2D extends CommonChart implements Chart {
 			//tempDataSet = tempDataSet.put("dataset", mainDataSet);
 			
 			chartJson = chartJson.put("categories", jsonArrCategory).put("dataset", mainDataSet);
-			logger.info("\n TempData: "+chartJson+"\n");
-			//logger.info("\n"+jsonArrSubCategory+"\n");
+			logger.info("\n TempData: "+chartJson+"\n");*/
+
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}

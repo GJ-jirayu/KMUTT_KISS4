@@ -422,6 +422,34 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		horizontalLED.setData(results);
 		    		chartJson = horizontalLED.build();
 		    	}
+		    	/*Stacked Column 2D chart*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("stackedcolumn2d")){		    		
+		    		StackColumn2D stackColumn2D = new StackColumn2D();
+		    		stackColumn2D.setTemplate(chartInsEnt.getChartJson());
+		    		stackColumn2D.setData(results);
+		    		chartJson = stackColumn2D.build();
+		    	}
+		    	/*Horizontal Bullet graph*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("hbullet")){		    		
+		    		HorizontalBullet horizontalBullet = new HorizontalBullet();
+		    		horizontalBullet.setTemplate(chartInsEnt.getChartJson());
+		    		horizontalBullet.setData(results);
+		    		chartJson = horizontalBullet.build();
+		    	}
+		    	/*Box and Whisker 2D*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("boxandwhisker2d")){
+		    		BoxAndWhisker2DTemporary boxAndWhisker2D = new BoxAndWhisker2DTemporary();
+		    		boxAndWhisker2D.setTemplate(chartInsEnt.getChartJson());
+		    		boxAndWhisker2D.setData(results);
+		    		chartJson = boxAndWhisker2D.build();
+		    	}
+		    	/*Multi-Series 2D DualY Combination*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("mscombidy2d")){
+		    		MultiSeries2DDualYCombination multiSeries2DDualYCombination = new MultiSeries2DDualYCombination();
+		    		multiSeries2DDualYCombination.setTemplate(chartInsEnt.getChartJson());
+		    		multiSeries2DDualYCombination.setData(results);
+		    		chartJson = multiSeries2DDualYCombination.build();
+		    	}
 		    	
 		    	// add json
 		    	source.setChartJson(chartJson);

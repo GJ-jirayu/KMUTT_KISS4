@@ -68,20 +68,18 @@ public class MultiSeriesColumn2D extends CommonChart implements Chart {
 				
 				/* Put seriesname to JSON */
 				JSONObject objectseries = new JSONObject();
-				objectseries.put("seriesname", resultUniqueSeries);				
+				objectseries.put("seriesname", resultUniqueSeries);
 				
 				/*Put Data set to JSON*/
 				JSONArray objectData = new JSONArray();
-				for( Object[] resultData : this.data){									
+				for( Object[] resultData : this.data){
 					if(resultData[1].equals(resultUniqueSeries)){
-						JSONObject attr = new JSONObject();	
+						JSONObject attr = new JSONObject();
 						attr.put("value",resultData[2] );
 						objectData.put(attr);
 					}					
 				}
-				objectseries.put("data", objectData);
-							
-				
+				objectseries.put("data", objectData);			
 				objectIndex.put(objectseries);
 			}
 			
