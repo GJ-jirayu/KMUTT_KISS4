@@ -16,6 +16,11 @@
 </portlet:actionURL>
 	<head>
     <title></title>
+    <style>
+     	.aui select{
+	    	width:auto !important;
+	    }
+    </style>
     <script type="text/javascript" src="<c:url value="/resources/js/jquery-1.11.2.min.js"/>"></script>
 	<script>
 		function regenerateItem(id,val,items){
@@ -60,14 +65,9 @@
            action="${formAction}" enctype="multipart/form-data" style="margin:0 0 0 0">
 	<b>Filters :</b> <img id="cascadeWaiting"  src="<c:url value="/resources/images/rotate.gif"/>" style="cursor:pointer;width:22px;height: 22px;padding-left:5px;display:none;" />
 	<br/> 
-    <table class="" border="0" style="font-size: 14px;width:100%">
-    <thead>
-    </thead>
-    <tbody>
     <c:if test="${not empty filterList}">
-        <tr style="">
-        <td style="text-align: left">
         <c:forEach items="${filterList}" var="filter" varStatus="loop">
+        	<div style="display:inline-block">
            ${filter.filterName}  
                    &nbsp;&nbsp;
                 <select id="g_filter_${filter.filterId}" name="g_filter_${filter.filterId}" class="global_filter" onchange="cascadeGlobal(this)">
@@ -83,21 +83,12 @@
                         </c:forEach>
                 </select>
             &nbsp;&nbsp;
+            </div>
         </c:forEach>
-        </td>
-        </tr>
     </c:if>
-    </tbody>
-	</table>
-    <table width="100%">
-        <tr>
-            <td align="center">
-            <button type="submit"
-            class="btn btn-primary">Submit
-    </button>
-            </td>
-            </tr>
-        </table>
+	<div style="display:inline-block">
+	   	<button type="submit"class="btn btn-primary">Submit</button>
+    </div>
 </form:form>
 </body>
 </html>

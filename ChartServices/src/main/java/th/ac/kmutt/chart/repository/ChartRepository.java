@@ -904,6 +904,9 @@ public class ChartRepository {
 	}
 	public List<FilterM> fetchFilterOfService(Integer serviceId){
 		List<FilterM> filters = new ArrayList<FilterM>();
+		
+		List<FilterM> globalFilter = fetchGlobalFilter();
+		
 		String sql = "SELECT f.filter_id,filter_name,column_name,SUBSTITUTE_DEFAULT,f.SQL_QUERY FROM SERVICE_FILTER_MAPPING sfm "
 				+ " left join FILTER f on sfm.filter_id = f.filter_id  "
 				+ " where f.type = 'internal' and  sfm.service_id = "+serviceId;
@@ -918,9 +921,11 @@ public class ChartRepository {
 			filter.setSelectedValue((String)result[3]);
 			filter.setSqlQuery((String)result[4]);
 			//filterValue
-			List<FilterValueM> fvs = fetchFilterValue( filter.getSqlQuery());
+			List<FilterM> paramFilter = new ArrayList<FilterM>();
+			paramFilter.addAll(globalFilter);
+			paramFilter.addAll(findParamFilterMapping(filter.getFilterId()));
+			List<FilterValueM> fvs = fetchFilterValueCascade( filter.getFilterId(),paramFilter);
 			filter.setFilterValues(fvs);
-			
 			filters.add(filter);
 		}
 		return filters;

@@ -28,6 +28,9 @@
     	.aui .table thead th {
 	    	background-color:transparent;
 	    }
+	    .aui select{
+	    	width:auto !important;
+	    }
 	    .chartContainer .aui .table thead th {
 	    	background-color:transparent;
 	    }
@@ -98,6 +101,7 @@
         <form:hidden path="chartInstance"/>
         <form:hidden path="globalFilterString"/>
 	    <c:forEach items="${filters}" var="filter" varStatus="loop">
+	    	<div style="display:inline-block">
 	        &nbsp;&nbsp;${filter.filterName}:&nbsp;
 	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterId}" >
 	        	<c:forEach items="${filter.filterValues}" var="item" varStatus="loop2">
@@ -111,17 +115,12 @@
 					</c:choose>
 	        	</c:forEach>
         	</select>
-        &nbsp;&nbsp;
+        	&nbsp;&nbsp;
+        	</div>
     	</c:forEach>
-	    <table width="100%">
-	        <tr>
-	            <td align="left">
-	                <button type="submit"
-	                        class="btn btn-primary">Submit
-	                </button>
-	            </td>
-	        </tr>
-	    </table>
+    	<div style="display:inline-block">
+	    	<button type="submit"  class="btn btn-primary">Submit</button>
+	    </div>
     </form:form>
 </c:if>
 <table border="0" width="100%">
