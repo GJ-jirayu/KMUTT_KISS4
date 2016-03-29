@@ -32,13 +32,8 @@
               <role-name>kmutt-user</role-name>
           </security-role-ref>
           -->
-          <!--
-          <supported-publishing-event xmlns:x='http://liferay.com'>
-              <qname>x:empinfo</qname>
-          </supported-publishing-event>
-          -->
-          <supported-publishing-event>
-              <qname xmlns:x="http://liferay.com/events">x:empinfo</qname>
+          <supported-publishing-event xmlns:x="http://liferay.com/events">
+              <qname>x:paramOverride</qname>
           </supported-publishing-event>
       </portlet>
 
@@ -57,28 +52,18 @@
         <portlet-info>
             <title>Common Charts</title>
         </portlet-info>
+        
         <!--
         <security-role-ref>
             <role-name>kmutt-user</role-name>
         </security-role-ref>
         -->
-        <!--
-        <supported-processing-event xmlns:x='http://liferay.com'>
-                <qname>x:empinfo</qname>
-        </supported-processing-event>
-        -->
-        <supported-processing-event>
-            <qname xmlns:x="http://liferay.com/events">x:empinfo</qname>
+        <supported-processing-event xmlns:x="http://liferay.com/events">
+            <qname>x:paramOverride</qname>
         </supported-processing-event>
     </portlet>
-    <!--
-    <event-definition xmlns:x='http://liferay.com'>
-        <qname>x:empinfo</qname>
-        <value-type>java.lang.String</value-type>
-    </event-definition>
-    -->
     <event-definition>
-        <qname xmlns:x="http://liferay.com/events">x:empinfo</qname>
+        <qname xmlns:x="http://liferay.com/events">x:paramOverride</qname>
         <value-type>th.ac.kmutt.chart.model.FilterInstanceM</value-type>
     </event-definition>
 </portlet-app>

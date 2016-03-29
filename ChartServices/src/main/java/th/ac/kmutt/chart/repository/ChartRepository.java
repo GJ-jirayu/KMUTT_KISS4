@@ -368,6 +368,12 @@ public class ChartRepository {
     	}
     	return ret;
     }
+    public Integer findFilterIdByColumnName(String columnName){
+    	String sql = "select filter_id from FILTER where column_name = '"+columnName+"'";
+    	Query query = 		entityManager.createNativeQuery(sql);
+    	Object result = query.getSingleResult();
+    	return (Integer) result;
+    }
     //FILTER_INSTANCE
     public Integer saveFilterInstanceEntity(FilterInstanceEntity transientInstance) throws DataAccessException {
         entityManager.persist(transientInstance);
@@ -769,7 +775,7 @@ public class ChartRepository {
 		return results;
 	}
 	@SuppressWarnings("unchecked")
-	public FilterInstanceM fetchFilterInstance(String instanceId){
+	public FilterInstanceM fetchFilterInstance(String instanceId,List<FilterM> filterList){
 		 List<FilterM> filters = new ArrayList<FilterM>();  
 		 // [filter_name,column_name,value]
 		String sql = "SELECT f.FILTER_ID,f.FILTER_NAME,f.COLUMN_NAME, coalesce( fi.VALUE , f.SUBSTITUTE_DEFAULT) as filter_value,f.SQL_QUERY "
@@ -784,9 +790,13 @@ public class ChartRepository {
 			f.setFilterName( (String)result[1]);
 			f.setColumnName((String)result[2]);
 			f.setSelectedValue( (String)result[3] );
-			String sqlItem = (String)result[4];
+			//String sqlItem = (String)result[4];
+			/*temp get filterID by columnname*/
+			for(FilterM filter : filterList){
+				filter.setFilterId( findFilterIdByColumnName(filter.getColumnName()) );
+			}
 			// filter value
-			List<FilterValueM> fvs = fetchFilterValue( sqlItem);
+			List<FilterValueM> fvs = fetchFilterValueCascade( f.getFilterId(),filterList);
 			f.setFilterValues(fvs);
 			filters.add(f);
 		}

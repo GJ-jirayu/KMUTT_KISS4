@@ -322,7 +322,7 @@ public class ChartServiceJpaImpl implements ChartService {
 	    	source.setServiceId(chartInsEnt.getServiceId());
 	    	try {
 	    		//find filter
-		    	FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId());
+		    	FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId(),source.getFilters());
 		    	List<FilterM> allFilters = new ArrayList<FilterM>(fim.getFilterList());
 		    	if(source.getFilters()==null | source.getFilters().size()==0  ){ // portlet only send global filters 
 		    		List<FilterM> globalFilters = chartRepository.fetchGlobalFilter();
@@ -471,7 +471,7 @@ public class ChartServiceJpaImpl implements ChartService {
     }
     @Override 
     public FilterInstanceM getFilterInstance(FilterInstanceM fim){
-    	return chartRepository.fetchFilterInstance(fim.getInstanceId());
+    	return chartRepository.fetchFilterInstance(fim.getInstanceId(),fim.getFilterList());
     }
 	@Override
 	public FilterInstanceM saveFilterInstance(FilterInstanceM fim) {

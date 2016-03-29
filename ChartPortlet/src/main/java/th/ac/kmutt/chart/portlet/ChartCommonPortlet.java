@@ -63,17 +63,17 @@ public class ChartCommonPortlet {
 
         binder.setAllowedFields(ALLOWED_FIELDS);
     }
+   /* @RequestMapping("VIEW")
+    public void iniPage(PortletRequest request, Model model) {
+    	logger.info("chart=>default");
+    }*/
     @RequestMapping("VIEW")
-    //@RenderMapping(params="render=show")
-    public String iniPage(PortletRequest request, Model model) {
-    	return "chart/showChart";
-    }
-    @RequestMapping("VIEW")
-    @RenderMapping(params="render=show")
+    @RenderMapping
     public String displayChart(PortletRequest request, Model model) {
         ThemeDisplay themeDisplay = (ThemeDisplay) request
                 .getAttribute(WebKeys.THEME_DISPLAY);
         String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
+        logger.info("chart=>show");
         // get chartInstance prop
         ChartInstanceM chartInstanceM=chartService.findChartInstanceById(instanceId);
         String chartType="";
@@ -133,6 +133,7 @@ public class ChartCommonPortlet {
         }else{
             FilterInstanceM filterInstance = new FilterInstanceM();
             filterInstance.setInstanceId(instanceId);
+            filterInstance.setFilterList(globalFilter);
             filterInstance = chartService.getFilterInstance(filterInstance);
             internalFilter = filterInstance.getFilterList();
         }
@@ -179,12 +180,13 @@ public class ChartCommonPortlet {
     public void doSubmit(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
                          @ModelAttribute("chartSettingForm") ChartSettingForm chartSettingForm,
                          BindingResult result, Model model) {
+    	//logger.info("chart=>submit");
     	String instanceId = chartSettingForm.getChartInstance();
     	//retrive global Filter from view
     	String globalString = chartSettingForm.getGlobalFilterString();
+    	FilterInstanceM globalFilter = new FilterInstanceM();
     	if(globalString!=null){
 	    	if(!globalString.equals("")){
-	    		FilterInstanceM globalFilter = new FilterInstanceM();
 	    		globalFilter.setFilterList(decodeGlobalFilterString(globalString));
 	    		model.addAttribute("globalFilter", globalFilter);
     		}
@@ -192,29 +194,26 @@ public class ChartCommonPortlet {
     	//retrive Internal Filter  from view
         FilterInstanceM filterInstance = new FilterInstanceM();
         filterInstance.setInstanceId(instanceId);
-        List<FilterM> submitFilterList = new ArrayList<FilterM>(); 
-        List<FilterInstanceM> filters = chartService.getFilterInstanceWithItem(filterInstance);
-        for(FilterInstanceM filter : filters){
-        	FilterM sumbitFilter = filter.getFilterM();
+        filterInstance.setFilterList(globalFilter.getFilterList());
+     //   List<FilterInstanceM> filters = chartService.getFilterInstanceWithItem(filterInstance);
+        FilterInstanceM fin = chartService.getFilterInstance(filterInstance);
+        
+        for(FilterM filter : fin.getFilterList()){
     		String val = request.getParameter("filter_"+instanceId+"_"+filter.getFilterId());
     		if(val!=null){
-    			sumbitFilter.setSelectedValue(val);
+    			filter.setSelectedValue(val);
     		}// end exist value
-    		submitFilterList.add(sumbitFilter);
     	}
-        model.addAttribute("submitFilter", submitFilterList);
-        response.setRenderParameter("render", "show");
+        model.addAttribute("submitFilter", fin.getFilterList());
     }
-    @EventMapping(value ="{http://liferay.com/events}empinfo")
-    //@javax.portlet.ProcessEvent(qname = "{http://liferay.com}empinfo")
+    //@javax.portlet.ProcessEvent(qname = "{http://liferay.com}paramOverride")
+    @RequestMapping("VIEW")
+    @EventMapping(value ="{http://liferay.com/events}paramOverride")
     public void receiveEvent(EventRequest request, EventResponse response, ModelMap map)
     {
         Event event = request.getEvent();
         FilterInstanceM globalFilter = (FilterInstanceM) event.getValue();
-        map.put("empinfo", globalFilter);
         map.addAttribute("globalFilter", globalFilter);
-      //  response.setRenderParameter("action", "list");
-        response.setRenderParameter("render", "show");
     }
     public String generateChartTitle(String titleString , List<FilterM> filters,String flag){
     	 String newTitle = titleString;

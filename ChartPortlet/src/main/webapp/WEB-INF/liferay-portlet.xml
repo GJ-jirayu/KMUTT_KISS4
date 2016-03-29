@@ -5,10 +5,12 @@
 	<portlet>
 		<portlet-name>Chart Common</portlet-name>
 		<instanceable>true</instanceable>
+		<render-weight>2</render-weight>
 	</portlet>
 	<portlet>
 		<portlet-name>Filter Chart</portlet-name>
 		<instanceable>true</instanceable>
+		<render-weight>1</render-weight>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>

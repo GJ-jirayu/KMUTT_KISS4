@@ -43,23 +43,6 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.*;
 
-/*import com.opencsv.CSVReader;
-import com.opencsv.bean.BeanToCsv;
-import com.opencsv.bean.ColumnPositionMappingStrategy;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
-*/
-//import org.apache.log4j.Logger;
-/*import th.ac.kmutt.research.constant.ServiceConstant;
-import th.ac.kmutt.research.form.FilterForm;
-import th.ac.kmutt.research.mapper.CustomObjectMapper;
-import th.ac.kmutt.research.model.ResearchGroupM;
-import th.ac.kmutt.research.service.ResearchService;
-import th.ac.kmutt.research.utils.ImakeUtils;
-import th.ac.kmutt.research.xstream.common.ImakeResultMessage;
-*/
-
-
 @Controller("filterController")
 @RequestMapping("VIEW")
 @SessionAttributes({"filterForm"})
@@ -93,11 +76,11 @@ public class FilterController {
         FilterForm filterForm = null;
         if (!model.containsAttribute("filterForm")) {
             filterForm = new FilterForm();
-            model.addAttribute("filterForm",
-                    filterForm);
         } else {
             filterForm = (FilterForm) model.asMap().get("filterForm");
         }
+        model.addAttribute("filterForm",filterForm);
+        
         // retrive submit global filter value
         List<FilterM> globalFilter = new ArrayList<FilterM>();
         if (model.containsAttribute("FilterMList")) {
@@ -118,30 +101,31 @@ public class FilterController {
     }
 
     @RequestMapping(params = "action=doSubmit") // action phase
-    public void doSubmit(SessionStatus status,javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
+    public void doSubmit(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
                              @ModelAttribute("filterForm") FilterForm filterForm,
                              BindingResult result, Model model) {
-
+    	
        List<FilterM> gFilters = chartService.getGlobalFilter();
        List<FilterM> reRenFilters = new ArrayList<FilterM>();
        for(int i = 0 ; i<gFilters.size();i++){
     	   // map  name select in view showfilter.jsp  format  g_filter_+filterM.filterId
     	   String val = request.getParameter("g_filter_"+gFilters.get(i).getFilterId());
-    	   gFilters.get(i).setSelectedValue(val);
-    	   if(val!=null){
-    		   reRenFilters.add(gFilters.get(i));
+    	   if(val!=null ){
+    		   if(!val.trim().equals("")){
+    			   gFilters.get(i).setSelectedValue(val);
+    		   		reRenFilters.add(gFilters.get(i));
+    		   }
     	   }
        	}
        // portlet to portlet  require configuration  portlet.xml
-        QName qname = new QName("http://liferay.com/events","empinfo","x");
-       FilterInstanceM globalFilterIns = new FilterInstanceM();
+        FilterInstanceM globalFilterIns = new FilterInstanceM();
         globalFilterIns.setFilterList(gFilters);
-        response.setEvent(qname, globalFilterIns); // send event to all portlet 
-        //status.setComplete();
+       
+       	QName qname = new QName("http://liferay.com/events","paramOverride","x");
+       	response.setEvent(qname, globalFilterIns); 
         
         //re show 
-        model.addAttribute("FilterMList", reRenFilters);
-       // response.setRenderParameter("action", "list");
+       model.addAttribute("FilterMList", reRenFilters);
     }
     @ResourceMapping(value="cascadeGlobalFilter")
 	@ResponseBody 

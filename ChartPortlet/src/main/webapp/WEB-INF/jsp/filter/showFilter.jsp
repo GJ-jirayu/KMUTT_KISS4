@@ -17,11 +17,48 @@
 	<head>
     <title></title>
     <script type="text/javascript" src="<c:url value="/resources/js/jquery-1.11.2.min.js"/>"></script>
+	<script>
+		function regenerateItem(id,val,items){
+			var g_fiter_prefix = "g_filter_";
+			var cnt = $("#"+g_fiter_prefix+id);  
+			cnt.empty();
+			for(var i=0;i<items.length;i++){
+				var opt = $("<option/>");
+				opt.attr("value",items[i]["key"]);
+				opt.html(items[i]["desc"]);
+				cnt.append(opt);
+			}
+			//cnt.val(val); // *becareful, are u sure to open this?*
+		}
+		function cascadeGlobal(current){
+			var filterId = current.id.replace("g_filter_","");
+			var factor = [];
+			var limitor = ":#:";
+			var seperate = ":&:";
+			$("#filterForm select.global_filter").each(function(){
+				factor.push(this.id.replace("g_filter_","")+seperate+this.value);
+			});
+			$("#cascadeWaiting").show();
+			$(".global_filter").prop("disabled",true);
+			$.ajax({
+	   	 		dataType: "json",
+	   	 		url:"<%=cascadeGlobalFilter%>",
+	   	 		data: { filterId : filterId , factor : factor.join(limitor)  },
+	   	 		success:function(data){
+	   	 			$("#cascadeWaiting").hide();
+	   	 			$(".global_filter").prop("disabled",false);
+	   	 			for(var i = 0 ; i<data["content"].length;i++){
+	   	 				regenerateItem(data["content"][i]["id"],data["content"][i]["value"],data["content"][i]["item"]);
+	   	 			}
+	   	 		} //end success 
+	   	 	}); // end ajax
+		} //end function
+	</script>
 </head>
 <body>
 <form:form id="filterForm" modelAttribute="filterForm" method="post" name="filterForm"
            action="${formAction}" enctype="multipart/form-data" style="margin:0 0 0 0">
-<b>Filters :</b> <img id="cascadeWaiting"  src="<c:url value="/resources/images/rotate.gif"/>" style="cursor:pointer;width:22px;height: 22px;padding-left:5px;display:none;" />
+	<b>Filters :</b> <img id="cascadeWaiting"  src="<c:url value="/resources/images/rotate.gif"/>" style="cursor:pointer;width:22px;height: 22px;padding-left:5px;display:none;" />
 	<br/> 
     <table class="" border="0" style="font-size: 14px;width:100%">
     <thead>
@@ -62,42 +99,5 @@
             </tr>
         </table>
 </form:form>
-<script>
-		function regenerateItem(id,val,items){
-			var g_fiter_prefix = "g_filter_";
-			var cnt = $("#"+g_fiter_prefix+id);  
-			cnt.empty();
-			for(var i=0;i<items.length;i++){
-				var opt = $("<option/>");
-				opt.attr("value",items[i]["key"]);
-				opt.html(items[i]["desc"]);
-				cnt.append(opt);
-			}
-			//cnt.val(val); // *becareful, are u sure to open this?*
-		}
-		function cascadeGlobal(current){
-			var filterId = current.id.replace("g_filter_","");
-			var factor = [];
-			var limitor = ":#:";
-			var seperate = ":&:";
-			$("#filterForm select.global_filter").each(function(){
-				factor.push(this.id.replace("g_filter_","")+seperate+this.value);
-			});
-			$("#cascadeWaiting").show();
-			$(".global_filter").prop("disabled",true);
-			$.ajax({
-	   	 		dataType: "json",
-	   	 		url:"<%=cascadeGlobalFilter%>",
-	   	 		data: { filterId : filterId , factor : factor.join(limitor)  },
-	   	 		success:function(data){
-	   	 			$("#cascadeWaiting").hide();
-	   	 			$(".global_filter").prop("disabled",false);
-	   	 			for(var i = 0 ; i<data["content"].length;i++){
-	   	 				regenerateItem(data["content"][i]["id"],data["content"][i]["value"],data["content"][i]["item"]);
-	   	 			}
-	   	 		} //end success 
-	   	 	}); // end ajax
-		} //end function
-	</script>
 </body>
 </html>

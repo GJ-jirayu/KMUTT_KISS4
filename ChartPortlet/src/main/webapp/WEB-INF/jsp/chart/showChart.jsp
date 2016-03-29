@@ -152,7 +152,14 @@ Please Config Chart!
         window.open(link_url,"_blank");
     }
     function ${ns}renderTable(){
-    	var jsonStrObj=${chartSettingForm.jsonStr};
+    	<c:choose>
+    		<c:when test="${not empty chartSettingForm.jsonStr }">
+    			 var jsonStrObj=${chartSettingForm.jsonStr};
+     		</c:when>
+     		 <c:otherwise>
+     			var jsonStrObj="";
+     		 </c:otherwise>
+     	</c:choose>
 		var table1 = new wtpTable("#${ns}chartContainer",jsonStrObj);
 		table1.updatePath("<%=request.getContextPath()%>");
 		table1.render();
