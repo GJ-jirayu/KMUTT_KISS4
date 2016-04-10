@@ -30,6 +30,7 @@
 	    }
 	    .aui select{
 	    	width:auto !important;
+	    	max-width:98%;
 	    }
 	    .chartContainer .aui .table thead th {
 	    	background-color:transparent;
@@ -146,22 +147,8 @@ Please Config Chart!
 <script src="<c:url value='/resources/js/bootbox.min.js'/>" type="text/javascript"></script>
 --%>
 <script type="text/javascript">
-   
     function ${ns}linkto(link_url){
         window.open(link_url,"_blank");
-    }
-    function ${ns}renderTable(){
-    	<c:choose>
-    		<c:when test="${not empty chartSettingForm.jsonStr }">
-    			 var jsonStrObj=${chartSettingForm.jsonStr};
-     		</c:when>
-     		 <c:otherwise>
-     			var jsonStrObj="";
-     		 </c:otherwise>
-     	</c:choose>
-		var table1 = new wtpTable("#${ns}chartContainer",jsonStrObj);
-		table1.updatePath("<%=request.getContextPath()%>");
-		table1.render();
     }
     $(document).ready(function () {
         $("#${ns}comment_bt").popover({
@@ -188,7 +175,10 @@ Please Config Chart!
         revenueChart.render();
         </c:if>        
         <c:if test="${chartSettingForm.chartType=='table' }">
-            ${ns}renderTable();
+			   	var jsonStrObj=${chartSettingForm.jsonStr};
+				var table1 = new wtpTable("#${ns}chartContainer",jsonStrObj);
+				table1.updatePath("/ChartPortlet");
+				table1.render();
         </c:if>
     });
 </script>

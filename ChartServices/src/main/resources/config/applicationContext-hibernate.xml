@@ -81,7 +81,7 @@
 	<!-- <jee:jndi-lookup id="dataSource" resource-ref="true" jndi-name="jdbc/chartdb"/> 
 		<jee:jndi-lookup id="liferayDataSource" resource-ref="true" jndi-name="jdbc/chartportaldb"/> -->
 	
-<!-- 
+ <!-- 
 	 <bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -96,7 +96,7 @@
 		<property name="username" value="root" />
 		<property name="password" value="password" />
 	</bean>
--->
+ -->
 	 <bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -131,7 +131,7 @@
 		<property name="username" value="kissusr1" />
 		<property name="password" value="gxHoc=,xN" />
 	</bean> 
-	<!-- 
+	<!--
 	<bean id="dataSourceDwh"	class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://localhost:3306/CHART_DB" />

@@ -7,8 +7,9 @@ function wtpTable(x,y){
 	this.container = x;
 	this.defaultFont = "MS Sans Serif";
 	this.defaultFontSize = "14";
-	this.json = JSON.parse(this.jsonString);   // JSON.stringify(json)
-	this.contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/",2));
+	//this.json = JSON.parse(this.jsonString);   // JSON.stringify(json) // no parse for production
+	this.json = this.jsonString;
+	//this.contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/",2));
 }
 wtpTable.prototype.updatePath = function(x){
 	this.dir_root = x;
@@ -177,9 +178,9 @@ wtpTable.prototype.createTable = function(){
 	        			var diff = datarow[textToNumber(jsonStrObj.extra[j].cellB)-1].value-datarow[textToNumber(jsonStrObj.extra[j].cellA)-1].value;
 	        			var growth = (diff/datarow[textToNumber(jsonStrObj.extra[j].cellA)-1].value)*100;
 	        				if(growth>0){
-			            	      str=str+"<img src=\""+this.contextPath+"/resources/js/sort_up_green.png\" style=\"width:20px;height: 20px;vertical-align:bottom\" />";
+			            	      str=str+"<img src=\""+this.dir_root+"/resources/js/sort_up_green.png\" style=\"width:20px;height: 20px;vertical-align:bottom\" />";
 			            	 }else if(growth<0){
-			            		   str=str+"<img src=\""+this.contextPath+"/resources/js/sort_down_red.png\" style=\"width:20px;height: 20px;\" />";
+			            		   str=str+"<img src=\""+this.dir_root+"/resources/js/sort_down_red.png\" style=\"width:20px;height: 20px;\" />";
 			            	 }
 	        			str = str + " "+growth+" %";
 	        		 }//end growth

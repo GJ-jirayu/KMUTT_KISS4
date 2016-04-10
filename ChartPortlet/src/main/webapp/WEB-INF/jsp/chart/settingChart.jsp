@@ -32,6 +32,10 @@
         .border_chart_setting{
             border-style: solid;border-width: 1px;border-color: #1993BF;padding: 10px;
         }
+        .aui select{
+	    	width:auto !important;
+	    	max-width:98%;
+	    }
     </style>
 </head>
 <form:form id="${ns}chartSettingForm" modelAttribute="chartSettingForm" method="post" name="chartSettingFormm"

@@ -19,6 +19,8 @@
     <style>
      	.aui select{
 	    	width:auto !important;
+	    	width:auto !important;
+	    	max-width:98%;
 	    }
     </style>
     <script type="text/javascript" src="<c:url value="/resources/js/jquery-1.11.2.min.js"/>"></script>

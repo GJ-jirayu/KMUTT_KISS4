@@ -1,0 +1,22 @@
+{
+	"table": {
+        "caption": "Top 5 Stores by Sales",
+        "subCaption": "Last month",
+        "headerBgColor": "#efefef",
+        "bodyBgColor":"#efefef",
+        "footerBgColor": "#efefef",
+        "font": "Tahoma",
+        "fontSize" : "16"
+    },"header":[
+    	{ "cell": "category name", "type": "text" }
+    	,{ "cell": "last year", "type": "number" }  
+    	,{ "cell": "this year", "type": "number" }
+    ],"dataset": [
+        { "data": [{"value":"cateA"},{"value":"500"},{"value":"2000"}] }
+        ,{ "data": [{"value":"cateB"},{"value":"1000"},{"value":"2000"}] }
+        ,{ "data": [{"value":"cateC"},{"value":"1000"},{"value":"2000"}] }
+        ,{ "data": [{"value":"cateD"},{"value":"1000"},{"value":"2000"}] }
+    ]
+    ,"extra":[{ "type":"growth" , "cellA":"2", "cellB":"3"}]
+    ,"footer":[{  "type":"sum" , "cell":"2"  },{  "type":"sum" , "cell":"3"  }]
+}
