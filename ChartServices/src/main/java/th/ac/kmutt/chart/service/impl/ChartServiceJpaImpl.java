@@ -321,10 +321,10 @@ public class ChartServiceJpaImpl implements ChartService {
 	    	source.setChartType(chartInsEnt.getChartType());
 	    	source.setServiceId(chartInsEnt.getServiceId());
 	    	try {
-	    		//find filter
-		    	FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId(),source.getFilters());
+	    		//find filter v2  portlet dont send filter ***
+		    	/*FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId(),source.getFilters());
 		    	List<FilterM> allFilters = new ArrayList<FilterM>(fim.getFilterList());
-		    	if(source.getFilters()==null | source.getFilters().size()==0  ){ // portlet only send global filters 
+		    	if(source.getFilters()==null | source.getFilters().size()==0  ){ // v1 portlet only send global filters 
 		    		List<FilterM> globalFilters = chartRepository.fetchGlobalFilter();
 		    		allFilters.addAll(globalFilters);
 		    	}else{
@@ -332,6 +332,8 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		allFilters.addAll(globalFilters);
 		    	}
 		    	source.setFilters(allFilters);  // set Filters for generate Title in  portlet app side
+		    	*/
+	    		List<FilterM> allFilters = source.getFilters();  // v3 portlet send filter(internal & global)
 		    	// retrive data in chart
 		    	List<Object[]> results = new ArrayList<Object[]>();
 		    	if(chartInsEnt.getDataSourceType().equals("1")){
@@ -362,8 +364,8 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		chartJson = multiSeriesColumn2D.build();
 		    	} else if(chartInsEnt.getChartType().toLowerCase().equals("table")) {
 		    		Table table = new Table();
-		    		//table.setTemplate(chartInsEnt.getChartJson());
-		    		//table.setData(results);
+		    		table.setTemplate(chartInsEnt.getChartJson());
+		    		table.setData(results);
 		    		chartJson = table.build();	
 		    	} 
 		    	/*Multi serial line 2d*/

@@ -136,6 +136,7 @@
 						</c:choose>
 			        </c:forEach>
 		        </select>
+		        &nbsp;&nbsp;${filter.filterM.columnName}
         	</td>
         	<td></td>
         	</tr>

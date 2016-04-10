@@ -9,6 +9,7 @@
 <%@ include file="/WEB-INF/jsp/include.jsp" %>
 <%@ page contentType="text/html; charset=utf-8" %>
 <c:set var="ns"><portlet:namespace/></c:set>
+<portlet:resourceURL var="cascadeInternalFilter" id="cascadeInternalFilter"></portlet:resourceURL>  
 <!DOCTYPE html>
 <html>
 <head>
@@ -90,7 +91,7 @@
         <img id="${ns}linktox" src="<c:url value="/resources/images/link-xxl.png"/>" style="cursor:pointer;width:16px;height: 16px;padding-left:5px" />
             </a>
     </c:if>
-
+	<img id="${chartSettingForm.chartInstance}_cascadeWaiting"  src="<c:url value="/resources/images/rotate.gif"/>" style="cursor:pointer;width:22px;height: 22px;padding-left:5px;display:none;" />
 </div>
 <c:if test="${chartSettingForm.dataSourceType=='1' && chartSettingForm.showFilter=='1' }">
     <portlet:actionURL var="formAction">
@@ -104,7 +105,7 @@
 	    <c:forEach items="${filters}" var="filter" varStatus="loop">
 	    	<div style="display:inline-block">
 	        &nbsp;&nbsp;${filter.filterName}:&nbsp;
-	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterId}" >
+	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterId}" class="filter_${chartSettingForm.chartInstance}" onchange="F${chartSettingForm.chartInstance}_cascade(this)" >
 	        	<c:forEach items="${filter.filterValues}" var="item" varStatus="loop2">
 		        	<c:choose>
 					    <c:when test="${filter.selectedValue.equals(item.keyMapping)}">
@@ -181,6 +182,41 @@ Please Config Chart!
 				table1.render();
         </c:if>
     });
+	function F${chartSettingForm.chartInstance}_regenerateItem(id,val,items){
+		var g_fiter_prefix = "filter_${chartSettingForm.chartInstance}_";
+		var cnt = $("#"+g_fiter_prefix+id);  
+		cnt.empty();
+		for(var i=0;i<items.length;i++){
+			var opt = $("<option/>");
+			opt.attr("value",items[i]["key"]);
+			opt.html(items[i]["desc"]);
+			cnt.append(opt);
+		}
+		//cnt.val(val); // *becareful, are u sure to open this?*
+	}
+	function F${chartSettingForm.chartInstance}_cascade(current){
+		var filterId = current.id.replace("filter_${chartSettingForm.chartInstance}_","");
+		var factor = [];
+		var limitor = ":#:";
+		var seperate = ":&:";
+		$("select.filter_${chartSettingForm.chartInstance}").each(function(){
+			factor.push(this.id.replace("filter_${chartSettingForm.chartInstance}_","")+seperate+this.value);
+		});
+		$("#${chartSettingForm.chartInstance}_cascadeWaiting").show();
+		$(".filter_${chartSettingForm.chartInstance}").prop("disabled",true);
+		$.ajax({
+   	 		dataType: "json",
+   	 		url:"<%=cascadeInternalFilter%>",
+   	 		data: { filterId : filterId , factor : factor.join(limitor)  },
+   	 		success:function(data){
+   	 			$("#${chartSettingForm.chartInstance}_cascadeWaiting").hide();
+   	 			$(".filter_${chartSettingForm.chartInstance}").prop("disabled",false);
+   	 			for(var i = 0 ; i<data["content"].length;i++){
+   	 				F${chartSettingForm.chartInstance}_regenerateItem(data["content"][i]["id"],data["content"][i]["value"],data["content"][i]["item"]);
+   	 			}
+   	 		} //end success 
+   	 	}); // end ajax
+	} //end function
 </script>
         </body>
 </html>

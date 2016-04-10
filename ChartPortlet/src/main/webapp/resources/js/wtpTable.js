@@ -7,9 +7,11 @@ function wtpTable(x,y){
 	this.container = x;
 	this.defaultFont = "MS Sans Serif";
 	this.defaultFontSize = "14";
-	//this.json = JSON.parse(this.jsonString);   // JSON.stringify(json) // no parse for production
-	this.json = this.jsonString;
+	//this.json = JSON.parse(this.jsonString);   // JSON.stringify(json)
+	this.json = y;
 	//this.contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/",2));
+	//chart prop default
+	this.dFractions = 2;  // decimal
 }
 wtpTable.prototype.updatePath = function(x){
 	this.dir_root = x;
@@ -20,6 +22,9 @@ wtpTable.prototype.getRootPath = function(){
 wtpTable.prototype.createTable = function(){
 	 if( this.json!=null && this.container!=null ){
 		 //define function help
+		 var numberFormat = function(x,y) {
+				return x.toFixed(y);
+		 }
 		 var numberWithCommas = function(x) {
 				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 		 }
@@ -182,7 +187,7 @@ wtpTable.prototype.createTable = function(){
 			            	 }else if(growth<0){
 			            		   str=str+"<img src=\""+this.dir_root+"/resources/js/sort_down_red.png\" style=\"width:20px;height: 20px;\" />";
 			            	 }
-	        			str = str + " "+growth+" %";
+	        			str = str + " "+numberFormat(growth,this.dfractions)+" %";
 	        		 }//end growth
 	            	 str=str+"</td>";
 	        	 }//end extra list
@@ -191,14 +196,14 @@ wtpTable.prototype.createTable = function(){
 	     }
 	     str=str+"</tbody>";
 	     str=str+"</table>";
-	     $(this.container).html(str);
+	     $(this.container).html(str); // render table
 	     if(jsonStrObj.group!=null && jsonStrObj.group.length>0 ){
 	    	 for(var ig = 0 ; ig<jsonStrObj.group.length ; ig++){
-		    	 var posAr = jsonStrObj.group[ig].cell;
+		    	 var posAr = jsonStrObj.group[ig].cate;
 		    	 for(var igx = 0 ; igx < posAr.length;igx++){
 		    		 ascSort(this.container,posAr[igx]);
 		    	 	var prop = JSON.parse("{ \"bgColor\":\""+jsonStrObj.table.groupBgColor+"\"}");
-			     	//wGroup(this.container,posAr[igx],[2,3],prop);
+			     	wGroup(this.container,posAr[igx],jsonStrObj.group[ig].series,prop);
 		    	 }
 	    	 }
 	     }
@@ -213,11 +218,14 @@ wtpTable.prototype.createTable = function(){
 	    	for(var i = 0 ;i<jsonStrObj.footer.length;i++){
 	    		if(footer[i].type == "sum"){
 	    			trNew.children("td:nth-child(1)").html("รวม");
-	    			var total = 0;
-	    			tfooter.children("tr.dataset").children("td:nth-child("+footer[i].cell+")").each(function(){
-	    				total=textToNumber(total)+textToNumber($(this).html());
-	    			})
-	    			trNew.children("td:nth-child("+footer[i].cell+")").html(numberWithCommas(total));
+	    			var cell = footer[i].cell;
+	    			cell.forEach(function(item,index){
+	    				var total = 0;
+		    			tfooter.children("tr.dataset").children("td:nth-child("+ item +")").each(function(){
+		    				total=textToNumber(total)+textToNumber($(this).html());
+		    			})
+		    			trNew.children("td:nth-child("+item+")").html(numberWithCommas(total));
+	    			});
 	    		}//if sum
 	    	}//end loop
 	    	tfooter.append(trNew);

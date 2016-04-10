@@ -776,6 +776,10 @@ public class ChartRepository {
 	}
 	@SuppressWarnings("unchecked")
 	public FilterInstanceM fetchFilterInstance(String instanceId,List<FilterM> filterList){
+		/*temp get filterID by columnname*/
+		for(FilterM filter : filterList){
+			filter.setFilterId( findFilterIdByColumnName(filter.getColumnName()) );
+		}
 		 List<FilterM> filters = new ArrayList<FilterM>();  
 		 // [filter_name,column_name,value]
 		String sql = "SELECT f.FILTER_ID,f.FILTER_NAME,f.COLUMN_NAME, coalesce( fi.VALUE , f.SUBSTITUTE_DEFAULT) as filter_value,f.SQL_QUERY "
@@ -791,12 +795,10 @@ public class ChartRepository {
 			f.setColumnName((String)result[2]);
 			f.setSelectedValue( (String)result[3] );
 			//String sqlItem = (String)result[4];
-			/*temp get filterID by columnname*/
-			for(FilterM filter : filterList){
-				filter.setFilterId( findFilterIdByColumnName(filter.getColumnName()) );
-			}
 			// filter value
-			List<FilterValueM> fvs = fetchFilterValueCascade( f.getFilterId(),filterList);
+			List<FilterM> paramFilter = findParamFilterMapping(f.getFilterId());
+			paramFilter.addAll(filterList);
+			List<FilterValueM> fvs = fetchFilterValueCascade( f.getFilterId(),paramFilter);
 			f.setFilterValues(fvs);
 			filters.add(f);
 		}
@@ -957,7 +959,9 @@ public class ChartRepository {
 			// find filter Item
 			List<FilterValueM> fvs = new ArrayList<FilterValueM>();
 			try{
-				fvs = fetchFilterValue( f.getSqlQuery());
+				//fvs = fetchFilterValue( f.getSqlQuery());
+				List<FilterM> paramFilter = findParamFilterMapping(f.getFilterId());
+				 fvs = fetchFilterValueCascade( f.getFilterId(),paramFilter);
 			}catch(Exception ex){
 				 fvs = new ArrayList<FilterValueM>();
 			}

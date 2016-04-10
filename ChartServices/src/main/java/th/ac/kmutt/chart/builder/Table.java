@@ -9,7 +9,7 @@ import org.json.JSONObject;
 public class Table extends CommonChart implements Chart {
 	List<Object[]> data;
 	public Table(){
-		super("Table");  
+		super("TableWithGroup");  
 	}
 	@Override
 	public void setData(List<Object[]> data){

@@ -1,9 +1,11 @@
 package th.ac.kmutt.chart.portlet;
 
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -13,22 +15,27 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
+import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 
 import th.ac.kmutt.chart.form.ChartSettingForm;
 import th.ac.kmutt.chart.model.*;
 import th.ac.kmutt.chart.service.ChartService;
 
 import javax.portlet.*;
+import javax.servlet.http.HttpServletRequest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
 
 
 @Controller("chartCommonController")
@@ -73,7 +80,6 @@ public class ChartCommonPortlet {
         ThemeDisplay themeDisplay = (ThemeDisplay) request
                 .getAttribute(WebKeys.THEME_DISPLAY);
         String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
-        logger.info("chart=>show");
         // get chartInstance prop
         ChartInstanceM chartInstanceM=chartService.findChartInstanceById(instanceId);
         String chartType="";
@@ -119,18 +125,19 @@ public class ChartCommonPortlet {
         if(chartInstanceM!=null){
         //retrive global filter 
         List<FilterM> globalFilter = new ArrayList<FilterM>();
-        if (model.containsAttribute("globalFilter")) {
+        if (model.containsAttribute("globalFilter")) {  //retrive from  global submit
             FilterInstanceM filterIns = (FilterInstanceM) model.asMap().get("globalFilter");
             globalFilter = filterIns.getFilterList();
-            chartSettingForm.setGlobalFilterString(encrptGlobalFilterString(globalFilter));//  store global filter
-        }else{
-        	globalFilter = chartService.getGlobalFilter(); // default all  global filter
+        }else{  // default all  global filter
+        	globalFilter = chartService.getGlobalFilter(); 
         }
+        chartSettingForm.setGlobalFilterString(encrptGlobalFilterString(globalFilter));//  store global filter
+        
         // retrive internal filter 
-        List<FilterM> internalFilter = new ArrayList<FilterM>();
+        List<FilterM> internalFilter = new ArrayList<FilterM>(); // retrive from previous cycle Run
         if (model.containsAttribute("submitFilter")) {
         	internalFilter = (ArrayList<FilterM>)model.asMap().get("submitFilter");
-        }else{
+        }else{ // get default FilterInstance
             FilterInstanceM filterInstance = new FilterInstanceM();
             filterInstance.setInstanceId(instanceId);
             filterInstance.setFilterList(globalFilter);
@@ -215,6 +222,16 @@ public class ChartCommonPortlet {
         FilterInstanceM globalFilter = (FilterInstanceM) event.getValue();
         map.addAttribute("globalFilter", globalFilter);
     }
+    public String findFilterValueSelected(List<FilterValueM> filterValues,String Selected){
+    	String a = "";
+    	for( FilterValueM  fv : filterValues){
+    		if(fv.getKeyMapping().equals(Selected)){
+    			a = fv.getValueMapping();
+    			break;
+    		}
+    	}
+    	return a;
+    }
     public String generateChartTitle(String titleString , List<FilterM> filters,String flag){
     	 String newTitle = titleString;
     	 if(flag!=null ){
@@ -222,7 +239,7 @@ public class ChartCommonPortlet {
 		    	 for( FilterM filter : filters ){
 		    		 CharSequence  check = "_"+filter.getColumnName()+"_";
 		    		 if(    newTitle.contains(check)    ){
-		    			 newTitle = newTitle.replaceAll(check.toString(),filter.getSelectedValue());
+		    			 newTitle = newTitle.replaceAll(check.toString(), findFilterValueSelected(filter.getFilterValues() , filter.getSelectedValue()) );
 		    		 }
 		    	 }
     		 }
@@ -236,7 +253,7 @@ public class ChartCommonPortlet {
 	    		for( FilterM filter : filters ){
 		    		 CharSequence  check = "_"+filter.getColumnName()+"_";
 		    		 if(    newSub.contains(check)    ){
-		    			 newSub = newSub.replaceAll(check.toString(),filter.getSelectedValue());
+		    			 newSub = newSub.replaceAll(check.toString(), findFilterValueSelected(filter.getFilterValues() , filter.getSelectedValue()) );
 		    		 }
 		    	}
     		}//end check enable
@@ -270,4 +287,70 @@ public class ChartCommonPortlet {
     	} // end loop
     	return globalFilter;
     }
+    //cascade ajax
+    @ResourceMapping(value="cascadeInternalFilter")
+   	@ResponseBody 
+   	public void cascadeInternalFilter(ResourceRequest request,ResourceResponse response) throws IOException{
+       	//for cascade parameter
+       	com.liferay.portal.kernel.json.JSONObject json = JSONFactoryUtil.createJSONObject();
+       	JSONArray header = JSONFactoryUtil.createJSONArray();
+       	JSONArray content = JSONFactoryUtil.createJSONArray();
+          	
+       	ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
+       	String instanceId=themeDisplay.getPortletDisplay().getInstanceId();
+       	
+       	HttpServletRequest httpReq = PortalUtil.getHttpServletRequest(request);
+   		HttpServletRequest normalRequest	=	PortalUtil.getOriginalServletRequest(httpReq);
+       	String causeFilterId = normalRequest.getParameter("filterId");
+       	String factorString = normalRequest.getParameter("factor");
+       	// format factorStrung  =  "filterId::filterValue||filterId::filterValue"
+       	
+       	FilterInstanceM fin = new FilterInstanceM();  
+       	fin.setInstanceId(instanceId);
+       	fin.setFilterList( decriptCascadeString(factorString,causeFilterId) );
+       	List<FilterM> filters = chartService.cascadeFilterItems(fin); //
+       	for(FilterM filter : filters){
+       		if(!filter.getFilterId().equals(causeFilterId)){  // only change element to insert
+       			com.liferay.portal.kernel.json.JSONObject fo = JSONFactoryUtil.createJSONObject();
+   	    		fo.put("id", filter.getFilterId());
+   	    		fo.put("value", filter.getSelectedValue());
+   	    		JSONArray foItem = JSONFactoryUtil.createJSONArray();
+   	    		for(FilterValueM fv : filter.getFilterValues()){
+   	    			com.liferay.portal.kernel.json.JSONObject fov = JSONFactoryUtil.createJSONObject();
+   	    			fov.put("key",fv.getKeyMapping());
+   	    			fov.put("desc", fv.getValueMapping());
+   	    			foItem.put(fov);
+   	    		}
+   	    		fo.put("item", foItem);
+   	        	content.put(fo);
+       		}
+       	}
+       	json.put("content", content);
+   		response.getWriter().write(json.toString());
+       }
+    //
+    private List<FilterM> decriptCascadeString(String cascadeString,String causeFilterId){
+   	 List<FilterM> filters = new ArrayList<FilterM>();
+   	 // example string =  "filterId::filterValue||filterId::filterValue"
+   	String filterLimit = ":#:";
+    	String seperate = ":&:";
+    	
+    	String[] gs = cascadeString.split(filterLimit);
+    	for( String g : gs){
+	    		String[] gkv = g.split(seperate);  // [0] = filterId , [1] = value
+	    			FilterM gm = new FilterM();
+	 	    		gm.setFilterId( Integer.parseInt( (String)gkv[0] ) );
+	 	    		try{
+	 	    			gm.setSelectedValue( (String)gkv[1] );
+	 	    		}catch(Exception ex){
+	 	    			gm.setSelectedValue(null);
+	 	    		}
+	 	    		gm.setActiveFlag("1");
+	 	    		if( ((String)gkv[0].toString()).equals(causeFilterId)){
+	 	    			gm.setActiveFlag("0"); // important to mark ,this is cause filter 
+	 	    		}
+	 	    		filters.add(gm);
+    	} // end loop
+   	 return filters;
+   }
 }
