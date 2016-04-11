@@ -5,11 +5,9 @@ import com.thoughtworks.xstream.io.xml.Dom4JDriver;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import th.ac.kmutt.chart.xstream.common.ImakeResultMessage; 
 import th.ac.kmutt.chart.xstream.common.ImakeXML; 
@@ -25,8 +23,8 @@ public class PostCommon {
 
     public ImakeResultMessage postMessage(ImakeXML vserviceXML, String className, String endPoint, boolean isReturn) {
         // HttpPost httppost = new HttpPost(ServiceConstant.hostReference+endPoint);
-      HttpPost httppost = new HttpPost("http://localhost:8081/ChartServices/rest/" + endPoint);
-       // HttpPost httppost = new HttpPost("http://10.1.127.61:8081/ChartServices/rest/"+endPoint);
+        HttpPost httppost = new HttpPost("http://localhost:8081/ChartServices/rest/" + endPoint);
+       // HttpPost httppost = new HttpPost("http://10.1.141.6:8081/ChartServices/rest/"+endPoint);
         XStream xstream = new XStream(new Dom4JDriver());
         Class c = null;
         try {

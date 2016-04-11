@@ -104,8 +104,8 @@
         <form:hidden path="globalFilterString"/>
 	    <c:forEach items="${filters}" var="filter" varStatus="loop">
 	    	<div style="display:inline-block">
-	        &nbsp;&nbsp;${filter.filterName}:&nbsp;
-	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterId}" class="filter_${chartSettingForm.chartInstance}" onchange="F${chartSettingForm.chartInstance}_cascade(this)" >
+	        &nbsp;&nbsp;${filter.filterName}:&nbsp;  <!--  onchange="F${chartSettingForm.chartInstance}_cascade(this)" -->
+	        <select id="filter_${chartSettingForm.chartInstance}_${filter.filterId}" name="filter_${chartSettingForm.chartInstance}_${filter.filterId}" class="filter_${chartSettingForm.chartInstance}"  >
 	        	<c:forEach items="${filter.filterValues}" var="item" varStatus="loop2">
 		        	<c:choose>
 					    <c:when test="${filter.selectedValue.equals(item.keyMapping)}">
