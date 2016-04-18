@@ -1,9 +1,11 @@
 package th.ac.kmutt.chart.model;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import th.ac.kmutt.chart.xstream.common.ImakeXML;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by imake on 20/10/2015.
@@ -19,7 +21,8 @@ public class ServiceM extends ImakeXML implements Serializable {
     private String type;
     private String activeFlag;
     private String sqlString;
-
+    private List<FilterM> filterList;
+    
     public Integer getServiceId() {
         return serviceId;
     }
@@ -76,5 +79,13 @@ public class ServiceM extends ImakeXML implements Serializable {
 
 	public void setSqlString(String sqlString) {
 		this.sqlString = sqlString;
+	}
+
+	public List<FilterM> getFilterList() {
+		return filterList;
+	}
+
+	public void setFilterList(List<FilterM> filterList) {
+		this.filterList = filterList;
 	}
 }

@@ -137,6 +137,7 @@ public class ChartCommonSettingController {
         chartInstanceM.setInstanceId(chartSettingForm.getChartInstance());
         chartInstanceM.setChartType(chartSettingForm.getChartType());
         chartInstanceM.setDataSourceType(chartSettingForm.getDataSourceType());
+        
         if(chartSettingForm.getDataSourceType().equals("1")){ // choose use datasource
             chartInstanceM.setServiceId(Integer.valueOf(chartSettingForm.getDataSource()));
         }

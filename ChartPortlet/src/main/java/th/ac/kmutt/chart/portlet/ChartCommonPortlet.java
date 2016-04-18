@@ -213,6 +213,7 @@ public class ChartCommonPortlet {
     	}
         model.addAttribute("submitFilter", fin.getFilterList());
     }
+    
     //@javax.portlet.ProcessEvent(qname = "{http://liferay.com}paramOverride")
     @RequestMapping("VIEW")
     @EventMapping(value ="{http://liferay.com/events}paramOverride")
@@ -222,6 +223,7 @@ public class ChartCommonPortlet {
         FilterInstanceM globalFilter = (FilterInstanceM) event.getValue();
         map.addAttribute("globalFilter", globalFilter);
     }
+    
     public String findFilterValueSelected(List<FilterValueM> filterValues,String Selected){
     	String a = "";
     	for( FilterValueM  fv : filterValues){

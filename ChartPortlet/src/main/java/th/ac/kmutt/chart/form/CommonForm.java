@@ -20,7 +20,8 @@ public class CommonForm implements Serializable {
     private String tab;
     private String[] ids;
     private String filter;
-
+    private String message;
+    
     public String[] getIds() {
         return ids;
     }
@@ -116,9 +117,13 @@ public class CommonForm implements Serializable {
     public String getFilter() {
         return filter;
     }
-
     public void setFilter(String filter) {
         this.filter = filter;
     }
-
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
 }

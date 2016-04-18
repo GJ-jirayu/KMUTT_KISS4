@@ -322,7 +322,7 @@ public class ChartServiceJpaImpl implements ChartService {
 	    	source.setServiceId(chartInsEnt.getServiceId());
 	    	try {
 	    		//find filter v2  portlet dont send filter ***
-		    	/*FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId(),source.getFilters());
+		    	FilterInstanceM fim = chartRepository.fetchFilterInstance(chartInsEnt.getInstanceId(),source.getFilters());
 		    	List<FilterM> allFilters = new ArrayList<FilterM>(fim.getFilterList());
 		    	if(source.getFilters()==null | source.getFilters().size()==0  ){ // v1 portlet only send global filters 
 		    		List<FilterM> globalFilters = chartRepository.fetchGlobalFilter();
@@ -332,8 +332,8 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		allFilters.addAll(globalFilters);
 		    	}
 		    	source.setFilters(allFilters);  // set Filters for generate Title in  portlet app side
-		    	*/
-	    		List<FilterM> allFilters = source.getFilters();  // v3 portlet send filter(internal & global)
+		    	
+	    		//List<FilterM> allFilters = source.getFilters();  // v3 portlet send filter(internal & global)
 		    	// retrive data in chart
 		    	List<Object[]> results = new ArrayList<Object[]>();
 		    	if(chartInsEnt.getDataSourceType().equals("1")){
@@ -451,6 +451,41 @@ public class ChartServiceJpaImpl implements ChartService {
 		    		multiSeries2DDualYCombination.setTemplate(chartInsEnt.getChartJson());
 		    		multiSeries2DDualYCombination.setData(results);
 		    		chartJson = multiSeries2DDualYCombination.build();
+		    	}
+		    	/*Stacked Area 2D*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("stackedarea2d")){
+		    		StackArea2D stackArea2D = new StackArea2D();
+		    		stackArea2D.setTemplate(chartInsEnt.getChartJson());
+		    		stackArea2D.setData(results);
+		    		chartJson = stackArea2D.build();
+		    	}
+		    	/*Doughnut 3D chart*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("doughnut3d")){
+		    		Doughnut3D doughnut3d = new Doughnut3D();
+		    		doughnut3d.setTemplate(chartInsEnt.getChartJson());
+		    		doughnut3d.setData(results);
+		    		chartJson = doughnut3d.build();
+		    	}
+		    	/*Multi-series Column 3D + Line - Dual Y Axis*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("mscolumn3dlinedy")){
+		    		MultiSeriesColumn3DLineDualY multiSeriesColumn3DLineDualY = new MultiSeriesColumn3DLineDualY();
+		    		multiSeriesColumn3DLineDualY.setTemplate(chartInsEnt.getChartJson());
+		    		multiSeriesColumn3DLineDualY.setData(results);
+		    		chartJson = multiSeriesColumn3DLineDualY.build();
+		    	}
+		    	/*Stacked Column 3D + Line Single Y Axis*/
+		    	else if(chartInsEnt.getChartType().equals("stackedColumn3DLine")){
+		    		StackedColumn3DLineSingleY stackedColumn3DLineSingleY = new StackedColumn3DLineSingleY();
+		    		stackedColumn3DLineSingleY.setTemplate(chartInsEnt.getChartJson());
+		    		stackedColumn3DLineSingleY.setData(results);
+		    		chartJson = stackedColumn3DLineSingleY.build();
+		    	}
+		    	/*Multi-series Bar 2D*/
+		    	else if(chartInsEnt.getChartType().toLowerCase().equals("msbar2d")){
+		    		MultiSeriesBar2D multiSeriesBar2D = new MultiSeriesBar2D();
+		    		multiSeriesBar2D.setTemplate(chartInsEnt.getChartJson());
+		    		multiSeriesBar2D.setData(results);
+		    		chartJson = multiSeriesBar2D.build();
 		    	}
 		    	
 		    	// add json

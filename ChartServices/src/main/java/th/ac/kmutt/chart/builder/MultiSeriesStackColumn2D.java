@@ -2,10 +2,9 @@ package th.ac.kmutt.chart.builder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import org.apache.taglibs.standard.functions.Functions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,127 +28,100 @@ public class MultiSeriesStackColumn2D extends CommonChart implements Chart {
 	public String build(){
 		JSONObject chartJson = super.getChartJson(); // retriveJSONObject	
 		try{
-			/* Generate Category */	
-			JSONArray categoryJson = new  JSONArray();
-			List<String> makeCategories = new ArrayList<String>();
+			/* 1.Generate json category 
+			 * ทำการสรา้ง JSON ในส่วนของ Category และสร้าง Unique Category 
+			 * โดยการเอาข้อมูลทั้งหมดมา loop ใส่ list และดู loop รอบถัด ๆ ไปว่ามีซำกับ list หรือเปล่า
+			 * ถ้าไม่มีก็ put ใส่ list ถ้ามีก็ข้ามไป
+			 * */	
+			JSONArray categoryJson = new JSONArray();			
+			ArrayList<String> categoryList = new ArrayList<String>();
+			ArrayList<String> uniqueCategoryList = new ArrayList<String>();
 			for( Object[] resultRow : this.data){
-				makeCategories.add(resultRow[0].toString());
-			}
-			Set<String> setUniqueCategory = new TreeSet<String>(makeCategories);
-			List<Object> UniqueCategory = new ArrayList<Object>(setUniqueCategory);
-			Object[] objUniqueCategory = UniqueCategory.toArray();
-			
-			JSONObject jsonObjCategory = new  JSONObject();
-			JSONArray jsonArrCategory = new JSONArray();
-			for( Object resultRow : objUniqueCategory){
-				JSONObject attr = new JSONObject();
-				attr.put("label", resultRow);
-				categoryJson.put(attr);
-			}
-			jsonObjCategory = jsonObjCategory.put("category", categoryJson);
-			jsonArrCategory = jsonArrCategory.put(jsonObjCategory);
-			
-			
-			/* Generate Sub Category */	
-			JSONArray subCategoryJson = new  JSONArray();
-			List<String> makeSubCategories = new ArrayList<String>();
-			for( Object[] resultRow : this.data){
-				makeSubCategories.add(resultRow[1].toString());
-			}
-			Set<String> setUniqueSubCategory = new TreeSet<String>(makeSubCategories);
-			List<Object> UniqueSubCategory = new ArrayList<Object>(setUniqueSubCategory);
-			Object[] objUniqueSubCategory = UniqueSubCategory.toArray();
-			
-			JSONObject jsonObjSubCategory = new  JSONObject();
-			JSONArray jsonArrSubCategory = new JSONArray();
-			for( Object resultRow : objUniqueSubCategory){
-				JSONObject attr = new JSONObject();
-				attr.put("label", resultRow);
-				subCategoryJson.put(attr);
-			}
-			jsonObjSubCategory = jsonObjSubCategory.put("subCategory", subCategoryJson);
-			jsonArrSubCategory = jsonArrSubCategory.put(jsonObjSubCategory);
-			
-			/* Generate new Series */
-			List<String> makeSeries = new ArrayList<String>();
-			for( Object[] resultRow : this.data){
-				makeSeries.add(resultRow[2].toString());
-			}
-			Set<String> setUniqueSeries= new TreeSet<String>(makeSeries);
-			List<Object> UniqueSeries = new ArrayList<Object>(setUniqueSeries);
-			Object[] objUniqueSeries = UniqueSeries.toArray();
-			
-
-			
-			JSONArray objectIndex = new JSONArray();
-			for( Object resultUniqueSeries : objUniqueSeries){
-				
-				/* Put seriesname to JSON */
-				JSONObject objectseries = new JSONObject();
-				objectseries.put("seriesname", resultUniqueSeries);				
-				
-				/*Put Data set to JSON*/
-				JSONArray objectData = new JSONArray();
-				for( Object[] resultData : this.data){									
-					if(resultData[2].equals(resultUniqueSeries)){
-						JSONObject attr = new JSONObject();	
-						attr.put("value",resultData[3] );
-						objectData.put(attr);
-					}
+				if(!categoryList.contains(resultRow[0].toString())){ 
+					uniqueCategoryList.add(resultRow[0].toString());
+					JSONObject attr = new JSONObject();
+					attr.put("label", resultRow[0]);
+					categoryJson.put(attr);
 				}
-				objectseries.put("data", objectData);
-							
-				
-				objectIndex.put(objectseries);
+				categoryList.add(resultRow[0].toString());
 			}
-			logger.info("\n -- objectIndex -->"+objectIndex+"\n");
+			JSONObject jsonObjCategory = new JSONObject().put("category", categoryJson);
+			JSONArray jsonArrCategory = new JSONArray().put(jsonObjCategory);
 			
 			
+			/* 2.Generate json sub category 
+			 * ทำการสรา้ง JSON ในส่วนของ Sub Category และสร้าง Unique Sub Category 
+			 * */			
+			ArrayList<String> subCategoryList = new ArrayList<String>();
+			ArrayList<String> uniqueSubCategoryList = new ArrayList<String>();
+			for( Object[] resultRow : this.data){
+				if(!subCategoryList.contains(resultRow[1].toString())){ 
+					uniqueSubCategoryList.add(resultRow[1].toString());
+				}
+				subCategoryList.add(resultRow[1].toString());
+			}
 			
-			/* Generate Data group set */
-			//JSONObject tempDataSet = new JSONObject();			
-			/*JSONArray mainDataSet = new JSONArray();
-			Integer subCategorySize = jsonArrSubCategory.getJSONObject(0).getJSONArray("subCategory").length();
 			
-			for(int i = 0 ; i < subCategorySize; i++){
-				JSONObject subObjDataSet = new JSONObject();
-				String subCategoryStr = jsonArrSubCategory.getJSONObject(0)
-						.getJSONArray("subCategory").getJSONObject(i).getString("label");
-				JSONArray subDataSet = new JSONArray();
+			/* 3. Generate json Series object */
+			ArrayList<String> seriesList = new ArrayList<String>();
+			ArrayList<String> uniqueSeriesList = new ArrayList<String>();
+			for( Object[] resultRow : this.data){
+				if(!seriesList.contains(resultRow[2].toString())){ 
+					uniqueSeriesList.add(resultRow[2].toString());
+				}
+				seriesList.add(resultRow[2].toString());
+			}
+			
+			
+			/* 4. สร้าง Object โดยสร้างตาม Sub Category เพื่อรอรับข้อมูล dataset ที่จะสร้างขึ้นภายหลัง*/
+			JSONArray arrSubCategory = new JSONArray();
+			for( Object resultUniqueSubCategoryList : uniqueSubCategoryList){
+				JSONObject objSubCategory = new JSONObject();
 				
-				for( Object strSeries : objUniqueSeries){
-					JSONObject seriesObjDataSet = new JSONObject();
-					JSONArray arrData = new JSONArray();
+				JSONArray datasetArray = new JSONArray();
+				for(Object resultUniqueSeries : uniqueSeriesList){
+					JSONObject seriesData = new JSONObject();
+					seriesData.put("seriesname", resultUniqueSubCategoryList+"-"+resultUniqueSeries);
+					JSONArray objectData = new JSONArray();
+					
+					for (Object uniqueCategory : uniqueCategoryList) {
+						Boolean checkNoneValue = Boolean.FALSE;
+						for (Object[] resultData : this.data) {
+							if (resultData[2].equals(resultUniqueSeries) 
+									&& resultData[1].equals(resultUniqueSubCategoryList)
+									&& resultData[0].equals(uniqueCategory)) {
+								JSONObject attr = new JSONObject();
+								attr.put("value", resultData[3]);
+								objectData.put(attr);
+
+								checkNoneValue = Boolean.TRUE;
+							}
+						}
 						
-					for(Object strCatrgory : objUniqueCategory){
-						for(Object[] resultData : this.data){
-							if(resultData[0].toString().equals(strCatrgory) 
-									&& resultData[2].toString().equals(strSeries)
-									&& resultData[1].toString().equals(subCategoryStr)){
-								JSONObject attr = new JSONObject();	
-								attr.put("value",resultData[3]);
-								arrData.put(attr);
-							}						
+						if(checkNoneValue.equals(Boolean.FALSE)){
+							JSONObject attr = new JSONObject();
+							attr.put("value", 0);
+							objectData.put(attr);
 						}
 					}
+					seriesData.put("data", objectData);
 					
-					seriesObjDataSet.put("seriesname", strSeries);
-					seriesObjDataSet.put("data", arrData);
-					subDataSet.put(seriesObjDataSet);
+					datasetArray.put(seriesData);
 				}
-	
-				subObjDataSet.put("dataset", subDataSet);
-				mainDataSet.put(subObjDataSet);
+				
+				objSubCategory.put("dataset", datasetArray);		
+				
+				arrSubCategory.put(objSubCategory);
 			}
+			chartJson.put("categories", jsonArrCategory);
+			chartJson = chartJson.put("dataset", arrSubCategory);
 			
-			//tempDataSet = tempDataSet.put("dataset", mainDataSet);
+			//logger.info("\n -- chartJson --> "+chartJson+"\n");
 			
-			chartJson = chartJson.put("categories", jsonArrCategory).put("dataset", mainDataSet);
-			logger.info("\n TempData: "+chartJson+"\n");*/
-
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
 		return chartJson.toString();
 	}
+	
 }

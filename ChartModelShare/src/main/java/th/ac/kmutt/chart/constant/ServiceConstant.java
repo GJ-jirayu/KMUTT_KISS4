@@ -202,4 +202,17 @@ public class ServiceConstant {
     
     //cascade
     public static final String CASCADE_FILTER = "cascadeFilter";
+    
+    // chart datasource 
+    public static final String CHART_DS_LIST = "listChartDatasource";
+    public static final String CHART_DS_DETAIL = "detailChartDatasource";
+    public static final String CHART_DS_SAVE = "saveChartDatasource";
+    public static final String CHART_DS_BIND_FILTER = "bindChartDatasourceXFilter";
+    public static final String CHART_DS_DEL_FILTER = "unbindChartDatasourceXFilter";
+    
+    // chart parameter
+    public static final String PARAM_LIST = "listParam";
+    public static final String PARAM_DETAIL = "detailParam";
+    public static final String PARAM_SAVE = "saveParam";
+    public static final String PARAM_DELETE = "deleteParam";
 }

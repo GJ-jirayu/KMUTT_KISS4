@@ -24,7 +24,7 @@ public class PostCommon {
     public ImakeResultMessage postMessage(ImakeXML vserviceXML, String className, String endPoint, boolean isReturn) {
         // HttpPost httppost = new HttpPost(ServiceConstant.hostReference+endPoint);
         HttpPost httppost = new HttpPost("http://localhost:8081/ChartServices/rest/" + endPoint);
-       // HttpPost httppost = new HttpPost("http://10.1.141.6:8081/ChartServices/rest/"+endPoint);
+      //  HttpPost httppost = new HttpPost("http://10.1.141.5:8081/ChartServices/rest/"+endPoint);
         XStream xstream = new XStream(new Dom4JDriver());
         Class c = null;
         try {

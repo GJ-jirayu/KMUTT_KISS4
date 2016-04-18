@@ -143,7 +143,6 @@ public class FilterController {
     	String causeFilterId = normalRequest.getParameter("filterId");
     	String factorString = normalRequest.getParameter("factor");
     	// format factorStrung  =  "filterId::filterValue||filterId::filterValue"
-    	
     	FilterInstanceM fin = new FilterInstanceM();  
     	fin.setInstanceId(instanceId);
     	fin.setFilterList( decriptCascadeString(factorString,causeFilterId) );

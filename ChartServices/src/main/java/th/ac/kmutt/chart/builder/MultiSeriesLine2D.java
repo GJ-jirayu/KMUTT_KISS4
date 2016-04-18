@@ -29,66 +29,80 @@ public class MultiSeriesLine2D extends CommonChart implements Chart {
 	public String build(){
 		JSONObject chartJson = super.getChartJson(); // retriveJSONObject	
 		try{			
-			/* Generate new category */	
-			JSONArray categoryJson = new  JSONArray();
-			List<String> makeCategories = new ArrayList<String>();
+			
+			/* 1.Generate json category 
+			 * ทำการสรา้ง JSON ในส่วนของ Category และสร้าง Unique Category 
+			 * โดยการเอาข้อมูลทั้งหมดมา loop ใส่ list และดู loop รอบถัด ๆ ไปว่ามีซำกับ list หรือเปล่า
+			 * ถ้าไม่มีก็ put ใส่ list ถ้ามีก็ข้ามไป
+			 * */	
+			JSONArray categoryJson = new JSONArray();			
+			ArrayList<String> categoryList = new ArrayList<String>();
+			ArrayList<String> uniqueCategoryList = new ArrayList<String>();
 			for( Object[] resultRow : this.data){
-				makeCategories.add(resultRow[0].toString());
-			}
-			Set<String> setUniqueCategory = new TreeSet<String>(makeCategories);
-			List<Object> UniqueCategory = new ArrayList<Object>(setUniqueCategory);
-			Object[] objUniqueCategory = UniqueCategory.toArray();
-			
-			JSONObject jsonObjCategory = new  JSONObject();
-			JSONArray jsonArrCategory = new JSONArray();
-			for( Object resultRow : objUniqueCategory){
-				JSONObject attr = new JSONObject();
-				attr.put("label", resultRow);
-				categoryJson.put(attr);
-			}
-			jsonObjCategory = jsonObjCategory.put("category", categoryJson);
-			jsonArrCategory = jsonArrCategory.put(jsonObjCategory);
-			
-			
-			/* Generate new Series */
-			List<String> makeSeries = new ArrayList<String>();
-			for( Object[] resultRow : this.data){
-				makeSeries.add(resultRow[1].toString());
-			}
-			Set<String> setUniqueSeries= new TreeSet<String>(makeSeries);
-			List<Object> UniqueSeries = new ArrayList<Object>(setUniqueSeries);
-			Object[] objUniqueSeries = UniqueSeries.toArray();
-			
-			
-			/* Generate Data set */
-			JSONObject tempDataSet = new JSONObject();	
-			
-			JSONArray objectIndex = new JSONArray();
-			for( Object resultUniqueSeries : objUniqueSeries){
-				
-				/* Put seriesname to JSON */
-				JSONObject objectseries = new JSONObject();
-				objectseries.put("seriesname", resultUniqueSeries);				
-				
-				/*Put Data set to JSON*/
-				JSONArray objectData = new JSONArray();
-				for( Object[] resultData : this.data){									
-					if(resultData[1].equals(resultUniqueSeries)){
-						JSONObject attr = new JSONObject();	
-						attr.put("value",resultData[2] );
-						objectData.put(attr);
-					}					
+				if(!categoryList.contains(resultRow[0].toString())){ 
+					uniqueCategoryList.add(resultRow[0].toString());
+					JSONObject attr = new JSONObject();
+					attr.put("label", resultRow[0]);
+					categoryJson.put(attr);
 				}
-				objectseries.put("data", objectData);
-							
+				categoryList.add(resultRow[0].toString());
+			}
+			JSONObject jsonObjCategory = new JSONObject().put("category", categoryJson);
+			JSONArray jsonArrCategory = new JSONArray().put(jsonObjCategory);
+			//logger.info("\n -- jsonArrCategory --> "+jsonArrCategory+"\n");
+			
+			
+			/* 2. Generate json Series object */
+			JSONArray seriesJson = new JSONArray();
+			ArrayList<String> seriesList = new ArrayList<String>();
+			ArrayList<String> uniqueSeriesList = new ArrayList<String>();
+			for( Object[] resultRow : this.data){
+				if(!seriesList.contains(resultRow[1].toString())){ 
+					uniqueSeriesList.add(resultRow[1].toString());
+					JSONObject attr = new JSONObject();
+					attr.put("seriesname", resultRow[1].toString());
+					seriesJson.put(attr);
+				}
+				seriesList.add(resultRow[1].toString());
+			}
+			//logger.info("\n -- seriesJson --> "+seriesJson+"\n");
+			
+			
+			/* 3. Generate dataset 
+			 * - data ที่ต้องการจะมันจะแบ่ง object ตามข้อมุลของ series ตาม category เลยต้องเอา series มาวนลูบ
+			 * เลยทำการวนลูบ series และตามด้วย category และสร้าง object value ของแต่ละ series, category นั้น ๆ 
+			 * - เนืองจาก data ของ category อาจจะไม่มีทุก category เลยต้องทำการสร้าง dummy value ให้กับ object 
+			 * เพื่อไม่ให้มันมีข้อมูลว่าง
+			 * */
+			int index = 0;
+			for( Object resultUniqueSeries : uniqueSeriesList){
+				JSONArray objectData = new JSONArray();
+				for (Object uniqueCategory : uniqueCategoryList) {
+					Boolean checkNoneValue = Boolean.FALSE;
+					for (Object[] resultData : this.data) {
+						if (resultData[1].equals(resultUniqueSeries) 
+								&& resultData[0].equals(uniqueCategory)) {
+							JSONObject attr = new JSONObject();
+							attr.put("value", resultData[2]);
+							objectData.put(attr);
+
+							checkNoneValue = Boolean.TRUE;
+						}
+					}
+					
+					if(checkNoneValue.equals(Boolean.FALSE)){
+						JSONObject attr = new JSONObject();
+						attr.put("value", "0");
+						objectData.put(attr);
+					}
+				}				
 				
-				objectIndex.put(objectseries);
+				seriesJson.getJSONObject(index).put("data", objectData);
+				index++;
 			}
 			
-			//tempDataSet = tempDataSet.put("dataset", objectIndex);		
-			
-			chartJson = chartJson.put("categories", jsonArrCategory).put("dataset", objectIndex);
-			logger.info("\n"+chartJson+"\n");
+			/*ทำการ put ข้อมูล json ที่ build ได้ใส่ลงไปใน main json*/
+			chartJson = chartJson.put("categories", jsonArrCategory).put("dataset", seriesJson);
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}

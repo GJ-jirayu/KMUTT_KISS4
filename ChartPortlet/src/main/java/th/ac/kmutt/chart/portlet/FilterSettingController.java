@@ -99,6 +99,7 @@ public class FilterSettingController {
         String[] ids=filterForm.getFilterGlobals();
         List<String> filterIds = Arrays.asList(ids);
         List<FilterM> filterList = new ArrayList<FilterM>();
+        
         for(String filterId : filterIds){
         	FilterM filter = new FilterM();
         	filter.setFilterId(Integer.valueOf(filterId));

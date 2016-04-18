@@ -889,4 +889,63 @@ public class ChartServiceWSImpl extends PostCommon implements ChartService {
 		 }
 		return filters;
 	}
+
+	@Override
+	public List<ServiceM> listChartDatasource() {     // "===  sevice"
+		try{
+		ServiceM sm = new ServiceM();
+		sm.setServiceName( ServiceConstant.CHART_DS_LIST );  
+		ImakeResultMessage imakeMessage = postMessage(sm, sm.getClass().getName(), "service", true);
+		@SuppressWarnings("unchecked")
+		List<ServiceM> sms = imakeMessage.getResultListObj();
+		return sms;
+		}catch(Exception e){
+			return new ArrayList<ServiceM>();	
+		}
+	}
+
+	@Override
+	public ServiceM detailChartDatasource(ServiceM s) {
+		try{
+		s.setServiceName( ServiceConstant.CHART_DS_DETAIL );  
+		ImakeResultMessage imakeMessage = postMessage(s, s.getClass().getName(), "service", true);
+		s = (ServiceM)imakeMessage.getResultListObj().get(0);
+		return s;
+		}catch(Exception e){
+			return new ServiceM();
+		}
+	}
+	@Override
+	public Integer saveChartDatasource(ServiceM s) {
+		try{
+			s.setServiceName( ServiceConstant.CHART_DS_SAVE );  
+			ImakeResultMessage imakeMessage = postMessage(s, s.getClass().getName(), "service", true);
+			if(imakeMessage.getReturnId()==null) throw new Exception();
+			return  1;
+		}catch(Exception e){
+			return 0;
+		}
+	}
+	@Override
+	public Integer saveDatasourceXFilter(ServiceM s) {
+		try{
+			s.setServiceName( ServiceConstant.CHART_DS_BIND_FILTER );  
+			ImakeResultMessage imakeMessage = postMessage(s, s.getClass().getName(), "service", true);
+			if(imakeMessage.getReturnId()==null) throw new Exception();
+			return  1;
+		}catch(Exception e){
+			return 0;
+		}
+	}
+	@Override
+	public Integer deleteDatasourceXFilter(ServiceM s) {
+		try{
+			s.setServiceName( ServiceConstant.CHART_DS_DEL_FILTER );  
+			ImakeResultMessage imakeMessage = postMessage(s, s.getClass().getName(), "service", true);
+			if(imakeMessage.getReturnId()==null) throw new Exception();
+			return  1;
+		}catch(Exception e){
+			return 0;
+		}
+	}
 }

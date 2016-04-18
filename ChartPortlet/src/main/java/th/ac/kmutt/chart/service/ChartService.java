@@ -140,4 +140,14 @@ public interface ChartService {
 
 	//cascade
 	public List<FilterM> cascadeFilterItems(FilterInstanceM fin); 
+	
+	
+	// chart datasource
+	public List<ServiceM> listChartDatasource();
+	public ServiceM detailChartDatasource(ServiceM s);
+	public Integer saveChartDatasource(ServiceM s);
+	public Integer saveDatasourceXFilter(ServiceM s);
+	public Integer deleteDatasourceXFilter(ServiceM s);
+	
+	// chart filter
 }
