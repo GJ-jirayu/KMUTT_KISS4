@@ -27,7 +27,7 @@ public class Table extends CommonChart implements Chart {
 					JSONArray datas =new JSONArray();
 					for(Object cell : resultRow){
 						JSONObject attr = new JSONObject();
-						attr.put("value", (String)cell);
+						attr.put("value", cell.toString());
 						datas.put(attr);
 					}
 					dataSetObj.put("data", datas);

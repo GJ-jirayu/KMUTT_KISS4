@@ -5,16 +5,20 @@ function wtpTable(x,y){
 	this.dir_root = window.location.href;
 	this.jsonString = y;
 	this.container = x;
-	this.defaultFont = "MS Sans Serif";
-	this.defaultFontSize = "14";
 	//this.json = JSON.parse(this.jsonString);   // JSON.stringify(json)
 	this.json = y;
-	//this.contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/",2));
+	this.contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/",2));
 	//chart prop default
-	this.dFractions = 2;  // decimal
+	this.dfractions = 2;  // decimal
+	// style property
+	this.style = null;
+	this.headerStyle = "text-align:center;";
+	this.bodyStyle = "text-align:left;";
+	this.dStyle = "font-family: 'MS Sans Serif';font-size:14px;";
 }
 wtpTable.prototype.updatePath = function(x){
 	this.dir_root = x;
+	this.contextPath = x;
 };
 wtpTable.prototype.getRootPath = function(){
 	return this.dir_root;
@@ -42,7 +46,7 @@ wtpTable.prototype.createTable = function(){
 				 if(ar[i]==x){  total++; }
 			 }
 			 var dup = total<=1? 0:1;
-			 return dup
+			 return dup;
 		 }
 		 var uniqueArray = function(ar){
 			 var uniqueNames = [];
@@ -69,7 +73,6 @@ wtpTable.prototype.createTable = function(){
 				 items[idx] = "";
 				 var lineIdx = idx + 1;
 				 newTbody.append(tbody.children("tr:nth-child("+lineIdx+")").clone());
-				 
 			 }
 			 //renew
 			 tbody.empty();
@@ -89,8 +92,7 @@ wtpTable.prototype.createTable = function(){
 			 var items = [];
 			 tbody.children("tr.dataset").children("td:nth-child("+pos+")").each(function(){
 					items.push($(this).html()); 
-				 });
-			 
+				 });			 
 			 var uniq = uniqueArray(items);
 			 var totals = [];
 			 $.each(uniq,function(i,cate){
@@ -111,7 +113,7 @@ wtpTable.prototype.createTable = function(){
 				 var lastLine =  tbody.children("tr:nth-child("+lastLineNumber+")");
 				 var newTr = lastLine.clone();
 				 newTr.removeClass().addClass("wtpGroup");
-				 newTr.attr("style"," background-color :" +prop.bgColor);
+				 newTr.attr("style",prop);
 				 newTr.children("td").empty();
 				 newTr.children("td:nth-child("+pos+")").html(" ผลรวม "+cate);
 				 $.each(totals,function(i,total){
@@ -119,6 +121,7 @@ wtpTable.prototype.createTable = function(){
 						 newTr.children("td:nth-child("+i+")").html(numberWithCommas(total));
 					 }
 				 });
+				 newTr.children("td").attr("style",prop);
 				 newTr.insertAfter(lastLine);;
 				 
 			 }); // end lookup uniq group text
@@ -130,46 +133,56 @@ wtpTable.prototype.createTable = function(){
 	     var header =jsonStrObj.header;
 	     var dataset= jsonStrObj.dataset;
 	     //setting
-	     var style = ""
-	     if(jsonStrObj.table.font!=null){
-	    	 style = style + "font-family: "+this.defaultFont+";";
-	      	 style = style + "font-family: "+jsonStrObj.table.font+" "+this.defaultFont+";"; 
+	     if(typeof jsonStrObj.table.style =="undefined"){
+	    	 this.style = this.dStyle;  
 	     }else{
-	    	 style = style + "font-family: "+this.defaultFont+";";
-		 }
-	     if(jsonStrObj.table.fontSize!=null){
-	    	 style = style + "font-size:"+jsonStrObj.table.fontSize+"px;";
-	     }else{
-	    	 style = style + "font-size:"+this.defaultFontSize+"px;";
+	    	 this.style = jsonStrObj.table.style;
 	     }
+	     if(typeof jsonStrObj.table.headerStyle!="undefined"){
+	    	 this.headerStyle=jsonStrObj.table.headerStyle;
+	     }else this.headerStyle="";
+	     if(typeof jsonStrObj.table.bodyStyle!="undefined"){
+	    	 this.bodyStyle=jsonStrObj.table.bodyStyle;
+	     }else this.bodyStyle="";
+	     if(typeof jsonStrObj.table.groupStyle!="undefined"){
+			this.groupStyle=jsonStrObj.table.groupStyle;
+		 }else this.groupStyle="";
 	     // title
 	     $(this.container).append( $("<div align=\"center\"></div>").html("<b>"+caption+"</b><br/>") );
 	     $(this.container).append(  $("<div align=\"center\"></div>").html(subCaption) );
-	     var str="<table class=\"table table-bordered\">";
+	     var str="<table class=\"table table-bordered\" style=\""+this.style+"\" >";
 	    //header
 	     if(header.length>0){
-	         str=str+"<thead bgcolor=\""+jsonStrObj.table.headerBgColor+"\">"+"<tr>";
+	    	 str=str+"<thead bgcolor=\""+jsonStrObj.table.headerBgColor+"\">";	 
+	    	 str=str+"<tr>";
 		         for(var i=0;i<header.length;i++){
-		             str=str+""+
-		                 "<th class=\"th_class\"  style=\"text-align:center;"+style+"\" >"+header[i].cell+"</th>";
+		        	 if(typeof header[i].style !="undefined")
+		        	 str=str+"<th class=\"th_class\"  style=\""+this.style+this.headerStyle+header[i].style+"\" >"+header[i].cell+"</th>";
+		        	 else
+		             str=str+""+"<th class=\"th_class\"  style=\""+this.style+this.headerStyle+"\" >"+header[i].cell+"</th>";
 		         }
 		         //check extra
 		         if(jsonStrObj.extra!=null){
 		        	 for(var i=0;i<jsonStrObj.extra.length;i++){
-		        		 str=str+"<th></th>";
+		        		 //str=str+"<th ></th>";
+		        		 str=str+"<th class=\"th_class\"  style=\""+this.style+this.headerStyle+"\" ></th>";
 		        	 }
 		         }//end check extra
 		         str=str+"</tr></thead>";
 	     }
 	     //data
-	     str=str+"<tbody bgcolor=\""+jsonStrObj.table.bodyBgColor+"\">";
+	     str=str+"<tbody bgcolor=\""+jsonStrObj.table.bodyBgColor+"\" style=\""+this.bodyStyle+"\">";
 	     for(var i=0;i<dataset.length;i++){
 	         var datarow=dataset[i].data;
-	         str=str+""+ " <tr class=\"dataset\"  style=\"cursor: pointer;\" \">";
+	         str=str+""+ " <tr class=\"dataset\">";
 	         for(var j=0;j<datarow.length;j++){
-	             str=str+""+"<td class=\"wtpColumn\"  style=\"text-align:left;"+style+"\">";
-	             if(jsonStrObj.header[j].type=="number"){
-	            	 str=str+""+numberWithCommas(datarow[j].value);
+	             str=str+""+"<td class=\"wtpColumn\"  style=\""+this.style+this.bodyStyle+"\">";
+	             if(typeof jsonStrObj.header[j].type !="undefined"){
+		             if(jsonStrObj.header[j].type=="number"){
+		            	 str=str+""+numberWithCommas(datarow[j].value);
+		             }else{
+		            	 str=str+""+datarow[j].value;
+		             } 
 	             }else{
 	            	 str=str+""+datarow[j].value;
 	             }
@@ -178,16 +191,16 @@ wtpTable.prototype.createTable = function(){
 	         //compare
 	         if(jsonStrObj.extra!=null){
 	        	 for(var j=0;j<jsonStrObj.extra.length;j++){
-	            	 str=str+"<td width=\"50\" style=\"text-align:center;"+style+"\">";
+	            	 str=str+"<td width=\"50\" style=\""+this.style+this.bodyStyle+"\">";
 	        		 if(jsonStrObj.extra[j].type=='growth'){
 	        			var diff = datarow[textToNumber(jsonStrObj.extra[j].cellB)-1].value-datarow[textToNumber(jsonStrObj.extra[j].cellA)-1].value;
 	        			var growth = (diff/datarow[textToNumber(jsonStrObj.extra[j].cellA)-1].value)*100;
 	        				if(growth>0){
-			            	      str=str+"<img src=\""+this.dir_root+"/resources/js/sort_up_green.png\" style=\"width:20px;height: 20px;vertical-align:bottom\" />";
+			            	      str=str+"<img src=\""+this.contextPath+"/resources/js/sort_up_green.png\" style=\"width:20px;height: 20px;vertical-align:bottom\" />";
 			            	 }else if(growth<0){
-			            		   str=str+"<img src=\""+this.dir_root+"/resources/js/sort_down_red.png\" style=\"width:20px;height: 20px;\" />";
+			            		   str=str+"<img src=\""+this.contextPath+"/resources/js/sort_down_red.png\" style=\"width:20px;height: 20px;\" />";
 			            	 }
-	        			str = str + " "+numberFormat(growth,this.dfractions)+" %";
+	        			str = str + " "+numberFormat(growth,this.dfractions)+" ";
 	        		 }//end growth
 	            	 str=str+"</td>";
 	        	 }//end extra list
@@ -196,14 +209,13 @@ wtpTable.prototype.createTable = function(){
 	     }
 	     str=str+"</tbody>";
 	     str=str+"</table>";
-	     $(this.container).html(str); // render table
+	     $(this.container).append(str); // render table
 	     if(jsonStrObj.group!=null && jsonStrObj.group.length>0 ){
 	    	 for(var ig = 0 ; ig<jsonStrObj.group.length ; ig++){
 		    	 var posAr = jsonStrObj.group[ig].cate;
 		    	 for(var igx = 0 ; igx < posAr.length;igx++){
 		    		 ascSort(this.container,posAr[igx]);
-		    	 	var prop = JSON.parse("{ \"bgColor\":\""+jsonStrObj.table.groupBgColor+"\"}");
-			     	wGroup(this.container,posAr[igx],jsonStrObj.group[ig].series,prop);
+			     	 wGroup(this.container,posAr[igx],jsonStrObj.group[ig].series,this.groupStyle);
 		    	 }
 	    	 }
 	     }
@@ -213,8 +225,8 @@ wtpTable.prototype.createTable = function(){
 	    	 var footer = jsonStrObj.footer;
 	    	 var trNew = tfooter.children("tr:last-child").clone();
 	    	 trNew.removeClass(); trNew.addClass("footer"); trNew.attr("style","");
-	    	 trNew.attr("bgcolor",jsonStrObj.table.footerBgColor);
 	    	 trNew.children("td").empty();//clear content
+	    	 trNew.children("td").attr("style",jsonStrObj.table.footerStyle);
 	    	for(var i = 0 ;i<jsonStrObj.footer.length;i++){
 	    		if(footer[i].type == "sum"){
 	    			trNew.children("td:nth-child(1)").html("รวม");

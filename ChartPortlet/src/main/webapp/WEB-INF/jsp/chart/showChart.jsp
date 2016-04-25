@@ -37,10 +37,10 @@
 	    	background-color:transparent;
 	    }
 	    .chartContainer .aui .table{
-	    background-color:transparent;
+	    	background-color:transparent;
 	    }
 	    .chartContainer .aui .table tbody{
-	    background-color:transparent;
+	    	background-color:transparent;
 	    }
 	     .chartContainer .aui .table tbody td {
 	     	background-color:transparent;
@@ -51,6 +51,7 @@
 	     .chartContainer .aui .table thead td {
 	     	background-color:transparent;
 	     }
+	     .minChartContainer{ min-height:220px;}
     </style>
     <!-- Bootstrap core CSS -->
     <%--
@@ -171,7 +172,6 @@ Please Config Chart!
             "height": "${chartSettingForm.chartHeight}", // chartHeight,
             "dataFormat": "json",
             "dataSource":${chartSettingForm.jsonStr}
-
         });
         revenueChart.render();
         </c:if>        
@@ -180,6 +180,11 @@ Please Config Chart!
 				var table1 = new wtpTable("#${ns}chartContainer",jsonStrObj);
 				table1.updatePath("/ChartPortlet");
 				table1.render();
+        </c:if>
+        /*check*/
+        <c:if test="${empty chartSettingForm.jsonStr} ">
+        	$("#${ns}chartContainer").append("การแสดงผลผิดพลาด");
+        	$("#${ns}chartContainer").addClass("minChartContainer");
         </c:if>
     });
 	function F${chartSettingForm.chartInstance}_regenerateItem(id,val,items){

@@ -10,6 +10,13 @@
 
     <packaging>war</packaging>
     <name>ChartPortlet</name>
+    <repositories>
+        <repository>
+            <id>maven-restlet</id>
+            <name>Restlet repository</name>
+            <url>http://maven.restlet.com</url>
+        </repository>
+    </repositories>
     <properties>
         <junit.version>4.11</junit.version>
         <spring.version>4.2.1.RELEASE</spring.version>
@@ -207,6 +214,8 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <webResources>
+                </webResources>
                 </configuration>
             </plugin>
         </plugins>

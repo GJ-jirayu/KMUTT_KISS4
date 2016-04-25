@@ -65,9 +65,8 @@
 <body>
 <form:form id="filterForm" modelAttribute="filterForm" method="post" name="filterForm"
            action="${formAction}" enctype="multipart/form-data" style="margin:0 0 0 0">
-	<b>Filters :</b> <img id="cascadeWaiting"  src="<c:url value="/resources/images/rotate.gif"/>" style="cursor:pointer;width:22px;height: 22px;padding-left:5px;display:none;" />
-	<br/> 
-    <c:if test="${not empty filterList}">
+	<img id="cascadeWaiting"  src="<c:url value="/resources/images/rotate.gif"/>" style="cursor:pointer;width:22px;height: 22px;padding-left:5px;display:none;" />
+	<c:if test="${not empty filterList}">
         <c:forEach items="${filterList}" var="filter" varStatus="loop">
         	<div style="display:inline-block">
            ${filter.filterName}  

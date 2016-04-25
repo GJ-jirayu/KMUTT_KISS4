@@ -2,12 +2,12 @@
 	"table": {
 		"caption": "Top 5 Stores by Sales",
 		"subCaption": "Last month",
-		"headerBgColor": "#dcdcdc",
-		"bodyBgColor":"white",
-		"groupBgColor":"#efefef",
-		"footerBgColor": "#dcdcdc",
 		"font": "tahoma",
-		"fontSize" : "16"
+		"fontSize" : "16",
+		"headerStyle": "background-color:#dcdcdc;",
+		"bodyStyle": "background-color:white;",
+		"groupStyle": "background-color:#efefef;",
+		"footerStyle": "background-color:#dcdcdc;"
 	},"header":[
 			{ "cell": "category name", "type": "text" }
 			,{ "cell": "last year", "type": "number" }  

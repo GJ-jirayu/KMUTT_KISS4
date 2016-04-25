@@ -52,11 +52,12 @@
 	</bean>
 	<bean id="jpaVendorAdapter"
 		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-		<!-- <property name="database" value="HSQL" /> <property name="databasePlatform" 
-			value="org.hibernate.dialect.DB2Dialect" /> -->
+		<!-- 
+		<property name="database" value="HSQL" /> <property name="databasePlatform" 
+			value="org.hibernate.dialect.DB2Dialect" /> 
+			-->
 		<property name="database" value="MYSQL" />
 		<property name="databasePlatform" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
-
 
 		<property name="showSql" value="true" />
 
@@ -96,7 +97,7 @@
 		<property name="username" value="root" />
 		<property name="password" value="password" />
 	</bean>
- -->
+  -->
 	 <bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -123,7 +124,7 @@
 		<property name="jpaDialect" ref="jpaDialect" />
 		<property name="packagesToScan" value="th.ac.kmutt.chart.dwh.domain.*" />
 	</bean>
-  
+	
 	<bean id="dataSourceDwh"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.ibm.db2.jcc.DB2Driver" />
@@ -141,9 +142,10 @@
 	-->
 	<bean id="jpaVendorAdapterDwh"
 		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		   
 		<property name="database" value="DB2" /> 
 		<property name="databasePlatform" value="org.hibernate.dialect.DB2Dialect" />
-		<!-- 
+		<!--
 		<property name="database" value="MYSQL" />
 		<property name="databasePlatform" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
 		-->
