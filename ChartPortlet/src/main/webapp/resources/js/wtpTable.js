@@ -147,6 +147,8 @@ wtpTable.prototype.createTable = function(){
 	     if(typeof jsonStrObj.table.groupStyle!="undefined"){
 			this.groupStyle=jsonStrObj.table.groupStyle;
 		 }else this.groupStyle="";
+	     //initial
+	     $(this.container).empty();
 	     // title
 	     $(this.container).append( $("<div align=\"center\"></div>").html("<b>"+caption+"</b><br/>") );
 	     $(this.container).append(  $("<div align=\"center\"></div>").html(subCaption) );

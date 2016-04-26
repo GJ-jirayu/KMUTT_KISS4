@@ -771,6 +771,7 @@ public class ChartRepository {
 			results = query.getResultList();
 		}catch(Exception ex){
 			logger.info("Exception => Chart Query ResultSet Exception at Instance["+datasource.getInstanceId()+" | Service["+datasource.getServiceId()+":"+ datasource.getServiceName()+"] reason="+ex.getMessage()  );
+			ex.printStackTrace();
 		}
 		return results;
 	}
